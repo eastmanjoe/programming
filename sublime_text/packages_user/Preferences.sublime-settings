@@ -1,0 +1,44 @@
+{
+	// Sets the colors used within the text area
+    "color_scheme": "Packages/Color Scheme - Default/Monokai Bright.tmTheme",
+
+    // Note that the font_face and font_size are overriden in the platform
+    // specific settings file, for example, "Preferences (Linux).sublime-settings".
+    // Because of this, setting them here will have no effect: you must set them
+    // in your User File Preferences.
+	"font_face": "Lucida Console",
+	"font_size": 10,
+
+    // Set to true to removing trailing white space on save
+    "trim_trailing_white_space_on_save": true,
+
+    //
+    // User Interface Settings
+    //
+
+    // Makes tabs with modified files more visible
+    "highlight_modified_tabs": true,
+
+    "show_tab_close_buttons": true,
+
+    // Show folders in the side bar in bold
+    "bold_folder_labels": true,
+
+    //
+    // Application Behavior Settings
+    //
+
+    // Exiting the application with hot_exit enabled will cause it to close
+    // immediately without prompting. Unsaved modifications and open files will
+    // be preserved and restored when next starting.
+    //
+    // Closing a window with an associated project will also close the window
+    // without prompting, preserving unsaved changes in the workspace file
+    // alongside the project.
+    "hot_exit": false,
+
+    // remember_open_files makes the application start up with the last set of
+    // open files. Changing this to false will have no effect if hot_exit is
+    // true
+    "remember_open_files": true
+}
