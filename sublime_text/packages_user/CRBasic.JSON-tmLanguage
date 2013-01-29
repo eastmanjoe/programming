@@ -37,7 +37,11 @@
       "name": "support.constant"
     },
     {
-      "match": "(<>|<|>|<=|>=|=|NOT|AND|OR)",
+      "match": "(<>|<|>|<=|>=|=)",
+      "name": "support.constant"
+    },
+    {
+      "match": "(?<!\\.)\\b(NOT|AND|OR)\\b",
       "name": "support.constant"
     },
     {

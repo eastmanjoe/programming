@@ -74,7 +74,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>(&lt;&gt;|&lt;|&gt;|&lt;=|&gt;=|=|NOT|AND|OR)</string>
+			<string>(&lt;&gt;|&lt;|&gt;|&lt;=|&gt;=|=)</string>
+			<key>name</key>
+			<string>support.constant</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?&lt;!\.)\b(NOT|AND|OR)\b</string>
 			<key>name</key>
 			<string>support.constant</string>
 		</dict>
