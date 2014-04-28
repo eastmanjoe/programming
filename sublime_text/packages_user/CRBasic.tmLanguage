@@ -48,7 +48,7 @@
 			<key>comment</key>
 			<string>Variable Declaration</string>
 			<key>match</key>
-			<string>(?&lt;!\.)\b(Sub|SubMenu|If|DisplayMenu|DataTable|BeginProg|Scan|ConstTable|Function|Do|For|#If|SubScan|While|Select|ShutDownBegin|SlowSequence|ElseIf|#ElseIf|EndSub|EndSubMenu|EndIf|EndMenu|EndTable|EndProg|NextScan|EndConstTable|EndFunction|Loop|Next|#EndIf|EndSequence|NextSubScan|Wend|EndSelect|ShutDownEnd|EndSequence)\b</string>
+			<string>(?&lt;!\.)\b(Sub|SubMenu|If|DisplayMenu|DataTable|BeginProg|Scan|ConstTable|Function|Do|For|#If|SubScan|While|Select|ShutDownBegin|SlowSequence|ElseIf|#ElseIf|EndSub|EndSubMenu|EndIf|EndMenu|EndTable|EndProg|NextScan|EndConstTable|EndFunction|Loop|Next|#EndIf|EndSequence|NextSubScan|Wend|EndSelect|ShutDownEnd|EndSequence|WebPageBegin|WebPageEnd)\b</string>
 			<key>name</key>
 			<string>keyword.source</string>
 		</dict>
