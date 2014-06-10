@@ -4,16 +4,372 @@
 		"selected_items":
 		[
 			[
+				"ema",
+				"email_addl_message"
+			],
+			[
+				"cfg_em",
+				"cfg_email_result"
+			],
+			[
+				"email_a",
+				"email_addrs_additional"
+			],
+			[
+				"email_me",
+				"email_message"
+			],
+			[
+				"File",
+				"FileClose"
+			],
+			[
+				"das",
+				"das_list"
+			],
+			[
+				"line",
+				"line_buffer"
+			],
+			[
+				"fil",
+				"file_handle"
+			],
+			[
+				"emai",
+				"email_addrs"
+			],
+			[
+				"lin",
+				"line_buffer"
+			],
+			[
+				"prj",
+				"project_number"
+			],
+			[
+				"project",
+				"project_number"
+			],
+			[
+				"draker_m",
+				"draker_model_number"
+			],
+			[
+				"drka",
+				"draker_email_sent"
+			],
+			[
+				"drak",
+				"draker_email_sent"
+			],
+			[
+				"draker",
+				"draker_program_compile"
+			],
+			[
+				"draker_",
+				"draker_program_compile"
+			],
+			[
+				"under",
+				"underscore_location"
+			],
+			[
+				"cfg",
+				"cfg_email_result"
+			],
+			[
+				"curre",
+				"current_time"
+			],
+			[
+				"CR",
+				"CRLF"
+			],
+			[
+				"bas",
+				"basestation"
+			],
+			[
+				"new",
+				"new_email_sent"
+			],
+			[
+				"End",
+				"EndIf"
+			],
+			[
+				"projec",
+				"project_number"
+			],
+			[
+				"und",
+				"underscore_location"
+			],
+			[
+				"cu",
+				"current_time"
+			],
+			[
+				"In",
+				"InStr"
+			],
+			[
+				"pru",
+				"project_number"
+			],
+			[
+				"cfg_emai",
+				"cfg_email_password"
+			],
+			[
+				"cfg_ema",
+				"cfg_email_username"
+			],
+			[
+				"cfg_emia",
+				"cfg_email_message"
+			],
+			[
+				"ser",
+				"cfg_email_server_addr"
+			],
+			[
+				"c",
+				"com"
+			],
+			[
+				"DRAK",
+				"DRAKER_BASESTATION_DATA_STORAGE"
+			],
+			[
+				"DRA",
+				"DRAKER_BASESTATION_TB_LAYOUT"
+			],
+			[
+				"Draker_bases",
+				"DRAKER_BASESTATION_CAISO_RIG"
+			],
+			[
+				"Draker_ba",
+				"DRAKER_BASESTATION_BP_SENSOR"
+			],
+			[
+				"DR",
+				"DRAKER_BASESTATION_ETHERNET_SWITCH"
+			],
+			[
+				"Dr",
+				"DRAKER_BASESTATION_MODEL"
+			],
+			[
+				"CR0",
+				"CR0"
+			],
+			[
+				"DRAKER",
+				"DRAKER_MODEL"
+			],
+			[
+				"ch",
+				"checkIpFormat"
+			],
+			[
+				"pnl",
+				"pnl_logger_ip"
+			],
+			[
+				"val",
+				"valid_ip"
+			],
+			[
+				"va",
+				"valid_ip"
+			],
+			[
+				"Lo",
+				"Long"
+			],
+			[
+				"pn",
+				"pnl_cfg_change_network_settings"
+			],
+			[
+				"ExitF",
+				"ExitFunction"
+			],
+			[
+				"pnl_lo",
+				"pnl_logger_gateway"
+			],
+			[
+				"pnl_logg",
+				"pnl_logger_netmask"
+			],
+			[
+				"cou",
+				"counter"
+			],
+			[
+				"Ex",
+				"ExitFunction"
+			],
+			[
+				"coun",
+				"counter2"
+			],
+			[
+				"buff",
+				"buffer_str"
+			],
+			[
+				"Else",
+				"Else"
+			],
+			[
+				"pnl_cfg",
+				"pnl_cfg_change_network_settings"
+			],
+			[
+				"Exit",
+				"ExitFor"
+			],
+			[
+				"buf",
+				"buffer_str"
+			],
+			[
+				"set",
+				"setNetworkSettings"
+			],
+			[
+				"Logg",
+				"LoggerType"
+			],
+			[
+				"u",
+				"util_pinging"
+			],
+			[
+				"pi",
+				"ping_response"
+			],
+			[
+				"pin",
+				"pingIpAddress"
+			],
+			[
+				"ip",
+				"ip_octet"
+			],
+			[
+				"uti",
+				"util_pinging"
+			],
+			[
+				"ut",
+				"util_enable_ping"
+			],
+			[
+				"ping_re",
+				"ping_response_time"
+			],
+			[
+				"ping",
+				"ping_response"
+			],
+			[
+				"oc",
+				"oct_4"
+			],
+			[
+				"da",
+				"datalogger_ip"
+			],
+			[
+				"S",
+				"String"
+			],
+			[
+				"cfg_data",
+				"cfg_datalogger_last_record"
+			],
+			[
+				"Then",
+				"Then"
+			],
+			[
+				"current",
+				"current_record"
+			],
+			[
+				"cfg_datalogger",
+				"cfg_datalogger_network_enabled"
+			],
+			[
+				"time",
+				"time_out"
+			],
+			[
+				"Min",
+				"MIN"
+			],
+			[
+				"Ne",
+				"NextScan"
+			],
+			[
+				"s",
+				"scan"
+			],
+			[
+				"slo",
+				"SlowSequence"
+			],
+			[
+				"I",
+				"IPGateway"
+			],
+			[
+				"IP",
+				"IPMaskEth"
+			],
+			[
+				"cfg_da",
+				"cfg_datalogger_gateway_ping_fail"
+			],
+			[
+				"OS",
+				"OS_VERSION"
+			],
+			[
+				"mask",
+				"mask"
+			],
+			[
+				"SP",
+				"SP"
+			],
+			[
+				"ra",
+				"raw_datalogger_ip"
+			],
+			[
+				"r",
+				"raw_datalogger_ip"
+			],
+			[
+				"Logger",
+				"LoggerModel"
+			],
+			[
 				"he",
 				"hex_num"
 			],
 			[
 				"mo",
 				"modbus_address"
-			],
-			[
-				"fil",
-				"file_id"
 			],
 			[
 				"ex",
@@ -26,10 +382,6 @@
 			[
 				"file",
 				"file_id_write"
-			],
-			[
-				"s",
-				"syslog_splitter"
 			],
 			[
 				"data",
@@ -80,10 +432,6 @@
 				"Pac_PEM"
 			],
 			[
-				"I",
-				"Iac_C_PEM"
-			],
-			[
 				"Ia",
 				"Iac_A_PEM"
 			],
@@ -132,10 +480,6 @@
 				"setting_string"
 			],
 			[
-				"ping",
-				"ping_response"
-			],
-			[
 				"sett",
 				"setting_string"
 			],
@@ -146,10 +490,6 @@
 			[
 				"subne",
 				"subnet_fields"
-			],
-			[
-				"ip",
-				"ip_address_fields"
 			],
 			[
 				"a",
@@ -174,238 +514,13 @@
 			[
 				"am",
 				"ambient_temp_id"
-			],
-			[
-				"x3",
-				"x320_mac"
-			],
-			[
-				"es",
-				"establishConnection"
-			],
-			[
-				"ro",
-				"row"
-			],
-			[
-				"writ",
-				"write_csv_file"
-			],
-			[
-				"part",
-				"part_number_column"
-			],
-			[
-				"list",
-				"list_diff"
-			],
-			[
-				"Pre",
-				"Pre-Merge"
-			],
-			[
-				"par",
-				"part_number_column"
-			],
-			[
-				"pa",
-				"part_number_index"
-			],
-			[
-				"da",
-				"data"
-			],
-			[
-				"modbu",
-				"modbus_ports"
-			],
-			[
-				"po",
-				"ports"
-			],
-			[
-				"verbose",
-				"verbose_enabled"
-			],
-			[
-				"verbo",
-				"verbose_enabled"
-			],
-			[
-				"arg",
-				"args"
-			],
-			[
-				"pars",
-				"parseARGS"
-			],
-			[
-				"server_",
-				"server_USB0"
-			],
-			[
-				"por",
-				"port_1"
-			],
-			[
-				"number",
-				"number_of_slaves"
-			],
-			[
-				"stop",
-				"stopbits"
-			],
-			[
-				"start",
-				"startbits"
-			],
-			[
-				"dat_fi",
-				"dat_file_row"
-			],
-			[
-				"head",
-				"header_title_1_index"
-			],
-			[
-				"dat",
-				"data_table"
-			],
-			[
-				"hea",
-				"header_title_1"
-			],
-			[
-				"split",
-				"split_data"
-			],
-			[
-				"cfg_t",
-				"cfg_tcp_server_ip_ping"
-			],
-			[
-				"Els",
-				"ElseIf"
-			],
-			[
-				"wo",
-				"workerThread"
-			],
-			[
-				"wor",
-				"workerThread"
-			],
-			[
-				"MB",
-				"MBS-2"
-			],
-			[
-				"MBS",
-				"MBS-1"
-			],
-			[
-				"mbs",
-				"mbs_1_dictonary"
-			],
-			[
-				"get",
-				"getopt"
-			],
-			[
-				"ar",
-				"args"
-			],
-			[
-				"ser",
-				"server_USB1"
-			],
-			[
-				"se",
-				"server_USB0"
-			],
-			[
-				"sin",
-				"sint16"
-			],
-			[
-				"w",
-				"write"
-			],
-			[
-				"m",
-				"modbusSlave"
-			],
-			[
-				"de",
-				"determineComPort"
-			],
-			[
-				"BAT2",
-				"BAT2CHARGEEN"
-			],
-			[
-				"Stat",
-				"StatusFlags"
-			],
-			[
-				"di",
-				"dio_in_status"
 			]
 		]
 	},
 	"buffers":
 	[
-		{
-			"file": "/C/Users/jeastman/Desktop/Draker Merger Issues.txt",
-			"settings":
-			{
-				"buffer_size": 2290,
-				"line_ending": "Windows",
-				"name": "Draker Merger Issues"
-			}
-		},
-		{
-			"file": "/C/home/jeastman/Python/scripts/loggernetDatFile_extract.py",
-			"settings":
-			{
-				"buffer_size": 3453,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/home/jeastman/Python/scripts/modbus_slave_modbus-tk.py",
-			"settings":
-			{
-				"buffer_size": 6717,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Draker/Datasheets and Manuals/Campbell Scientific/.csipasswd",
-			"settings":
-			{
-				"buffer_size": 48,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/S/Engineering/Datasheets and Manuals/Dataloggers/Campbell Scientific/CampbellSci Software/Loggernet Install/README.txt",
-			"settings":
-			{
-				"buffer_size": 455,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "/C/Users/jeastman/Desktop/daq_queries_at_BM1.py",
-			"settings":
-			{
-				"buffer_size": 1267,
-				"line_ending": "Windows"
-			}
-		}
 	],
-	"build_system": "Packages/User/python27.sublime-build",
+	"build_system": "Packages/User/CRBasic.sublime-build",
 	"command_palette":
 	{
 		"height": 311.0,
@@ -445,134 +560,134 @@
 	},
 	"file_history":
 	[
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/ac_meter/electro_shark_100.dld",
-		"/C/home/jeastman/Python/scripts/modbus_master_modbus-tk.py",
-		"/C/Draker/Products/Product Listing/ETL/2013 Evaluation/Generation 4 & Media Converter/Test Rig/Test Rig System Operation/BOOTSTRAP_INTERTEK.json",
-		"/S/Engineering/Tool Software/Electro Industries/Liscense.txt",
-		"/C/home/jeastman/engineering-hw/trunk/Test/LabVIEW/development/Projects/DBS4/SupportingScripts/Set_Soft_Switch/ssh.py",
-		"/C/home/jeastman/.bashrc",
-		"/C/home/jeastman/engineering-hw/trunk/Test/LabVIEW/development/Projects/DBS4/SupportingScripts/Get test results from site server/DBS4_Get_Latest_Data_json.py",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Testing/update_scripts/20140415_13091_siteserver-preen.log",
-		"/C/home/jeastman/engineering-hw/trunk/Product Engineering/DO_NOT_DELETE.txt",
-		"/C/home/jeastman/Python/scripts/syslog_splitter.py",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_24.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr__7.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr__1.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr_10.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr__9.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr__8.syslog",
-		"/C/Users/jeastman/Desktop/Mounting .img file in Ubuntu.sh",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/test.syslog",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Testing/syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Apr__8_pitcher.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_19_pitcher.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_26_pitcher.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_26.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_14_pitcher.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_19.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_14.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_15.syslog",
-		"/C/Draker/Projects/NYLE/Mooradian_Clifton_Park/Mar_14_syslog.bak",
-		"/C/home/jeastman/syslog.bak",
-		"/C/home/jeastman/Mar_15_syslog.bak",
-		"/C/home/jeastman/Mar_14_syslog.bak",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/lib_file_size.txt",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/ac_meter/series_800.dld",
-		"/S/Sites/0002709 - Freimersheim, Germany/0002709.01- Freimersheim, Germany/Draker Documentation/Configuration Files/LS300 Configuration File.xml",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/base.dld",
-		"/C/Draker/Firmware/Testing/ArrayLength.CR1",
-		"//file003/draker/Sites/0002709 - Freimersheim, Germany/0002709.01- Freimersheim, Germany/Draker Documentation/Configuration Files/LS300 Configuration File.xml",
-		"/C/home/jeastman/DataAcquisition/fabfile.py",
-		"/C/home/jeastman/diag_tunnel.sh",
-		"/C/Users/jeastman/Desktop/P3096 Troubleshooting Output.txt",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Testing/update_scripts/13091_siteserver-preen.log",
-		"/C/home/jeastman/ClarityUtil/clarity_util/utctime.py",
-		"/C/home/jeastman/DataAcquisition/daq/lib/process.py",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/strategy.py",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/protocol.py",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/parameters.py",
-		"/C/home/jeastman/DataAcquisition/etc/clarity/daq.cfg",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/manager.py",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/gateway.py",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/raven_xe.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV2000_Gen3_(DL315)/raven_xe.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/raven_xe.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/raven_xe.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PVProspector_Gen1_(DL274)/raven_xe.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PVProspector_Gen1_(DL274)/CR1000_Cell_Modem.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_Cell_Modem.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_Cell_Modem.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV2000_Gen3_(DL315)/CR1000_Cell_Modem.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_Cell_Modem.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_42_31.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_42_29.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_230.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_228.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_229.xml",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.tmLanguage",
+		"/C/home/jeastman/project-firmware/testing/p0000000-00_draker_test.cfg",
+		"/C/home/jeastman/firmware-lib/.draker_id",
+		"/C/home/jeastman/firmware-lib/backup.draker_id",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/ambient_temp_sensor.dld",
 		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/wind_sensor.dld",
 		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/panel_status.dld",
-		"/C/home/jeastman/.bash_logout",
-		"/C/home/jeastman/.bash_functions",
-		"/C/home/jeastman/.bash_aliases",
-		"/C/Draker/Projects/0003089.01 - Community SOlar/600-00034_import.csv",
-		"/C/Users/jeastman/Desktop/net_use.bat",
-		"/C/home/jeastman/.screenrc",
-		"/C/home/jeastman/.gitconfig",
-		"/C/home/jeastman/DataAcquisition/.git/config",
-		"/C/home/jeastman/DataAcquisition/tools/siteserver-preen",
-		"/C/home/jeastman/DataAcquisition/tools/update-to-f",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap",
-		"/C/Users/jeastman/Desktop/diagnostics_page.html",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Testing/update_scripts/siteserver-preen.log",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Testing/update_scripts/siteserver-preen",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/reverse_ssh_dinttest_01.sh",
-		"/C/home/jeastman/.bash_profile",
-		"/C/home/jeastman/ez-setup.py",
-		"/C/home/jeastman/DataAcquisition/update_to_f_dinttest_02.txt",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/daq_config_joeetest_01.ia",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/daq_config_dinttest_02.ia",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/daq_config_dinttest_01.ia",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/daq_config.ia",
-		"/C/Users/jeastman/Desktop/#951 Assembla Tcket",
-		"/C/Draker/Firmware/ping keep alive.dld",
-		"/C/cygwin/etc/bash.bashrc",
-		"/C/cygwin/etc/screenrc",
-		"/C/Users/jeastman/Downloads/Utilities/tftpd64.450/tftpd32.ini",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/daq/config.py",
-		"/C/home/jeastman/DataAcquisition/daq/services/mesh/__init__.py",
-		"/C/Draker/Products/SPT/Mesh_Util/Wireshark/Readme.txt",
-		"/C/Draker/Products/SPT/Mesh_Util/Python_Tools/daqlib/protocol.py",
-		"/C/Program Files/Wireshark/init.lua",
-		"/C/Users/jeastman/Desktop/Cygwin Wiki.dokuwiki",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/x320.dld",
-		"/C/Draker/Products/SPT/Mesh_Util/Python_Tools/rabbit_sender.py",
-		"/C/home/jeastman/DataAcquisition/daq/config.py",
+		"/C/home/jeastman/firmware-lib/testing.dld",
 		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/template.dld",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.7",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.6",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.5",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.4",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.3",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.2",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/syslogs/syslog.1",
-		"/C/home/jeastman/project-firmware/testing/draker_adc_test_01.CR1",
-		"/C/home/jeastman/.XWinrc",
-		"/C/home/jeastman/.Xresources",
-		"/C/home/jeastman/.Xdefaults",
-		"/C/home/jeastman/.startxwinrc",
-		"/C/home/jeastman/.minttyrc",
-		"/C/Users/jeastman/Desktop/p2652.CR8",
-		"/C/Users/jeastman/Desktop/p2652_orig.CR8",
-		"/C/cygwin/etc/X11/app-defaults/XTerm-color",
-		"/C/Users/jeastman/Desktop/recloverdaledrawingrevisions/505-00042_import.csv",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/700-00006F.img.sha1",
-		"/C/home/jeastman/.Xauthority",
-		"/C/cygwin/etc/X11/system.XWinrc",
-		"/C/cygwin/etc/X11/xinit/xinitrc",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/xuart fix.txt",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/700-00006E-readme",
-		"/C/Users/jeastman/Desktop/Cygwin Wiki",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/700-00006E.img.sha1",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config/20140311_daq_config.ia",
-		"/C/Draker/Datasheets and Manuals/Technologic Systems/TS-BAT10/tsbatctl_orig.c",
-		"/C/Draker/Products/PV250 GEN 3/Release Files, PV250 Rev2/PV250 Rev 2 Bill Of Materials.csv",
-		"/C/home/jeastman/Python/example_code/modbus-tk_modbus_tcp_master.py",
-		"/C/home/jeastman/Python/example_code/modbus-tk_modbus_tcp_slave.py",
-		"/C/home/jeastman/Python/scripts/etl_netbook_testing.py",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config - Copy.ia",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/daq_config.ia",
+		"/C/home/jeastman/LiveTerminalSheet/Gemfile.lock",
+		"/C/home/jeastman/LiveTerminalSheet/Gemfile",
+		"/C/home/jeastman/LiveTerminalSheet/README.md",
+		"/C/Users/jeastman/Desktop/Traing PV250/CR800 Series-25413-20140530_training.xml",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/application.js",
+		"/C/home/jeastman/LiveTerminalSheet/asset_builder.rb",
+		"/C/home/jeastman/LiveTerminalSheet/Rakefile",
+		"/C/home/jeastman/.gitconfig",
+		"/C/home/jeastman/firmware-lib/testing.CR8",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/obvius_flex_io.dld",
+		"/C/Users/jeastman/Desktop/p0000000-00_draker_test.cfg",
+		"/C/Users/jeastman/Desktop/CPU_fifteenMin.dat",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_LAN_Calling_67_192_199_228.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_LAN_Calling_67_192_199_229.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_LAN_Calling_67_192_199_230.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_LAN_Calling_98_129_42_29.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_Utility_(DL264)/CR1000_LAN_Calling_98_129_42_31.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_67_192_199_228.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_67_192_199_229.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_67_192_199_230.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_98_129_42_29.xml",
+		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_98_129_42_31.xml",
+		"/C/home/jeastman/firmware-lib/testing2.dld",
+		"/C/Draker/Firmware/Testing/setIP.dld",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/email.dld",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328_TB2.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328_TB1.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl315.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/terminal_sheet.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/views/device_terminal.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/utils/formatters.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/collections/terminals.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/devices.js",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/terminals.js.erb",
+		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328.js",
+		"/C/home/jeastman/project-firmware/testing/draker_test.cfg",
+		"/C/Users/jeastman/Desktop/Raven_X.xml",
+		"/C/Users/jeastman/Desktop/Raven_X_new.xml",
+		"/C/Campbellsci/Lib/Languages/coratools/1.11/coratools_1.11_english.str",
+		"/C/home/jeastman/RvnX_28_V4228_4.0.11.003.ini",
+		"/C/home/jeastman/bash.exe.stackdump",
+		"/C/Users/jeastman/Desktop/draker_id",
+		"/C/Users/jeastman/Desktop/backup.draker_id",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.tmPreferences",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.sublime-build",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.sublime-settings",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/Plain text.sublime-settings",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/cell_temp_sensor.dld",
+		"/S/Engineering/Parts&Vendors/P&V Installation Executable/README.txt",
+		"/C/Draker/Firmware/Testing/RDP120.DLD",
+		"/C/Draker/Firmware/Testing/CFG.DLD",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility.dld",
+		"/C/Draker/Firmware/Testing/TCPOpen.dld",
+		"/C/Draker/Firmware/Testing/pingScan.dld",
+		"/C/Draker/Firmware/Testing/panel_status-set_IP-Address.cr8",
+		"/C/Draker/Datasheets and Manuals/Campbell Scientific/.csipasswd",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/ac_meter/electro_shark_100.dld",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.JSON-tmLanguage",
+		"/C/Draker/Firmware/Testing/PingIP.CR1",
+		"/C/Users/jeastman/Desktop/Export1.csv",
+		"/C/Users/jeastman/Desktop/Export2.csv",
+		"/C/Draker/Firmware/Testing/const_table.dld",
+		"/C/Users/jeastman/Desktop/20140507_meeting_notes.txt",
+		"/C/Users/jeastman/Desktop/listDLLs.txt",
+		"/C/home/jeastman/.bash_functions",
+		"/C/home/jeastman/.bashrc",
+		"/C/home/jeastman/.bash_aliases",
+		"/C/cygwin/usr/share/doc/rebase/README",
+		"/C/home/jeastman/.ssh/environment",
+		"/C/home/jeastman/project-firmware/projects/newkirk_edgeboro-landfill.CR1",
+		"/C/home/jeastman/Python/scripts/configure_x320.py",
+		"/C/home/jeastman/DataAcquisition/tools/siteserver-preen",
+		"/C/home/jeastman/project-firmware/projects/belectric_bruceville-das-1.CR1",
+		"/C/home/jeastman/project-firmware/projects/ace_vineland_1000.CR1",
+		"/C/Users/jeastman/Desktop/mac_id_scanned.txt",
+		"/C/home/jeastman/diag_tunnel.sh",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility_2.ndc",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility_1.ndc",
+		"/C/home/jeastman/engineering-hw/trunk/Hardware/SMI10V80 V1 Panel Monitor/PCB/500-00016C/500-00014E.OutJob",
+		"/C/Draker/Products/PV250 GEN 3/Batteryless & TB changes/BOM's/Batteryless_and_tb_change_boms.csv",
+		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/180-00001C.NET",
+		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/Pick Place for 180-00001C(SPM80V12A_500-00002H).txt",
+		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/Fabrication Testpoint Report for 180-00001C.csv",
+		"/C/Draker/Products/Clarity/Mesh_Util/Python_Tools/usb.py",
+		"/C/Draker/Products/Clarity/Mesh_Util/Python_Tools/MeshTool.py",
+		"/C/Draker/Datasheets and Manuals/Sierra Wireless/LS300/LS300_Global/LS300_OpenSIM_Inc_UpdatePack_4.3.3a.014_to_4.3.5/README.txt",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/obvius_dc_current_monitor.dld",
+		"/S/Engineering/Datasheets and Manuals/Dataloggers/Campbell Scientific/CampbellSci Software/Loggernet Install/README.txt",
+		"/C/Draker/Firmware/Testing/TCPOpen.CR1",
+		"/C/Users/jeastman/Desktop/Draker Merger Issues.txt",
+		"/C/home/jeastman/Python/scripts/loggernetDatFile_extract.py",
+		"/C/home/jeastman/Python/scripts/modbus_slave_modbus-tk.py",
 		"/C/Users/jeastman/Desktop/daq_queries_at_BM1.py",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Site Server Documentation/Site Server Instructions.txt",
-		"/C/Users/jeastman/Desktop/Big Moon Site Information.txt",
-		"/C/Draker/Products/Generation 4 Basestation/Design Documentation/Battery Back-up Testing/X-320 Calculations - Puls.sm",
-		"/C/home/jeastman/project-firmware/projects/draker_dealer-rooftop.cfg",
-		"/C/home/jeastman/project-firmware/projects/draker_dealer-rooftop.CR1"
+		"/C/Draker/Firmware/Testing/webpage.dld",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/advantech_adam.dld",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/icp_7017.dld",
+		"/C/home/jeastman/project-firmware/projects/solular_living-faith-cc.CR8",
+		"/C/home/jeastman/project-firmware/projects/solular_living-faith-cc.cfg",
+		"/C/home/jeastman/Draker Hardware Configurations/SWIApplyTemplate.xml",
+		"/C/Campbellsci/LoggerNet/Data/solular_living-faith-cc_fifteenMin.dat",
+		"/C/Draker/PandV/Draker_Labs-to-Draker_Inc/cross.csv",
+		"/C/Campbellsci/LoggerNet/Lab-1000_fifteenMin.dat",
+		"/C/Users/jeastman/Desktop/629.html"
 	],
 	"find":
 	{
@@ -590,6 +705,125 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"gem",
+			"Public",
+			"Dim",
+			"Public",
+			"email_line_buffer",
+			"email_message_additional",
+			"email_subject_additional",
+			"email_addtl_addrs",
+			"email_addrs_additional",
+			"line_buffer",
+			"Dim",
+			"parseObviusFlexIoModule",
+			"Public",
+			"<component name=\"Domain Name Servers\" repeat-count=\"0\">0</component>\n    <component name=\"Domain Name Servers\" repeat-count=\"1\">0</component>",
+			"new_email_sent",
+			"new_program_compile",
+			"pnl_current_time",
+			"Mid(Status.TimeStamp, 7, 4) & \"-\" & ",
+			"pnl_current_time",
+			"current_time",
+			"cfg_logger_compile_time",
+			"String",
+			"sendPowerUpEmail",
+			"pnl",
+			"server_addr",
+			"1062",
+			"draker_id",
+			"readDrakerID",
+			"DRAKER_ID_FILE",
+			"readIpFile",
+			"readDrakerID",
+			"Electro",
+			"electro",
+			"DRAKER_ID_FILE",
+			"DRAKER_BATTERY_BACKUP_OPTION",
+			"pingKeepAlive",
+			"cfg_datalogger_network_enabled",
+			"cfg_datalogger_gateway",
+			"cfg_datalogger_network_enabled",
+			"pingKeepAlive",
+			"1006",
+			"writeDrakerID",
+			"DRAKER_BASESTATION_TERMIAL_BLOCK_LAYOUT",
+			"DRAKER_BATTERY_BACKUP_OPTION",
+			"DRAKER_BASESTATION_TERMIAL_BLOCK_LAYOUT",
+			"DRAKER_BASESTATION_NUM_OF_MODBUS_PORTS",
+			"_OF_MODBUS_PORTS",
+			"DRAKER_BASESTATION_",
+			"_OF_MODBUS_PORTS",
+			"DRAKER",
+			"DRAKER_MODEL",
+			"DRAKER_PN",
+			"AND",
+			">=",
+			"pnl_cfg_change_network_settings",
+			"valid_ip",
+			"DRAKER_TB_OPTION",
+			"DRAKER_BB_OPTION",
+			"DRAKER_TB_OPTION",
+			"DRAKER_BB_OPTION",
+			"IP Address",
+			"counter",
+			"Public",
+			"cfg_datalogger",
+			"IPInfo",
+			"ping_response",
+			"pingSingleIpAddress",
+			"response_time",
+			"util_ping_results",
+			"ping_scan_results",
+			"ip_octet(1) & ",
+			"cfg_datalogger_ip",
+			"Ping_Scan",
+			"Ping_Single",
+			"util_ping_response",
+			"util_ping_response_time",
+			"util_pingD_tcp_addr",
+			"ping_response_time",
+			"ping_tcp_addr",
+			"String",
+			"pingIpAddress",
+			"pingKeepAlive",
+			"cfg_datalogger_network_enabled",
+			"pingDevice",
+			"cfg_datalogger_ip",
+			"getAmbientTempCs215",
+			"DRAKER_PN",
+			"DRAKER_BB_OPTION",
+			"parseIpInfo",
+			"cygwin",
+			"cyge",
+			"SSH_AGENT_PID",
+			"cygwin",
+			"cfg_tcp_power_enabled",
+			"14",
+			"12",
+			"cfg_datalogger_gateway_fail",
+			"cfg_datalogger_gateway",
+			"cfg_tcp_server_ip_ping",
+			"Find_DAS_Ip",
+			"cfg_gw_search_string",
+			"cfg_mask_search_string",
+			"cfg_ip_search_string",
+			"cfg_gw_search_string",
+			"cfg_mask_search_string",
+			"cfg_ip_search_string",
+			"As String",
+			"+",
+			"raw_datalogger_ip",
+			"space_count",
+			"count_to_space",
+			"pnl_logger_ip_info",
+			"cfg_tcp_server_ip",
+			"filemod_logrotate_rsyslog",
+			"utility",
+			"base-addr",
+			"BASE_MAC",
+			"\"10.11.50.10\", ",
+			"index.html",
 			"execute",
 			"ups_control",
 			"ups-control",
@@ -598,126 +832,7 @@
 			"shut",
 			"shutdown",
 			"shut",
-			"shutdown",
-			"Connection succesful",
-			"Pitcher",
-			"datfile",
-			"Mar 14",
-			"]  ",
-			"│   ",
-			"├── [",
-			"[",
-			" [",
-			"]",
-			"[",
-			" [",
-			"Public",
-			"PNL_CFG_SDI_PORT",
-			"wind_cfg_type",
-			":",
-			"===================================================\n",
-			"delete",
-			"===============================================================================",
-			"JOETEST_01",
-			"DINTTEST_02",
-			"somerovic",
-			"marco",
-			"address",
-			"handle_ad",
-			"marco",
-			"xterm",
-			"alias",
-			"JOEETEST_01",
-			"DINTEST_01",
-			"DINTTEST_02",
-			"logfilename",
-			"level",
-			"loglevel",
-			"findMeterAndUpdate",
-			"cst",
-			"logfilename",
-			"loglevel",
-			"alias",
-			"registers",
-			"\"3\"",
-			"0B0303E7001E751B",
-			"0B031003000631A2",
-			"0B03044B0012B44B",
-			"0B0303E7001E751B",
-			"0B031003000631A2",
-			"0B03044B0012B44B",
-			"0B03044B0012B4",
-			"DINTTEST_01",
-			"5V DC Disconnected",
-			"shutdown",
-			"modbus",
-			"modbus slave",
-			"mbs_cfg_port",
-			"212-00005",
-			"212-",
-			"212",
-			"820-00001",
-			"info",
-			" _COGS_ACELECTRIC_BLOEMHOFFARMS",
-			"_COGS_0001167.01",
-			"row_data_in_line_data",
-			"line",
-			"debug",
-			"csv_file_reader",
-			"\"",
-			"get(pg(",
-			"subnet_fields",
-			"ip_address_fields[1], ",
-			"ip_address",
-			"info",
-			"log",
-			"url",
-			"debug",
-			"info",
-			"lan_connection_name",
-			"ip",
-			"IP",
-			"ip",
-			"print >> fd, ",
-			"print",
-			"csv_file_data",
-			"csv_file",
-			"write_csv_file",
-			":\n",
-			"debug",
-			"importFile",
-			":]))",
-			"files",
-			"data_table",
-			"dat_file",
-			"file_id",
-			"datfile",
-			"UBS",
-			"server_USB",
-			"NUM_MODBUSES",
-			"ctrl+d",
-			"[",
-			"NUM_MODBUSES",
-			"modbuses",
-			"MODBUSES",
-			"modbuses",
-			"debug",
-			":\n",
-			"server_USB0",
-			"\"",
-			"logging",
-			"self._serial.baudrate, ",
-			"set_verbose",
-			"ip_split(1), ",
-			"getLufft",
-			"met_cfg_port_num",
-			"data_table[row][header_title_1_index], ",
-			"header_title_3_index",
-			"header_title_2_index",
-			"ys",
-			"\"2",
-			"\",",
-			","
+			"shutdown"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -725,6 +840,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"<component name=\"Domain Name Servers\" repeat-count=\"0\">8.8.8.8</component>\n    <component name=\"Domain Name Servers\" repeat-count=\"1\">8.8.4.4</component>",
 			"'",
 			"log.info(",
 			"'"
@@ -738,174 +854,8 @@
 	"groups":
 	[
 		{
-			"selected": 4,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "/C/Users/jeastman/Desktop/Draker Merger Issues.txt",
-					"settings":
-					{
-						"buffer_size": 2290,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2290,
-								2290
-							]
-						],
-						"settings":
-						{
-							"auto_name": "Draker Merger Issues",
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "/C/home/jeastman/Python/scripts/loggernetDatFile_extract.py",
-					"settings":
-					{
-						"buffer_size": 3453,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								52,
-								52
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 546.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "/C/home/jeastman/Python/scripts/modbus_slave_modbus-tk.py",
-					"settings":
-					{
-						"buffer_size": 6717,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 780.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "/C/Draker/Datasheets and Manuals/Campbell Scientific/.csipasswd",
-					"settings":
-					{
-						"buffer_size": 48,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								48,
-								48
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "/S/Engineering/Datasheets and Manuals/Dataloggers/Campbell Scientific/CampbellSci Software/Loggernet Install/README.txt",
-					"settings":
-					{
-						"buffer_size": 455,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "/C/Users/jeastman/Desktop/daq_queries_at_BM1.py",
-					"settings":
-					{
-						"buffer_size": 1267,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -942,7 +892,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 269.0
+		"height": 88.0
 	},
 	"replace":
 	{
@@ -969,6 +919,6 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 165.0,
+	"side_bar_width": 159.0,
 	"status_bar_visible": true
 }
