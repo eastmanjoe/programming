@@ -1,0 +1,98 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipeLineMode
+
+
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Public pnl_logger_network_settings(6) As String * 24
+Alias pnl_logger_network_settings = pnl_datalogger_mac, pnl_logger_ip, pnl_logger_netmask, pnl_logger_gateway, pnl_logger_dns1, pnl_logger_dns2
+
+'################################################
+
+'## Data Tables #################################
+' DataTable(fifteenMin, TRUE, -1)
+'   DataInterval(0, 15, MIN, 0)
+'   #If LoggerType = CR1000
+'   CardOut(0, -1)
+'   #EndIf
+
+' EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+Function parseIpInfo()
+  'Data in CR800 Status.IPInfo = CSIO(1) MAC: 00d02c0209b0  CSIO(1) IP: 10.11.50.26  CSIO(1) mask: 255.255.0.0  CSIO(1) gw: 10.11.1.1  dns: 10.11.10.11  dns: 10.11.10.12
+  'Data in CR1000 Status.IPInfo = eth MAC: 00d02c044e5b  eth IP: 192.168.13.100  eth mask: 255.255.255.0  eth gw: 192.168.13.2  dns: 8.8.8.8  dns: 8.8.4.4
+  'IP Address length is between 7 and 15 characters
+
+  Dim counter As Long
+  Dim buffer_str As String * 24
+  Dim line_buffer As String * 200
+
+  Move(buffer_str, Len(buffer_str), "", 1)
+
+  For counter = 1 to ArrayLength(pnl_logger_network_settings)
+    Move(pnl_logger_network_settings(counter), Len(pnl_logger_network_settings(counter)), "", 1)
+  Next
+
+  'parse Status.IPInfo to get current settings
+  line_buffer = LowerCase(Status.IPInfo)
+  line_buffer = Replace(line_buffer, SP, "")
+  line_buffer = Replace(line_buffer, CRLF, ",")
+
+  SplitStr(pnl_logger_network_settings(), line_buffer, ",", ArrayLength(pnl_logger_network_settings), 5)
+
+  #If LoggerType = CR1000 Then
+    pnl_logger_ip = Status.IPAddressEth
+    pnl_logger_netmask = Status.IPMaskEth
+    pnl_logger_gateway = Status.IPGateway
+  #ElseIf LoggerType = CR800 Then
+    pnl_logger_ip = Status.IPAddressCSIO(1)
+    pnl_logger_netmask = Status.IPMaskCSIO(1)
+    pnl_logger_gateway = Status.IPGatewayCSIO(1)
+  #EndIf
+
+  'change mac address format from 00d02c0209b0 to 00:D0:2C:02:09:B0
+  pnl_datalogger_mac = Right(pnl_datalogger_mac, Len(pnl_datalogger_mac) - InStr(1, pnl_datalogger_mac, ":", 2))
+  pnl_datalogger_mac = UpperCase(pnl_datalogger_mac)
+
+  For counter = 1 To Len(pnl_datalogger_mac) Step 2
+    buffer_str &= Mid(pnl_datalogger_mac, counter, 2)
+
+    If counter < 11 Then buffer_str &= ":"
+  Next
+
+  pnl_datalogger_mac = buffer_str
+  ' pnl_logger_ip = Right(pnl_logger_ip, Len(pnl_logger_ip) - InStr(1, pnl_logger_ip, ":", 2))
+  ' pnl_logger_netmask = Right(pnl_logger_netmask, Len(pnl_logger_netmask) - InStr(1, pnl_logger_netmask, ":", 2))
+  ' pnl_logger_gateway = Right(pnl_logger_gateway, Len(pnl_logger_gateway) - InStr(1, pnl_logger_gateway, ":", 2))
+  pnl_logger_dns1 = Right(pnl_logger_dns1, Len(pnl_logger_dns1) - InStr(1, pnl_logger_dns1, ":", 2))
+  pnl_logger_dns2 = Right(pnl_logger_dns2, Len(pnl_logger_dns2) - InStr(1, pnl_logger_dns2, ":", 2))
+EndFunction 'parseIpInfo
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  Scan (10,Sec,3,0)
+    parseIpInfo()
+  NextScan
+EndProg
+'################################################

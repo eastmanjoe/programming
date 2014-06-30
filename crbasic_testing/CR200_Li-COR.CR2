@@ -1,0 +1,114 @@
+'################################################
+'Property of Draker Laboratories
+'Client: Testing Li-COR Pyranometer
+'Project:
+'Config: 200-S1a
+'Program Author:
+'Created On:
+'################################################
+
+'################  CONFIGURATION ################
+
+'################################################
+
+'200
+'############  CONSTANTS ###########
+Const SamplingInt 			= 6 				' Sampling interval in seconds
+Const archive_interval 		= 15 				' interval of data table in minutes
+Const DataPush				= 1					' if =1, does SendData via NL100
+Const PushPort				= 2				    ' 1 =RF port, 2=RS232
+Const PushPB				= 680	'CHANGE ME!! 		'  = nl00 PakBus address  ;  MUST CHANGE IF USING DRAKER DHCP ROUTER
+
+'############  VARIABLES ###########
+Public V_batt   				' Datalogger battery voltage
+
+'############  UNITS ###########
+Units V_batt			=	Vdc
+'################################################
+
+'############  CONSTANTS ###########
+'S1a
+Dim S
+Const G_POA_Mult_1 			= -9.2 					'POA: W/m2 per mA   'IF APOGEE, enter 5.0 for both, Licor
+Const G_POA_Mult_2 			= 5 					'POA: W/m2 per mA   'IF APOGEE, enter 5.0 for both, Licor
+Const G_Resistor_1 			= 147				'(OHMS)  If APOGEE, enter 1000 (bogus) If Licor, it's 147 for actual resistor
+Const G_Resistor_2 			= 1000					'(OHMS)  If APOGEE, enter 1000 (bogus) If Licor, it's 147 for actual resistor
+
+Const SHA 					= 9.376e-4				'T_bom
+Const SHB 					= 2.208e-4				'T_bom
+Const SHC 					= 1.276e-7				'T_bom
+Const R_fixed 				= 24900  				'T_bom Bridge Rf in ohms
+
+Const bomDelayTime			= 500					' in microseconds,  minimum of 500, may need to be more for longer cables
+Const bomChannel			= 2						'
+Const bomVxChan        		= Ex1  					'
+
+'############  VARIABLES ###########
+'S1a
+Dim G_POA_Cal(2)						' Calibration
+Public G_POA(2) 						' Measured Plane-Of-Array solar irradiance
+Public T_BOM 						' Measured PV back-of-module temperature
+Dim X_BOM 						' Voltage ratio used to calculate R_BOM
+Dim R_BOM 						' Resistance of BOM thermistor
+
+
+'############  UNITS ###########
+'S1a
+Units G_POA					= W/m^2
+Units T_BOM					= Deg C
+Alias G_POA(1)			= Li-COR_Li-200SA
+Alias G_POA(2)			= Apogee_SP-110
+'################################################
+
+
+
+'############  TABLE ###########
+'200
+DataTable(fifteenMin,True,-1)
+	DataInterval(0,archive_interval,Min)	' date_time_utc					0
+	Minimum (1,V_batt,False,False)   		' voltage_dl					2
+	'S1a
+	Average (2,G_POA(1),G_POA(1)=NAN)		' poa_irradiance_pv1
+	Average (1,T_BOM,T_BOM=NAN)  		' bom_temp_pv1
+EndTable
+'################################################
+
+'############  MAIN PROGRAM ###########
+
+'## SCAN
+'CORE (200)
+
+BeginProg
+	Scan(SamplingInt,Sec)
+		'Default datalogger battery Voltage measurement:
+		Battery(V_batt)
+		
+		G_POA_Cal(1) = -(G_POA_Mult_1/G_Resistor_1)*1000   ' will yield W/m2 per mV.
+		G_POA_Cal(2) = G_POA_Mult_2  ' will yield W/m2 per mV.
+		
+		'Measure plane of array irradiance and insolation
+		VoltSe (G_POA(1),1,1,G_POA_Cal(1),0)
+		VoltSe (G_POA(2),1,2,G_POA_Cal(2),0)
+		'S1a
+		For S = 1 To 2
+			If G_POA(S) < 0 AND G_POA(S) > -5 Then
+				G_POA(S) = 0
+			EndIf
+		Next
+
+		'Measuring Back of Module Temperature T_bom:
+		ExDelSE (X_BOM,1,bomChannel,bomVxChan,mV2500,bomDelayTime,1.0,0)
+		X_BOM = X_BOM / 2500
+		R_BOM = R_fixed * X_BOM / (1 - X_BOM)
+		T_BOM = 1/(SHA+SHB*LOG(R_BOM)+SHC*LOG(R_BOM)^3)-273
+		'Call Data Tables and Store Data
+		CallTable(fifteenMin)
+
+		'### COMMUNICATIONS   every minute.
+		If IfTime(5,1,min) Then
+			If DataPush = 1  Then
+				SendData (PushPort,PushPB,4094,fifteenMin)  '
+			EndIf
+		EndIf
+	NextScan
+EndProg

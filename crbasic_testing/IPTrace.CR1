@@ -1,0 +1,28 @@
+Public Socket AS Long, PTemp, TCTemp, Result, Flag(2)
+Public IPDebug AS String * 100
+
+DataTable (Temp,True,-1)
+    Sample (1,PTemp,FP2)
+    Sample (1,TCTemp,FP2)
+EndTable
+
+DataTable (Debug,IPTrace(IPDebug)>0,100)
+    Sample (1,IPDebug,String)
+EndTable
+
+BeginProg
+    Scan (1,Sec,3,0)
+      PanelTemp (PTemp,250)
+      TCDiff (TCTemp,1,mV2_5C,1,TypeT,PTemp,True ,0,250,1.0,0)
+      If Flag(1) Then
+       Socket=TCPOpen ("10.50.11.10",3000,0)
+       SendVariables (Result,Socket,-1,4094,0000,0,"Public","Callback",TCTemp,1)
+      EndIf
+
+      If Flag(2) Then TCPClose(Socket)
+
+      CallTable (Temp)
+      CallTable (Debug)
+    NextScan
+
+EndProg

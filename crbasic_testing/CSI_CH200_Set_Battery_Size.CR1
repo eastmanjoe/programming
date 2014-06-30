@@ -1,0 +1,119 @@
+'CR1000 Series Datalogger
+'Program: SDI12_Set_Batt_Cap.CR1
+'Date: 7.October.2010
+'Ver: A
+'
+'Notes: This program sets the battery capacity in the PS/CH200
+'via SDI-12.
+'PS200/CH200 configured with SDI-12 address 0 (zero).
+'
+'Notes: Program sets the SDI-12 address of a PS200/CH200 and tests
+'the SDI-12 interface. Changes to the SDI-12 address can be made
+'"on the fly" by changing the variable "new_sdi12_address"!
+'
+'Use Campbell Scientific SDI-12 cable part # 20769.
+'
+'SDI-12 addresses must be numbered 0 through 9, a through z, or A
+'through Z.
+'Connect the PS200/CH200 to SDI-12 port C3 of the CR1000.
+'Use Campbell Scientific SDI-12 cable part # 20769.
+'
+'SDI-12 CABLE TO CR1000 WIRING
+'-----------------------------
+'WHITE: C3
+'BLACK: G
+'CLEAR: G
+'
+Public set_battery_cap As Boolean
+Public set_sdi12_address As Boolean
+
+Const PNL_CFG_SDI_PORT = 7
+
+'Public Variables
+Public PanelTempC 'Datalogger panel temperature: Celsius
+
+'Existing SDI-12 address in the PS/CH200
+Public sdi12_address As String = 0
+Public new_sdi12_address As String = 0
+Dim SDI_Addr_Chng As String
+
+Public CH200_M0(6) 'Array to hold data coming from the PS200/CH200
+
+'Alias names for array elements.
+Alias CH200_M0(1)=VBatt 'Battery voltage: VDC
+Alias CH200_M0(2)=IBatt 'Current going into, or out of, the battery: Amps
+Alias CH200_M0(3)=ILoad 'Current going to the load: Amps
+Alias CH200_M0(4)=V_in_chg 'Voltage coming into the charger: VDC
+Alias CH200_M0(5)=I_in_chg 'Current coming into the charger: Amps
+Alias CH200_M0(6)=Chg_TmpC 'Charger temperature: Celsius
+Public CH200_MX(4) 'Array to hold extended data from the PS200/CH200
+'Alias names for array elements.
+Alias CH200_MX(1) = BattTargV 'Battery charging target voltage.
+Alias CH200_MX(2) = DgtlPotSet 'Digital potentiometer setting.
+Alias CH200_MX(3) = BattCap 'Present battery capacity.
+Alias CH200_MX(4) = Qloss 'Battery charge deficit.
+
+'SDI-12 formatted battery capacity value.
+Public SDI12command As String
+
+'Response from PS/CH200. Returns the address of the unit and "OK" if
+'all went well.
+Public SDI12result As String
+Public NewBattCap As Float = 0
+
+
+'Define Data Tables
+'Stored hourly data.
+DataTable (Hour,1,-1)
+DataInterval (0,1,Hr,10)
+Minimum (6,CH200_M0(),FP2,0,False)
+Maximum (6,CH200_M0(),FP2,False,False)
+Minimum (1,PanelTempC(),FP2,0,False)
+Maximum (1,PanelTempC(),FP2,False,False)
+EndTable
+'Save the new and old battery capacity values and a time
+'stamp indicating when it was changed.
+DataTable (BattCapChng,True,48)
+Sample (1,NewBattCap,FP2)
+Sample (1,BattCap,FP2)
+EndTable
+
+
+'Main Program
+BeginProg
+  
+
+  Scan (5,Sec,0,0)
+    PanelTemp (PanelTempC,250)
+    CallTable Hour
+  NextScan
+  
+  SlowSequence
+  Scan (30,Sec,3,0)
+
+    'Get current SDI-12 address.
+    SDI12Recorder (sdi12_address,PNL_CFG_SDI_PORT,sdi12_address,"?!",1.0,0)
+    'Get PS200/CH200 values.
+    SDI12Recorder (CH200_M0(),PNL_CFG_SDI_PORT,sdi12_address,"M3!",1.0,0)
+    'Get present battery capacity settings.
+    SDI12Recorder (CH200_MX(),PNL_CFG_SDI_PORT,sdi12_address,"M6!",1.0,0)
+    
+    'If the present battery capacity is not the same as the new
+    'battery capacity then send the new one to the charger.
+    If set_battery_cap Then
+      CallTable BattCapChng
+      SDI12command = "XC" & FormatFloat (NewBattCap,"%4.1f") & "!"
+      SDI12Recorder (SDI12result,PNL_CFG_SDI_PORT,sdi12_address,SDI12command,1.0,0)
+      set_battery_cap = FALSE
+    EndIf
+    
+    If set_sdi12_address Then
+      SDI_Addr_Chng = "A" + new_sdi12_address + "!"
+      SDI12Recorder (sdi12_address,PNL_CFG_SDI_PORT,sdi12_address,SDI_Addr_Chng,1.0,0)
+      'SDI12Recorder (CH200_M0(),PNL_CFG_SDI_PORT,new_sdi12_address,"MC!",1.0,0)
+      set_sdi12_address = FALSE
+    EndIf
+    
+
+  NextScan
+EndProg

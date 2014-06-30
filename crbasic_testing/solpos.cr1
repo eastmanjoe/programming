@@ -1,0 +1,25 @@
+
+Const  Lat_c = 41.767458    'Site latitude, + for north latitude
+Const  Lon_c = -111.855731  'Site longitude, + for east longitude (Asia>0, Americas<0
+Const  Alt_c = 1358        'Site altitude in meters above mean sea level
+
+Public Dst(5)
+Public Time(9)
+
+Alias Dst(1) = SolarAzimuth
+Alias Dst(2) = SunElevation
+Alias Dst(3) = HourAngle
+Alias Dst(4) = Declination 
+Alias Dst(5) = AirMass
+
+Public Dst2(5)
+
+BeginProg
+  Scan(1,sec,0,0)
+    RealTime(Time)
+'    SolarPosition(Dst,Time, UTC_OFFSET ,Lat_c,Lon_c,Alt_c,Pressure,AirTemp)
+    SolarPosition(Dst,Time,-6*3600,Lat_c,Lon_c,Alt_c,-1,20)
+    SolarPosition(Dst2,0,-6*3600,Lat_c,Lon_c,Alt_c,-1,20)
+  NextScan
+EndProg
+

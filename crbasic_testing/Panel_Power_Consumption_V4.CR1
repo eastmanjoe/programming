@@ -1,0 +1,677 @@
+'################################################
+'Property of Draker Laboratories
+'Client:
+'Project:
+'################################################
+
+
+'################# Change Log ###################
+'
+'Note: Add changes to the top of the list, using the format:
+'2001-01-01 ITM [v0.01] Made this change and that change
+'################################################
+
+
+'################# Configuration ################
+'Environmental Sensors
+'->
+' - AC Generation Meter
+' - PV Powered Inverters
+'
+'################################################
+PipeLineMode
+
+Const NOT_USED = 0
+Const CUSTOM = 1
+Const DL202 = 2
+Const DL208 = 3
+Const DL242 = 4
+Const DL264 = 5
+Const DL274 = 6
+
+Const DRAKER_PN = DL202
+
+'################################################
+'ambient temp sensor
+Const CS109 = 1
+Const CS215 = 2
+
+Const AMB_CFG_01_TYPE = CS215
+Const AMB_CFG_CUSTOM = FALSE
+
+'################################################
+'ch200/ps200 power supply
+Public pwr_cfg_addr As Long = {2}
+Public pwr_cfg_ch200_present As Boolean = TRUE
+
+'################################################
+'panel power test
+Public cfg_test_volt(2) As Float = {13.5, 10.5}
+
+'################################################
+'meter
+Const DEV_TOTAL = 2
+Const MTR_SHARK_100_BAUD = 57600
+Const MTR_SHARK_100_RETRIES = 2
+Const MTR_SHARK_100_TIMEOUT = 25
+Public addr(DEV_TOTAL) As Long = {1, 33}  ', 13, 14}
+Public port(DEV_TOTAL) As Long = {COM1, COM2} ', COM3, COMRS232}
+
+'################################################
+
+
+'################# Declarations #################
+Const FREQ_REJECTION = _60HZ
+Const TOTAL_SLOW_SCANS = 1
+Const SLOW_SCAN_INTERVAL_01 = 30
+Const SLOW_SCAN_INTERVAL_02 = 30
+Const SLOW_SCAN_INTERVAL_03 = 30
+Const SLOW_SCAN_INTERVAL_04 = 30
+Const CR = CHR(13)
+Const LF = CHR(10)
+Const CRLF = CHR(13) & CHR(10)
+Dim counter As Long
+
+'################################################
+'core
+Public draker_core_ver As String * 7 = "4.00.03"
+Public core_status As Long = 0
+Public core_panel_temp As Float
+Public core_bat_voltage As Float
+Dim core_last_status As Long
+
+Units core_panel_temp = C
+Units core_bat_voltage = Vdc
+
+#If TOTAL_SLOW_SCANS > 0
+Public core_slow_scans(TOTAL_SLOW_SCANS) As Long
+#EndIf
+
+'################################################
+'ambient temp sensor
+Const AMB_TOTAL = 1
+#If AMB_CFG_CUSTOM
+#ElseIf LoggerType = CR1000
+Const AMB_CFG_01_CH = 9
+Const AMB_CFG_01_VX = VX1
+Const AMB_CFG_SDI_PORT = 7
+#ElseIf LoggerType = CR800
+Const AMB_CFG_01_CH = 5
+Const AMB_CFG_01_VX = VX1
+#EndIf
+
+Public draker_amb_ver As String * 7 = "4.00.02"
+Public amb_temp(AMB_TOTAL) As Float
+Dim amb_disable(AMB_TOTAL) As Boolean
+
+Units amb_temp = C
+
+#If AMB_CFG_01_TYPE = CS215
+Const AMB_CFG_SDI = TRUE
+Public amb_humidity(AMB_TOTAL) As Float
+Public amb_dew_point(AMB_TOTAL) As Float
+Units amb_humidity = %
+Units amb_dew_point = C
+#Else
+Const AMB_CFG_SDI = FALSE
+Const AMB_SETTLING_TIME = 3000
+Dim amb_mv_ratio As Float
+#EndIf
+
+'################################################
+'ch200/ps200 power supply
+Public draker_pwr_ver As String = "4.01.00 Alpha"
+#If DRAKER_PN = CUSTOM
+
+'Configuration for DL202 - Sentalis 1000
+#ElseIf DRAKER_PN = DL202
+Const PWR_CFG_SDI_PORT = 7
+
+'Configuration for DL242 - Sentalis 1000 Utility (RMT)
+#ElseIf DRAKER_PN = DL242
+Const PWR_CFG_SDI_PORT = 7
+
+'Configuration for DL264 - Sentalis 1000 Utility
+#ElseIf DRAKER_PN = DL264
+Const PWR_CFG_SDI_PORT = 7
+
+
+'Configuration for DL274 - Sentalis Prospector
+#ElseIf DRAKER_PN = DL274
+Const PWR_CFG_SDI_PORT = 7
+
+#EndIf
+
+Public pwr_battery_voltage As Float
+Public pwr_battery_current As Float
+Public pwr_battery_status As String * 30
+Public pwr_charge_status As String * 30
+Public pwr_load_current As Float
+Public pwr_input_voltage As Float
+Public pwr_input_current As Float
+Public pwr_input_source As String * 30
+Public pwr_temp As Float
+Dim DIS_pwr As Boolean
+Dim pwr_charge_code As Long
+Dim pwr_input_code As Long
+Dim pwr_battery_code As Long
+
+Units pwr_battery_voltage = VDC
+Units pwr_battery_current = Amps
+Units pwr_load_current = Amps
+Units pwr_input_voltage = VDC
+Units pwr_input_current = Amps
+Units pwr_temp = Deg C
+
+
+'################################################
+'panel power test
+Const RUN = 1
+Const RUN_DISCHARGE = 2
+Const RUN_CHARGE = 3
+Const CHARGE_STOP = 4
+Const TEST_COMPLETE = 5
+Const TEST_ABORT = 6
+
+Public run_test As Boolean
+
+Dim buffer_flt(6) As Float
+Public test_num As Long
+Public source_disconneted As Boolean
+Public user_notes As String * 255
+Public test_state As String * 50
+
+Dim disconnect_ac_source As Boolean
+Public initiate_test As Boolean
+Public mode As Long
+Dim test_counter As Long
+Public time_test_start As Long
+Public time_run As Long
+Public time_start_discharge As Long
+Public time_charge_complete As Long
+Public time_current As Long
+Dim time_status As String * 25
+Public record_onesec_start As Long
+Dim move_to_next_test As Boolean
+
+Dim time_utc(9) As Long
+Alias time_utc(1) = time_utc_year
+Alias time_utc(2) = time_utc_month
+Alias time_utc(3) = time_utc_day
+Alias time_utc(4) = time_utc_hr
+Alias time_utc(5) = time_utc_min
+Alias time_utc(6) = time_utc_sec
+Alias time_utc(7) = time_utc_microsec
+Alias time_utc(8) = time_utc_day_of_week
+Alias time_utc(9) = time_utc_day_of_year
+
+'meter
+Public result_code(DEV_TOTAL) As Long
+Public mtr_sn(DEV_TOTAL) As String * 40
+Dim buffer(8) As Long
+Dim buffer_string As String * 20
+Dim num As Long
+Dim mtr_counter As Long
+'################################################
+
+
+'################# Data Tables ##################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+
+  'core
+  Sample(1, draker_core_ver, String)
+  Sample(1, core_status, Long)
+  Average(1, core_panel_temp, FP2, FALSE)
+  Minimum(1, core_bat_voltage, FP2, FALSE, 0)
+
+  'ambient temp sensor
+  Sample(1, draker_amb_ver, String)
+  Average(AMB_TOTAL, amb_temp(), FP2, amb_disable())
+  #If AMB_CFG_SDI
+  Average(AMB_TOTAL, amb_humidity(), FP2, amb_disable())
+  Average(AMB_TOTAL, amb_dew_point(), FP2, amb_disable())
+  #EndIf
+
+  'ch200/ps200 regulator
+  Sample (1,draker_pwr_ver,String)
+  Average (1,pwr_battery_voltage,IEEE4,DIS_pwr)
+  Average (1,pwr_battery_current,IEEE4,DIS_pwr)
+  Average (1,pwr_load_current,IEEE4,DIS_pwr)
+  Average (1,pwr_input_voltage,IEEE4,DIS_pwr)
+  Average (1,pwr_input_current,IEEE4,DIS_pwr)
+  Average (1,pwr_temp,IEEE4,DIS_pwr)
+  Sample (1,pwr_charge_code,Long)
+  Sample (1,pwr_input_code,Long)
+  Sample (1,pwr_battery_code,Long)
+  
+  'panel power test
+  Sample(1, test_num, Long)
+  Sample(1, source_disconneted, Boolean)
+  Sample(1, test_state, String)
+  Sample(1, user_notes, String)
+
+EndTable 'fifteenMin
+
+'core
+DataTable(dataloggerStatus, core_status <> core_last_status, 2000)
+  Sample(1, core_status, Long)
+  Sample(1, Status.WatchdogErrors, UINT2)
+  Sample(1, Status.VarOutOfBound, UINT2)
+  Sample(1, Status.SkippedScan, UINT2)
+  Sample(1, Status.SkippedSystemScan, UINT2)
+  #If TOTAL_SLOW_SCANS > 0
+  Sample(TOTAL_SLOW_SCANS, core_slow_scans(), UINT2)
+  #EndIf
+
+  Sample(1, Status.Battery, FP2)
+  Sample(1, Status.LithiumBattery, FP2)
+  Sample(1, Status.Low12VCount, UINT2)
+  Sample(1, Status.Low5VCount, UINT2)
+EndTable 'dataloggerStatus
+
+DataTable(FiveSec, run_test, -1)
+  DataInterval(0, 5, sec, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  'panel power test
+  Sample(1, test_num, Long)
+  Sample(1, source_disconneted, Boolean)
+  Sample(1, test_state, String)
+  Sample(1, user_notes, String)
+  
+  'ch200/ps200 regulator
+  Sample (1,draker_pwr_ver,String)
+  Average (1,pwr_battery_voltage,IEEE4,DIS_pwr)
+  Average (1,pwr_battery_current,IEEE4,DIS_pwr)
+  Average (1,pwr_load_current,IEEE4,DIS_pwr)
+  Average (1,pwr_input_voltage,IEEE4,DIS_pwr)
+  Average (1,pwr_input_current,IEEE4,DIS_pwr)
+  Average (1,pwr_temp,IEEE4,DIS_pwr)
+  Sample (1,pwr_charge_code,Long)
+  Sample (1,pwr_input_code,Long)
+  Sample (1,pwr_battery_code,Long)
+
+  'time
+  Sample (1,time_test_start,Long)
+  Sample (1,time_run,Long)
+  Sample (1,time_start_discharge,Long)
+  Sample (1,time_charge_complete,Long)
+  Sample (1,time_current,Long)
+EndTable 'FiveSec
+
+DataTable(OneSec, run_test, -1)
+  DataInterval(0, 1, sec, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  'ch200/ps200 regulator
+  Sample (1,draker_pwr_ver,String)
+  Sample (1,pwr_battery_voltage,IEEE4)
+  Sample (1,pwr_battery_current,IEEE4)
+  Sample (1,pwr_load_current,IEEE4)
+  Sample (1,pwr_input_voltage,IEEE4)
+  Sample (1,pwr_input_current,IEEE4)
+  Sample (1,pwr_temp,IEEE4)
+  Sample (1,pwr_charge_code,Long)
+  Sample (1,pwr_input_code,Long)
+  Sample (1,pwr_battery_code,Long)
+  
+  'time
+  Sample (1,time_test_start,Long)
+  Sample (1,time_run,Long)
+  Sample (1,time_start_discharge,Long)
+  Sample (1,time_charge_complete,Long)
+  Sample (1,time_current,Long)
+EndTable 'OneSec
+
+'################################################
+
+
+'################ Display Tables ################
+DisplayMenu("LIVE DATA", -2)
+  SubMenu("Datalogger")
+    'core
+    DisplayValue("Serial Number", Status.SerialNumber)
+    DisplayValue("Temperature", core_panel_temp)
+    DisplayValue("Voltage", core_bat_voltage)
+
+  EndSubMenu
+  SubMenu("Environmental")
+    'ambient temp sensor
+    DisplayValue("Ambient Temp", amb_temp(1))
+    #If AMB_CFG_SDI
+    DisplayValue("Humidity", amb_humidity(1))
+    DisplayValue("Dew Point", amb_dew_point(1))
+    #EndIf
+
+  EndSubMenu
+EndMenu
+'################################################
+
+
+'################## Functions ###################
+'core
+Function getCoreStatus() As Long
+  Dim status As Long, counter As Long
+
+  status = 0
+  If Status.WatchdogErrors > 0 Then status += &H0001
+  If Status.VarOutOfBound > 0 Then status += &H0002
+  If Status.SkippedScan > 0 Then status += &H0004
+  If Status.SkippedSystemScan > 0 Then status += &H0008
+  If Status.Battery < 12.3 Then status += &H0100
+  If Status.LithiumBattery < 3.3 Then status += &H0200
+  If Status.Low12VCount > 0 Then status += &H0400
+  If Status.Low5VCount > 0 Then status += &H0800
+
+  #If TOTAL_SLOW_SCANS = 1
+  If Status.SkippedSlowScan > 0 Then status += &H0010
+  core_slow_scans(1) = Status.SkippedSlowScan
+
+  #ElseIf TOTAL_SLOW_SCANS > 1
+  For counter = 1 To TOTAL_SLOW_SCANS
+    If Status.SkippedSlowScan(counter) > 0 Then status += (&H0008 << counter)
+    core_slow_scans(counter) = Status.SkippedSlowScan(counter)
+  Next
+  #EndIf
+
+  Return status
+EndFunction
+
+'ambient temp sensor
+#If AMB_CFG_SDI
+Function getSDIAmbient(num As Long)
+  Dim sdi_buffer(2) As Float
+
+  SDI12Recorder(sdi_buffer(), AMB_CFG_SDI_PORT, "0", "CC!", 1.0, 0)
+  amb_temp(num) = sdi_buffer(1)
+
+  If sdi_buffer(1) = NAN Then
+    amb_humidity(num) = NAN
+    amb_dew_point(num) = NAN
+    amb_disable(num) = TRUE
+  Else
+    amb_humidity(num) = sdi_buffer(2)
+    DewPoint(amb_dew_point(num), amb_temp(num), amb_humidity(num))
+    amb_disable(num) = IIF(amb_temp(num) < -40 OR amb_temp(num) > 70, TRUE, FALSE)
+  EndIf
+EndFunction
+
+#Else
+Function calcAmbientTemp(num As Long, mv_ratio As Float)
+  Const AMB_R_FIXED = 24900
+  Const AMB_SHA = 1.129241e-3
+  Const AMB_SHB = 2.341077e-4
+  Const AMB_SHC = 8.775468e-8
+
+  Public amb_temp_x(AMB_TOTAL) As Float
+  Public amb_temp_r(AMB_TOTAL) As Float
+
+  amb_temp_x(num) = mv_ratio
+  If amb_temp_x(num) >= 1 Then
+    amb_temp(num) = NAN
+    amb_disable(num) = TRUE
+  Else
+    amb_temp_r(num) = AMB_R_FIXED * mv_ratio / (1 - mv_ratio)
+    amb_temp(num) = 1 / (AMB_SHA + AMB_SHB * LN(amb_temp_r(num)) + AMB_SHC * LN(amb_temp_r(num))^3) - 273
+    amb_disable(num) = IIF(amb_temp(num) < -50 OR amb_temp(num) > 70, TRUE, FALSE)
+  EndIf
+EndFunction
+#EndIf
+
+'ch200/ps200 regulator
+Function getPWRData(addr As Long)
+  Dim sdi_buffer(9) As Float
+
+  SDI12Recorder (sdi_buffer(),PWR_CFG_SDI_PORT,addr,"CC!",1.0,0)
+
+  If sdi_buffer(1) <> NAN Then
+    pwr_battery_voltage = sdi_buffer(1)
+    pwr_battery_current = sdi_buffer(2)
+    pwr_load_current = sdi_buffer(3)
+    pwr_input_voltage = sdi_buffer(4)
+    pwr_input_current = sdi_buffer(5)
+    pwr_temp = sdi_buffer(6)
+    pwr_charge_code = sdi_buffer(7)
+    pwr_input_code = sdi_buffer(8)
+    pwr_battery_code = sdi_buffer(9)
+    DIS_pwr = FALSE
+    
+    Select Case pwr_charge_code
+    Case Is = -1
+      pwr_charge_status = "Regulator Fault"
+    Case Is = 0
+      pwr_charge_status = "No Charge"
+    Case Is = 1
+      pwr_charge_status = "Current Limited Charging"
+    Case Is = 2
+      pwr_charge_status = "Cycle Charging"
+    Case Is = 3
+      pwr_charge_status = "Float Charging"
+    Case Is = 4
+      pwr_charge_status = "Battery Test Mode"
+    Case Else
+      pwr_charge_status = "No Code"
+    EndSelect
+    
+    Select Case pwr_input_code
+    Case Is = 0
+      pwr_input_source = "None"
+    Case Is = 1
+      pwr_input_source = "Solar Panel"
+    Case Is = 2
+      pwr_input_source = "Continuous"
+    Case Else
+      pwr_input_source = "No Code"
+    EndSelect
+    
+    Select Case pwr_battery_code
+    Case Is = 0
+      pwr_battery_status = "Normal"
+    Case Is = 1
+      pwr_battery_status = "Check Battery"
+    Case Else
+      pwr_battery_status = "No Code"
+    EndSelect
+    
+  Else
+    pwr_battery_voltage = NAN
+    pwr_battery_current = NAN
+    pwr_load_current = NAN
+    pwr_input_voltage = NAN
+    pwr_input_current = NAN
+    pwr_temp = NAN
+    pwr_charge_code = NAN
+    pwr_input_code = NAN
+    pwr_battery_code = NAN
+    DIS_pwr = TRUE 
+  EndIf
+EndFunction
+
+'################################################
+
+
+'################# Main Program #################
+BeginProg
+  'panel power test
+  WriteIO(&B10000000, &B10000000)
+  
+  Scan(1, SEC, 3, 0)
+    'Populate the time_utc array with the current timestamp
+    RealTime(time_utc())
+    
+    'core
+    PanelTemp(core_panel_temp, FREQ_REJECTION)
+    Battery(core_bat_voltage)
+
+    core_last_status = core_status
+    core_status = getCoreStatus()
+    CallTable(dataloggerStatus)
+
+    'ambient temp sensor
+    #If AMB_CFG_SDI
+    getSDIAmbient(1)
+    #Else
+    BrHalf(amb_mv_ratio, 1, mV2500, AMB_CFG_01_CH, AMB_CFG_01_VX, 1, 2500, TRUE, AMB_SETTLING_TIME, FREQ_REJECTION, 1.0, 0)
+    calcAmbientTemp(1, amb_mv_ratio)
+    #EndIf
+    
+    If pwr_cfg_ch200_present Then getPWRData(pwr_cfg_addr)
+
+    CallTable(fifteenMin)
+    CallTable(FiveSec)
+    CallTable(OneSec)
+  NextScan
+
+  #If TOTAL_SLOW_SCANS >= 1
+  SlowSequence
+    Do While TRUE
+    
+      If run_test AND time_test_start = 0 Then
+        'Capture time stamp
+        time_status = Status.TimeStamp(1,1)
+        time_test_start = SecsSince1990(time_status, 1)
+        record_onesec_start = OneSec.Record(1, 1)
+      EndIf
+      
+      Do While run_test
+        
+        time_status = Status.TimeStamp(1,1)
+        time_current = SecsSince1990(time_status, 1)
+      
+        Select Case mode
+        Case Is = 0
+          test_state = "START REQUESTED"
+          
+          'Check battery is not discharged
+          If (pwr_battery_voltage < cfg_test_volt(2)) Then
+            'Stop Test and Clear holding variables
+            test_state = "TEST ABORTED - BATTERY FULLY DISCHARGED"
+            mode = 0
+            time_test_start = 0
+            time_run = 0
+            time_start_discharge = 0
+            time_charge_complete = 0
+            run_test = FALSE
+            ExitDo
+          EndIf
+
+          If (time_test_start + 30) < time_current Then
+            'Check through the last 30 seconds to determine if battery fully charged and just trickle charging
+            '!!!!!! This gives a variable out out bounds error !!!!!!!
+            For counter = 1 To 30
+              If (OneSec.pwr_battery_voltage(1, counter + record_onesec_start) >= cfg_test_volt(1)) AND (OneSec.pwr_battery_current(1, counter + record_onesec_start) <= 0.05) Then
+                move_to_next_test = TRUE
+              Else
+                move_to_next_test = FALSE
+                ExitFor
+              EndIf
+            Next
+            
+            If move_to_next_test Then
+              time_status = Status.TimeStamp(1,1)
+              time_run = SecsSince1990(time_status, 1)
+              test_state = "START"
+              test_num += 1
+              mode = RUN
+            EndIf
+          EndIf
+        
+        Case RUN
+          test_state = "RUN"
+          
+          'After 60 mins start discharge
+          If (time_run + 3600) < time_current Then
+            mode = RUN_DISCHARGE
+            
+            'Capture time stamp
+            time_status = Status.TimeStamp(1,1)
+            time_start_discharge = SecsSince1990(time_status, 1)
+          EndIf
+          
+        Case RUN_DISCHARGE
+          test_state = "RUN - DISCHARGE"
+          WriteIO(&B10000000, &B00000000)
+          source_disconneted = TRUE
+          
+          For counter = 1 To 300
+            If (OneSec.pwr_battery_voltage(counter) < cfg_test_volt(2)) Then
+              mode = RUN_CHARGE
+            Else
+              mode = RUN_DISCHARGE
+              ExitFor
+            EndIf
+          Next
+            
+        Case RUN_CHARGE
+          test_state = "RUN - CHARGE"
+          WriteIO(&B10000000, &B10000000)
+          source_disconneted = FALSE
+          
+          'Check through the last 30 seconds to determine if battery fully charged and just trickle charging
+          For counter = 1 To 30
+            If (OneSec.pwr_battery_voltage(1, counter) >= cfg_test_volt(1)) AND (OneSec.pwr_battery_current(1, counter) <= 0.05) Then
+              mode = CHARGE_STOP
+              time_status = Status.TimeStamp(1,1)
+              time_charge_complete = SecsSince1990(time_status, 1)
+            Else
+              mode = RUN_CHARGE
+              ExitFor
+            EndIf
+          Next
+          
+        Case CHARGE_STOP
+          test_state = "CHARGE STOP"                  
+          
+          'Wait 60 mins, before completing test
+          If time_charge_complete + 3600 >= time_current Then
+            'Stop Test and Clear holding variables
+            test_state = "TEST COMPLETE"
+            run_test = FALSE
+            ExitDo
+          EndIf
+        EndSelect
+        
+        Delay(1, 1, SEC)
+      Loop
+      
+      If time_test_start <> 0 AND test_state <> ""
+        WriteIO(&B10000000, &B10000000)
+        source_disconneted = FALSE
+        test_state = ""
+        mode = 0
+        time_test_start = 0
+        time_run = 0
+        time_start_discharge = 0
+        time_charge_complete = 0
+        run_test = FALSE
+      EndIf
+      
+      Delay(1, 1, SEC)
+    Loop
+  EndSequence
+  #EndIf
+  
+  SlowSequence
+    Scan(5, SEC, 3, 0)
+      For num = 1 To DEV_TOTAL
+        'query serial number
+        ModBusMaster(result_code(num), port(num), MTR_SHARK_100_BAUD, addr(num), 3, buffer(1), 9, 8, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+        If result_code(num) = 0 Then
+          buffer_string = ""
+          For mtr_counter = 0 To 7
+            MoveBytes(buffer_string, mtr_counter * 2, buffer(1 + mtr_counter), 2, 2)
+          Next
+
+          mtr_sn(num) = Trim(buffer_string)
+        EndIf
+      Next
+    NextScan
+  EndSequence
+
+EndProg

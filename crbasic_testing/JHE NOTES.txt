@@ -1,0 +1,27 @@
+NOTES on future programming
+
+- Pyranometer Type selection (POA and Horiz)
+	* Select Case/EndSelect use the name of the sensor to select the appropiate multiplier calculation
+
+- Functions
+	* Use to allow a single function by passing in variables
+	* Need to determine how to return multiple values
+	* Could be used for:
+		# Inverters
+		# Meters
+		# Back-Of-Module Temperature Sensors
+	
+- Ambient Temperature selection
+	* Select Case/EndSelect to select proper sensor type using name
+	
+- WindVector Command
+
+- Code Re-organization
+	* Seperate to the lowest component, NOT to configurations
+	* i.e. Code for pyranometers is written in almost every S and E component file.  Hard to make sure any updates are captured in all components
+	
+- Repetitions
+	* Data Table
+
+- Therm107, Therm108, Therm109 CANNOT be used inside conditional statements, if program is run PipeLine Mode
+	* But can be put inside conditional compilation statments 

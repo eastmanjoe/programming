@@ -1,0 +1,106 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipeLineMode
+
+
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Const NUM_OF_IPS = 16
+Public string1(NUM_OF_IPS) As String * 16 = { "192.168.13.100", "192.168.4.2", "10.11.50.2", "172.28.0.40", _
+                                              "166.143.14.167", "67.29.131.2", "8.8.8.8", "8.8.4.4", _
+                                              "76.14.23.56", "192.168.1.2", "192.168.13.A00", "192.168.4012.2", _
+                                              "10.11.0O.2", "172.28.0.40", "166.143.14.167", "67.29.131.2"}
+Public string2(NUM_OF_IPS) As String * 16 = { "192.168.13.100", "192.168.4.20", "10.11.50.210", "172.28.0.4", _
+                                              "166.143.14.1", "67.29.131.2", "8.8.8.4", "4.4.0.0", _
+                                              "762.1658.133.100", , "192.168.13.A00", "192.168.2", _
+                                              "10.1AA1.50.2", "17228.0.40", "166,143.14.167", "67.29.31.A2"}
+Public strings_match(NUM_OF_IPS) As Long
+Public pnl_network_settings_error(2, NUM_OF_IPS) As String * 1024
+Dim counter As Long
+'################################################
+
+'## Data Tables #################################
+' DataTable(fifteenMin, TRUE, -1)
+'   DataInterval(0, 15, MIN, 0)
+'   #If LoggerType = CR1000
+'   CardOut(0, -1)
+'   #EndIf
+
+' EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+Function checkIpFormat(type As String * 24, ip_string As String * 24) As String * 1024
+  Dim buffer_str(4) As String * 3
+  Dim counter As Long
+  Dim chr_counter As Long
+
+  If ip_string = "" Then
+    Return type & " is missing"
+
+  ElseIf Len(ip_string) > 15 Then
+    Return type & " contains too many characters"
+
+  Else
+    'check for valid ip address format
+    SplitStr(buffer_str(1), ip_string, ".", 4, 5)
+
+    For counter = 1 To 4
+      If buffer_str(counter) = "" Then
+        Return type & " is missing octet number: " & counter
+      EndIf
+
+      If Len(buffer_str(counter)) > 3 Then
+        Return type & " has too many characters in octet number: " & counter
+      EndIf
+
+      For chr_counter = 1 To Len(buffer_str(counter))
+        If ASCII(buffer_str(counter, 1, chr_counter)) < 48 OR ASCII(buffer_str(counter, 1, chr_counter)) > 57 Then
+          Return type & " contains illegal character in octet number: " & counter
+        EndIf
+      Next
+    Next
+  EndIf
+
+  Return ""
+EndFunction 'checkIpFormat
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  Scan (5,Sec,3,0)
+    For counter = 1 To ArrayLength(strings_match)
+      Move(pnl_network_settings_error(1, counter), Len(pnl_network_settings_error(1, counter)), "", 1)
+      Move(pnl_network_settings_error(2, counter), Len(pnl_network_settings_error(2, counter)), "", 1)
+
+      pnl_network_settings_error(1, counter) = checkIpFormat("ip_addr", string1(counter))
+      pnl_network_settings_error(2, counter) = checkIpFormat("ip_addr", string2(counter))
+
+      If pnl_network_settings_error(1, counter) = "" AND pnl_network_settings_error(2, counter) = "" Then
+        strings_match(counter) = StrComp(string1(counter), string2(counter))
+      Else
+        strings_match(counter) = NAN
+      EndIf
+    Next
+
+
+  NextScan
+EndProg
+'################################################

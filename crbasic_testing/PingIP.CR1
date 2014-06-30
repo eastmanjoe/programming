@@ -1,0 +1,59 @@
+'################################################
+'Property of Draker Laboratories
+'
+'Determine how to use the PingIP command
+'
+'PingIP command returns the response time of a ping
+'in milliseconds.  The PingIP commands requires the
+'IP Address and a response timeout.
+
+'Can be used in a For loop to cycle through all available
+'IP Addresses
+'################################################
+
+Const NUM_OF_IPS = 5
+Public ip_addr(NUM_OF_IPS) As String * 15 = {"10.11.50.10", "10.11.50.26", "10.11.50.53", "10.11.50.56", "10.11.1.1"}
+Public tcp_port(NUM_OF_IPS) As Long = {502, 502, 502, 502}
+
+
+Public mod_ping_response(NUM_OF_IPS) As Long
+Public ping_failed(NUM_OF_IPS) As Boolean
+Public ping_status As String * 50
+Dim counter As Long
+
+Units mod_ping_response = msec
+
+Function pingIpAddress(ip_addr As String, time_out As Long) As Long
+  Dim ping_response_time As Long
+  Dim counter
+
+  ping_response_time = 0
+
+  For counter = 1 To 10
+    ping_response_time += PingIP(ip_addr, time_out)
+  Next
+
+  Return ping_response_time / 10
+EndFunction
+
+BeginProg
+    Scan (30,Sec,3,0)
+      For counter = 1 to NUM_OF_IPS
+        mod_ping_response(counter) = 0
+        ping_failed(counter) = FALSE
+        ping_status = ""
+      Next
+
+      Delay(1, 5, SEC)
+
+      For counter = 1 to NUM_OF_IPS
+        ping_status = "Pinging: " & ip_addr(counter)
+        mod_ping_response(counter) = pingIpAddress(ip_addr(counter), 1000)
+        If mod_ping_response(counter) = 0 Then ping_failed(counter) = TRUE
+      Next
+
+      ping_status = ""
+
+      Delay(1, 5, SEC)
+    NextScan
+EndProg

@@ -1,0 +1,46 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipeLineMode
+
+
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+'################################################
+
+'## Data Tables #################################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+
+EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  Scan (5,Sec,3,0)
+
+  NextScan
+EndProg
+'################################################

@@ -1,0 +1,150 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipelineMode
+
+
+'################################################
+
+'## Declarations ################################
+Public util_enable_ping As Boolean = FALSE
+Public util_ping_tcp_addr As String * 15 = ""
+Public util_ping_response As String * 1300 = ""
+Public util_pinging As String * 15 = ""
+'################################################
+
+'## Data Tables #################################
+' DataTable(fifteenMin, TRUE, -1)
+'   DataInterval(0, 15, MIN, 0)
+'   #If LoggerType = CR1000
+'   CardOut(0, -1)
+'   #EndIf
+
+' EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+Function pingIpAddress(ip_addr As String, time_out As Long) As Long
+  Dim ping_response_time As Long
+  Dim counter
+
+  ping_response_time = 0
+
+  For counter = 1 To 10
+    ping_response_time += PingIP(ip_addr, time_out)
+  Next
+
+  Return ping_response_time / 10
+EndFunction
+
+
+
+
+
+'base
+Function pingSingleIpAddress(ip_addr As String * 15) As String * 60
+  Dim buffer_str As String * 60
+  Dim ping_response_time As Long
+
+  util_pinging = ip_addr
+
+  ping_response_time = pingIpAddress(ip_addr, 5000)
+
+  If ping_response_time > 0 Then
+    buffer_str = "Average Response time from " & ip_addr & " is " _
+      & ping_response_time & " MSEC."
+  Else
+    buffer_str = "No Response from " & ip_addr
+  EndIf
+
+  util_pinging = ""
+
+  Return buffer_str
+EndFunction 'pingSingleIpAddress
+
+
+
+
+
+'base
+Function pingScan() As String * 1300
+  Dim IPInfo As String * 200
+  Dim datalogger_ip As String * 15
+  Dim ip_octet(4) As String * 3
+  Dim buffer_str As String * 1300
+  Dim counter As Long
+
+
+  IPInfo = LowerCase(Status.IPInfo)
+  buffer_str = ""
+  util_pinging = ""
+
+  'get datalogger's ip address
+  #If LoggerType = CR1000
+    datalogger_ip = Mid(IPInfo, InStr(1, IPInfo, "eth ip: ", 2) + 8, _
+      InStr(1, IPInfo, "eth mask: ", 2) - (InStr(1, IPInfo, "eth ip: ", 2) _
+        + 8) - 2)
+  #ElseIf LoggerType = CR800
+    datalogger_ip = Mid(IPInfo, InStr(1, IPInfo, "csio(1) ip: ", 2) _
+      + 12, InStr(1, IPInfo, "csio(1) mask: ", 2) - (InStr(1, IPInfo, _
+        "csio(1) ip: ", 2) + 12) - 2)
+  #EndIf
+
+  SplitStr(ip_octet(1), datalogger_ip, ".", 4, 5)
+
+  For counter = 1 To 254
+    util_pinging = ip_octet(1) & "." & ip_octet(2) & "." & ip_octet(3) & "." & counter
+
+    If pingIpAddress(util_pinging, 500) Then
+      If buffer_str = "" Then
+        buffer_str = counter
+      Else
+        buffer_str = buffer_str & ", " & counter
+      EndIf
+    EndIf
+  Next
+
+  util_pinging = ""
+
+  If buffer_str = "" Then
+    buffer_str = "No ping responses"
+  Else
+    buffer_str = "Ping response from " & ip_octet(1) & "." & ip_octet(2) _
+    & "." & ip_octet(3) & "." & buffer_str
+  EndIf
+
+  Return buffer_str
+EndFunction 'pingScan
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  Scan (5,Sec,3,0)
+
+    If util_enable_ping Then
+
+      util_ping_response = ""
+
+      If util_ping_tcp_addr <> "" Then
+        util_ping_response = pingSingleIpAddress(util_ping_tcp_addr)
+        util_ping_tcp_addr = ""
+      Else
+        util_ping_response = pingScan()
+      EndIf
+
+      util_enable_ping = FALSE
+    EndIf
+
+
+  NextScan
+EndProg
+'################################################

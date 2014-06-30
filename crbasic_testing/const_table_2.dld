@@ -1,0 +1,875 @@
+'################################################
+'Property of Draker Laboratories
+'################################################
+
+
+'## Description #################################
+'Manufacturer:
+'Model(s):
+'
+'Components:
+'// COPY DESCRIPTION ////////////////////////////////////////////////////
+'
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Change Log ##################################
+'
+'Note: Add changes to the top of the list, using the format:
+'YYYY-MM-DD [vM.mm.pp] JQP: Made this change and that change
+'################################################
+
+
+'## Versions ####################################
+Public draker_base_ver As String = "4.02.00"
+'// COPY VERSION ////////////////////////////////////////////////////////
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Configuration ###############################
+PipeLineMode
+
+'part number macros (do not edit)
+Const NOT_USED = 0
+Const CUSTOM = 1
+Const DL202 = 2
+Const DL208 = 3
+Const DL242 = 4
+Const DL264 = 5
+Const DL274 = 6
+
+'draker part number for the basestation
+Const DRAKER_PN = DL202
+
+'name of the configuration file
+Const CFG_FILE = "draker_test.cfg"
+
+'set the maximum number of devices and ports in the config file
+Const CFG_DEVICE_MAX = 1
+Const CFG_PORT_MAX = 1
+
+'set to true if any serial device communicates over tcp
+Const CFG_TCP_ENABLE = FALSE
+
+'set interval time in seconds for each scan and slow sequence do/while loop
+Const CFG_SCAN_INTERVAL_MAIN = 6
+Const CFG_SCAN_INTERVAL_CLEAN = 30
+Const CFG_SCAN_INTERVAL_DIRTY = 30
+Const CFG_SCAN_INTERVAL_UTIL = 30
+
+'Note: ONLY FOR TCP DEVICES
+'  CFG_TCP_FAIL_MAX should be set to limit the time between refreshing
+'  tcp sockets to no less then 5 minutes. If the util scan interval is
+'  30 seconds, then refresh the socket after 10 failed attempts.
+
+'set the max comm failures before a tcp socket is closed and reopened
+Const CFG_TCP_FAIL_MAX = 10
+
+'// COPY CONFIG /////////////////////////////////////////////////////////
+'################################################
+ConstTable
+  Const TEST_CFG_PORT = 9
+EndConstTable
+
+Public test_port_status As Boolean
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Declarations ################################
+Const FREQ_REJECTION = _60HZ
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Const DRAKER_ID_FILE = ".draker_id"
+
+Public draker_id(3) As String * 12 = {"Not set", "YYYY-MM-DD", "DAS-1"}
+Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name
+Public draker_das_name_save As Boolean
+
+Public draker_id_backup As Boolean
+Dim draker_id_updated As Boolean
+
+Public cfg_scan_timer_clean As Float
+Public cfg_scan_timer_dirty As Float
+Public cfg_scan_timer_util As Float
+Dim cfg_scan_delay_clean As Long
+Dim cfg_scan_delay_dirty As Long
+Dim cfg_scan_delay_util As Long
+
+Public cfg_reload As Boolean = TRUE
+Public cfg_reload_error As String * 1024
+Public cfg_device_total As Long
+Public cfg_device_current_clean As String * 32
+Public cfg_device_current_dirty As String * 32
+Dim cfg_counter_clean As Long
+Dim cfg_counter_dirty As Long
+Dim cfg_counter As Long
+
+Public cfg_port_total As Long
+Public cfg_ports(CFG_PORT_MAX) As Long
+Dim cfg_port_busy(CFG_PORT_MAX) As Boolean
+
+#If CFG_TCP_ENABLE
+Public cfg_tcp_open As Long
+Public cfg_tcp_open_override As Long
+
+Public cfg_tcp_addr(CFG_PORT_MAX) As String
+Public cfg_tcp_port(CFG_PORT_MAX) As Long
+#EndIf
+
+Public cfg_device_index(CFG_DEVICE_MAX) As Long
+Public cfg_device_type(CFG_DEVICE_MAX) As String * 32
+Public cfg_device_port_num(CFG_DEVICE_MAX) As Long
+Public cfg_device_addr(CFG_DEVICE_MAX) As Long
+Dim cfg_device_result(CFG_DEVICE_MAX) As Long
+
+Dim time_utc(9) As Long
+Alias time_utc(1) = time_utc_year
+Alias time_utc(2) = time_utc_month
+Alias time_utc(3) = time_utc_day
+Alias time_utc(4) = time_utc_hr
+Alias time_utc(5) = time_utc_min
+Alias time_utc(6) = time_utc_sec
+Alias time_utc(7) = time_utc_microsec
+Alias time_utc(8) = time_utc_day_of_week
+Alias time_utc(9) = time_utc_day_of_year
+
+Units cfg_scan_timer_clean = Sec
+Units cfg_scan_timer_dirty = Sec
+Units cfg_scan_timer_util = Sec
+
+'// COPY DECLARATION ////////////////////////////////////////////////////
+'################################################
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Data Tables #################################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  Sample(1, draker_base_ver, String)
+  Sample(1, draker_panel_sn, String)
+
+  '// COPY TABLE 15MIN ////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndTable 'fifteenMin
+
+'// COPY TABLE //////////////////////////////////////////////////////////
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Display Tables ##############################
+DisplayMenu("LIVE DATA", -2)
+  DisplayValue("Basestation SN:", draker_panel_sn)
+  SubMenu("Environmental")
+    '// IGNORE //////////////////////////////////////////////////////////////
+    DisplayValue("Sample", "Env")
+    '// END /////////////////////////////////////////////////////////////////
+
+    '// COPY DISPLAY ENV ////////////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+  EndSubMenu
+
+  '// COPY DISPLAY ////////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndMenu
+'################################################
+
+
+
+
+
+'## Functions ###################################
+
+'// COPY FUNCTION ///////////////////////////////////////////////////////
+
+'// END /////////////////////////////////////////////////////////////////
+'base
+Function readDrakerID() As Boolean
+  Dim file_handle As Long
+  Dim line_buffer As String * 64
+
+  'try to open the draker id file, exit if file doesn't exist
+  file_handle = FileOpen("CPU:" & DRAKER_ID_FILE, "r", 0)
+  If file_handle = 0 Then Return FALSE
+
+  'if the file is not empty, parse the contents into the draker id array
+  If FileRead(file_handle, line_buffer, 64) > 0 Then
+    SplitStr(draker_id(), line_buffer, ",", ArrayLength(draker_id), 5)
+  EndIf
+
+  FileClose(file_handle)
+  Return TRUE
+EndFunction 'readDrakerID
+
+
+
+
+
+Function writeDrakerID()
+  Dim file_handle As Long
+  Dim new_das_name As String * 12
+  Dim line_buffer As String * 64
+  Dim counter As Long
+
+  'preserve the new das name before we potentially overwrite it
+  new_das_name = draker_das_name
+
+  'read in the current file, restore the new das name if successful
+  If readDrakerID() Then draker_das_name = new_das_name
+
+  'serialize the draker id parameters
+  line_buffer = ""
+  For counter = 1 To ArrayLength(draker_id)
+
+    'use a comma delimiter between parameters
+    If counter > 1 Then line_buffer &= ","
+
+    'filter out any commas in the next parameter and append it
+    draker_id(counter) = Replace(draker_id(counter), ",", "")
+    line_buffer &= draker_id(counter)
+  Next
+
+  'open the file and write out the serialized parameters
+  file_handle = FileOpen("CPU:" & DRAKER_ID_FILE, "w", 0)
+  FileWrite(file_handle, line_buffer, 0)
+  FileClose(file_handle)
+
+  'hide the file to protect it
+  FileManage("CPU:" & DRAKER_ID_FILE, 32)
+EndFunction 'writeDrakerID
+
+
+
+
+
+Function compatibleConfigFile(file_handle As Long) As Boolean
+  Dim line_buffer As String * 32
+
+  'loop through each line of the file until we find the config version
+  Do While TRUE
+
+    'read the next line, if we reach the end then the file has no version
+    If FileReadLine(file_handle, line_buffer, 32) = -1 Then
+      cfg_reload_error = "Config file has no version"
+      Return FALSE
+    EndIf
+
+    'change the line to lower case and remove tabs and spaces
+    line_buffer = LowerCase(line_buffer)
+    line_buffer = Replace(line_buffer, TB, "")
+    line_buffer = Replace(line_buffer, SP, "")
+
+    'check if this line has the version
+    If Left(line_buffer, 9) = "##version" Then
+
+      'isolate just the version and check it against the component version
+      If Mid(line_buffer, 10, 4) = Left(draker_base_ver, 4) Then Return TRUE
+
+      'otherwise the file is incompatible
+      cfg_reload_error = "Config file version does not match parser"
+      Return FALSE
+    EndIf
+  Loop
+EndFunction 'compatibleConfigFile
+
+
+
+
+
+Function getNextLine(file_handle As Long) As String * 128
+  Dim line_buffer As String * 128
+  Dim position As Long
+  Dim das_list As String * 64
+  Dim this_das As String
+
+  'normalize this das's name by stripping the hyphan and adding a colon to the end
+  this_das = Replace(LowerCase(draker_das_name), "-", "") & ":"
+
+  'loop through each line of the file until we find a valid device
+  Do While TRUE
+
+    'read the next line, if we reach the end then return
+    If FileReadLine(file_handle, line_buffer, 128) = -1 Then Return "EOF"
+
+    'change the line to lower case and remove tabs, spaces and line ending characters
+    line_buffer = LowerCase(line_buffer)
+    line_buffer = Replace(line_buffer, TB, "")
+    line_buffer = Replace(line_buffer, SP, "")
+    line_buffer = Replace(line_buffer, CR, "")
+    line_buffer = Replace(line_buffer, LF, "")
+
+    'find the position of the first comma in the line
+    position = InStr(1, line_buffer, ",", 2)
+
+    'if the line begins with das and contains a comma before the last character
+    If Left(line_buffer, 3) = "das" AND position > 0 AND position < Len(line_buffer) Then
+
+      'then isolate and normalize the das list using the form "das##:das##:"
+      das_list = Replace(Left(line_buffer, position - 1), "-", "") & ":"
+
+      'if this das is in the list then return the rest of the line
+      If InStr(1, das_list, this_das, 2) <> 0 Then Return line_buffer(1, 1, position + 1)
+    EndIf
+  Loop
+EndFunction 'getNextLine
+
+
+
+
+
+Function registerPort(port As String * 24) As Long
+  Dim params(2) As String
+  Dim tcp_addr As String
+  Dim tcp_port As Long
+  Dim comm_port As Long
+  Dim counter As Long
+
+  If port = "" Then
+    cfg_reload_error = "No port given"
+    Return -1
+  EndIf
+
+  tcp_addr = ""
+  tcp_port = 0
+  comm_port = 0
+
+  'check for tcp device
+  If InStr(1, port, ":", 2) > 0 Then
+
+    If NOT CFG_TCP_ENABLE Then
+      cfg_reload_error = "Tcp device was specified but is not enabled"
+      Return -1
+    EndIf
+
+    'clear params array
+    For counter = 1 To ArrayLength(params)
+      params(counter) = ""
+    Next
+
+    SplitStr(params(), port, ":", 2, 5)
+    tcp_addr = params(1)
+    tcp_port = params(2)
+
+    'validate the tcp address and port
+    If Len(tcp_addr) < 7 OR Len(tcp_addr) > 15 OR tcp_port = NAN Then
+      cfg_reload_error = "Invalid tcp address or port specified"
+      Return -1
+    EndIf
+
+  'otherwise check for comm port
+  Else
+    Select Case Left(port, 4)
+    Case "com1"
+      comm_port = COM1
+    Case "com2"
+      comm_port = COM2
+    Case "com3"
+      comm_port = COM3
+    Case "com4"
+      comm_port = COM4
+    Else
+      cfg_reload_error = "Invalid port specified"
+      Return -1
+    EndSelect
+  EndIf
+
+  'check if port is already registered and if so return port num
+  If cfg_port_total > 0 Then
+    For counter = 1 To cfg_port_total
+      If comm_port > 0 AND cfg_ports(counter) = comm_port Then
+        Return counter
+      EndIf
+
+      #If CFG_TCP_ENABLE
+        If tcp_addr <> "" AND cfg_tcp_addr(counter) = tcp_addr AND cfg_tcp_port(counter) = tcp_port Then
+          Return counter
+        EndIf
+      #EndIf
+    Next
+  EndIf
+
+  'check number of ports defined, exit if all port slots are used
+  If cfg_port_total = CFG_PORT_MAX Then
+    cfg_reload_error = "Ran out of slots in port array"
+    Return -1
+  EndIf
+
+  'register port and return port num
+  cfg_port_total += 1
+  cfg_ports(cfg_port_total) = comm_port
+  #If CFG_TCP_ENABLE
+    cfg_tcp_addr(cfg_port_total) = tcp_addr
+    cfg_tcp_port(cfg_port_total) = tcp_port
+  #EndIf
+
+  Return cfg_port_total
+EndFunction 'registerPort
+
+
+
+
+
+Sub parseConfig(file As String * 64)
+  Dim file_handle As Long
+  Dim line_buffer As String * 128
+  Dim params(5) As String * 32
+  Dim counter As Long
+
+  Dim device_prefix As String
+  Dim device_index As Long
+  Dim device_type As String * 32
+  Dim device_port As String * 24
+  Dim device_port_num As Long
+  Dim device_addr As Long
+  Dim include_device As Boolean
+
+  'clear device information and reset device total
+  If cfg_device_total > 0 Then
+    For counter = 1 To cfg_device_total
+      cfg_device_index(counter) = 0
+      cfg_device_type(counter) = ""
+      cfg_device_port_num(counter) = 0
+      cfg_device_addr(counter) = 0
+      cfg_device_result(counter) = 0
+    Next
+    cfg_device_total = 0
+  EndIf
+
+  'close tcp socket if open and reset port information
+  If cfg_port_total > 0 Then
+    For counter = 1 To cfg_port_total
+      #If CFG_TCP_ENABLE
+        If cfg_ports(counter) > 100 Then TCPClose(cfg_ports(counter))
+        cfg_tcp_addr(counter) = ""
+        cfg_tcp_port(counter) = 0
+      #EndIf
+      cfg_ports(counter) = 0
+      cfg_port_busy(counter) = FALSE
+    Next
+    cfg_port_total = 0
+  EndIf
+
+  'clear the error message
+  cfg_reload_error = ""
+
+  '// COPY CONFIG PARSE INIT //////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+  'try to open config file
+  file_handle = FileOpen(file, "r", 0)
+  If file_handle = 0 Then
+    cfg_reload_error = "Config file missing"
+    ExitSub
+  EndIf
+
+  'check if config file version matches the parser version
+  If NOT compatibleConfigFile(file_handle) Then
+    FileClose(file_handle)
+    ExitSub
+  EndIf
+
+  'continue through the file, any devices before the version line will be ignored
+  Do While TRUE
+
+    'get the next device, check if we have reached the end of the file
+    line_buffer = getNextLine(file_handle)
+    If line_buffer = "EOF" Then ExitDo
+
+    'clear params array
+    For counter = 1 To ArrayLength(params)
+      params(counter) = ""
+    Next
+
+    'parse the device parameters
+    SplitStr(params(), line_buffer, ",", 5, 5)
+    device_prefix = params(1)
+    device_index = params(2)
+    device_type = params(3)
+    device_port = params(4)
+    device_addr = params(5)
+
+    'reset add device flag
+    include_device = FALSE
+
+    'call prefix specific config parser, use line_buffer as parameter
+    Select Case device_prefix
+    '// COPY CONFIG PARSE PREFIX ////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+    EndSelect
+
+    'call device specific config parser, use line_buffer as parameter
+    Select Case device_type
+    '// COPY CONFIG PARSE TYPE //////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+    EndSelect
+
+    'check if an error occured
+    If cfg_reload_error <> "" Then ExitDo
+
+    'check if device should be added
+    If include_device Then
+
+      'check that the index is valid
+      If device_index = NAN OR device_index < 1 Then
+        cfg_reload_error = "Invalid index for " & device_type
+        ExitDo
+      EndIf
+
+      'check that the address is valid
+      If device_addr = NAN OR device_addr < 0 Then
+        cfg_reload_error = "Invalid address for " & device_type
+        ExitDo
+      EndIf
+
+      'check number of devices defined, exit if all device slots are used
+      If cfg_device_total = CFG_DEVICE_MAX Then
+        cfg_reload_error = "Ran out of slots in device array"
+        ExitDo
+      EndIf
+
+      'checks/adds port to list and returns an array reference or negative if error
+      device_port_num = registerPort(device_port)
+      If device_port_num < 0 Then ExitDo
+
+      'if all is good then add the device
+      cfg_device_total += 1
+      cfg_device_index(cfg_device_total) = device_index
+      cfg_device_type(cfg_device_total) = device_type
+      cfg_device_port_num(cfg_device_total) = device_port_num
+      cfg_device_addr(cfg_device_total) = device_addr
+    EndIf
+  Loop
+
+  'close the file before exiting
+  FileClose(file_handle)
+EndSub 'parseConfig
+
+
+
+
+
+Function callDevice(num As Long, do_not_wait As Boolean)
+  Dim port_num As Long
+  Dim result As Long
+
+  'if device num is out of bounds then exit
+  If num < 1 OR num > cfg_device_total Then
+    cfg_reload_error = "The device called is out of bounds"
+    ExitFunction
+  EndIf
+
+  'if the port is being used by another call then wait for it to be freed
+  port_num = cfg_device_port_num(num)
+  Do While cfg_port_busy(port_num)
+
+    If do_not_wait Then ExitFunction
+  Loop
+  cfg_port_busy(port_num) = TRUE
+
+  'call the device
+  Select Case cfg_device_type(num)
+  '// COPY CONFIG DEVICE CALL /////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+  EndSelect
+
+  cfg_port_busy(port_num) = FALSE
+
+  'check if index was out of bounds
+  If result = -9999 Then cfg_reload_error = "The array index is out of bounds"
+
+  'capture the result code
+  If result = 0 Then
+    cfg_device_result(num) = 0
+  Else
+    cfg_device_result(num) += 1
+  EndIf
+EndFunction 'callDevice
+
+
+
+
+
+#If CFG_TCP_ENABLE
+Function validTcpSocket(num As Long) As Boolean
+  Dim counter As Long
+
+  'check the result for devices using this socket
+  For counter = 1 To cfg_device_total
+
+    'check if any device using this socket has a result under the threshold
+    If cfg_device_port_num(counter) = num AND cfg_device_result(counter) < CFG_TCP_FAIL_MAX Then
+      Return TRUE
+    EndIf
+  Next
+
+  Return FALSE
+EndFunction 'validTcpSocket
+#EndIf
+
+
+
+
+
+Sub clearDeviceResult(num As Long)
+  Dim counter As Long
+
+  'reset result for all devices using this port
+  For counter = 1 To cfg_device_total
+    If cfg_device_port_num(counter) = num Then cfg_device_result(counter) = 0
+  Next
+EndSub 'clearDeviceResult
+'################################################
+
+
+
+
+
+'## Shutdown ####################################
+ShutDownBegin
+
+  'base
+  #If CFG_TCP_ENABLE
+    If cfg_port_total > 0 Then
+      For cfg_counter = 1 To cfg_port_total
+        If cfg_ports(cfg_counter) > 100 Then TCPClose(cfg_ports(cfg_counter))
+      Next
+    EndIf
+  #EndIf
+
+  '// COPY SHUTDOWN ///////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+ShutDownEnd
+'################################################
+
+
+
+
+
+'## Main Program ################################
+BeginProg
+
+  readDrakerID()
+
+  '// COPY PROGRAM ////////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+  Scan(CFG_SCAN_INTERVAL_MAIN, SEC, 3, 0)
+    'Populate the time_utc array with the current timestamp
+    RealTime(time_utc())
+
+    '// COPY SCAN ///////////////////////////////////////////////////////////
+      PortSet(TEST_CFG_PORT, NOT test_port_status)
+      
+      PortGet(test_port_status, TEST_CFG_PORT)
+    '// END /////////////////////////////////////////////////////////////////
+    CallTable(fifteenMin)
+  NextScan
+
+
+
+
+
+  'slow scan for devices with clean communications (comm code = 0)
+  SlowSequence
+  Do While TRUE
+    Timer(1, MSEC, 2)
+
+    If cfg_device_total > 0 Then
+      For cfg_counter_clean = 1 To cfg_device_total
+        If draker_das_name_save OR cfg_reload Then ExitFor
+
+        'only call devices that have clean communications
+        If cfg_device_result(cfg_counter_clean) = 0 Then
+
+          'report which device is being called
+          cfg_device_current_clean = cfg_device_type(cfg_counter_clean) & ":" & cfg_device_index(cfg_counter_clean)
+
+          'call the device, don't wait if port is busy
+          callDevice(cfg_counter_clean, TRUE)
+
+          cfg_device_current_clean = ""
+        EndIf
+      Next
+    EndIf
+
+    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
+    cfg_scan_timer_clean = Timer(1, MSEC, 4) * 0.001
+
+    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
+    cfg_scan_delay_clean = (CFG_SCAN_INTERVAL_CLEAN - cfg_scan_timer_clean) * 1000
+
+    'only delay the scan if the calculated value is positive time
+    If cfg_scan_delay_clean > 0 Then Delay(1, cfg_scan_delay_clean, MSEC)
+  Loop
+  EndSequence
+
+
+
+
+
+  'slow scan for devices with dirty communications (comm code <> 0)
+  SlowSequence
+  Do While TRUE
+    Timer(2, MSEC, 2)
+
+    If cfg_device_total > 0 Then
+      For cfg_counter_dirty = 1 To cfg_device_total
+        If draker_das_name_save OR cfg_reload Then ExitFor
+
+        'only call devices that have dirty communications
+        If cfg_device_result(cfg_counter_dirty) <> 0 Then
+
+          'report which device is being called
+          cfg_device_current_dirty = cfg_device_type(cfg_counter_dirty) & ":" & cfg_device_index(cfg_counter_dirty)
+
+          'call the device, wait if port is busy
+          callDevice(cfg_counter_dirty, FALSE)
+
+          cfg_device_current_dirty = ""
+        EndIf
+      Next
+    EndIf
+
+    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
+    cfg_scan_timer_dirty = Timer(2, MSEC, 4) * 0.001
+
+    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
+    cfg_scan_delay_dirty = (CFG_SCAN_INTERVAL_DIRTY - cfg_scan_timer_dirty) * 1000
+
+    'only delay the scan if the calculated value is positive time
+    If cfg_scan_delay_dirty > 0 Then Delay(1, cfg_scan_delay_dirty, MSEC)
+  Loop
+  EndSequence
+
+
+
+
+
+  'slow scan for checking user input flags and maintaining tcp sockets if enabled
+  SlowSequence
+  Do While TRUE
+    Timer(3, MSEC, 2)
+
+    'check if the draker id file should be updated
+    If draker_das_name_save Then
+      writeDrakerID()
+      draker_das_name_save = FALSE
+
+      'set flag to reparse the config file
+      cfg_reload = TRUE
+    EndIf
+
+    'check if the draker id file should be backed up
+    If draker_id_backup Then
+      FileCopy("CPU:" & DRAKER_ID_FILE, "CPU:backup" & DRAKER_ID_FILE)
+      draker_id_backup = FALSE
+    EndIf
+
+    'check if config file needs to be reloaded
+    If cfg_reload Then
+      Call parseConfig("CPU:" & CFG_FILE)
+      cfg_reload = FALSE
+    EndIf
+
+    #If CFG_TCP_ENABLE
+      If cfg_port_total > 0 Then
+        For cfg_tcp_open = 1 To cfg_port_total
+
+          'break out of the loop if either flag is set
+          If draker_das_name_save OR cfg_reload Then ExitFor
+
+          'check if user has set tcp socket override to none zero
+          If cfg_tcp_open_override > 0 AND cfg_tcp_open_override <= cfg_port_total Then
+
+            'if so then overwrite current tcp open
+            cfg_tcp_open = cfg_tcp_open_override
+            cfg_tcp_open_override = 0
+
+            'if socket is currently open then close it
+            If cfg_ports(cfg_tcp_open) > 100 Then
+              TCPClose(cfg_ports(cfg_tcp_open))
+              cfg_ports(cfg_tcp_open) = 0
+            EndIf
+
+          'otherwise if socket is currently open
+          ElseIf cfg_ports(cfg_tcp_open) > 100 Then
+
+            'close the socket if all devices have stopped communicating
+            If NOT validTcpSocket(cfg_tcp_open) Then
+              TCPClose(cfg_ports(cfg_tcp_open))
+              cfg_ports(cfg_tcp_open) = 0
+            EndIf
+          EndIf
+
+          'only try to open sockets that aren't already open
+          If cfg_ports(cfg_tcp_open) = 0 Then
+
+            'must use a different tcpOpen command for each unique socket
+            Select Case cfg_tcp_open
+            '// MULT CFG_PORT_MAX ///////////////////////////////////////////////////
+            Case CFG_PORT_MAX
+              cfg_ports(cfg_tcp_open) = TCPOpen(cfg_tcp_addr(cfg_tcp_open), cfg_tcp_port(cfg_tcp_open), 1)
+            '// END /////////////////////////////////////////////////////////////////
+            EndSelect
+
+            'reset the result when a new socket is opened
+            If cfg_ports(cfg_tcp_open) > 100 Then Call clearDeviceResult(cfg_tcp_open)
+          EndIf
+        Next
+      EndIf
+    #EndIf
+
+    '// COPY BASE SLOW SCAN /////////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
+    cfg_scan_timer_util = Timer(3, MSEC, 4) * 0.001
+
+    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
+    cfg_scan_delay_util = (CFG_SCAN_INTERVAL_UTIL - cfg_scan_timer_util) * 1000
+
+    'only delay the scan if the calculated value is positive time
+    If cfg_scan_delay_util > 0 Then Delay(1, cfg_scan_delay_util, MSEC)
+  Loop
+  EndSequence
+
+  '// COPY SLOW SCANS /////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndProg
+'################################################
+

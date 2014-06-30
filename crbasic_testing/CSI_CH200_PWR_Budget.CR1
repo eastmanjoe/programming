@@ -1,0 +1,147 @@
+'CR1000 Series Datalogger
+'Program: SDI12_Amp-Hr_Test.CR1
+'Programmer: Bart Nef - CSI
+'Date: 12.November.2010
+'Ver: A
+'
+'Notes: This program measures and records current usage by the station
+'in amp-hours. Data is stored for hourly and daily values as well as
+'PS/CH200 status variables.
+'In order to calculate amp-hour capacity the measured currents coming
+'from the PS/CH200 must be modified to include the scan rate and then
+'totalled over the data table interval.
+'PS200/CH100 configured with SDI-12 address 0 (zero).
+'Use CSI cable part # 20769. The black and clear wires connect to the CR1000
+'ground, and the white wire connects to the CR1000 control port C3.
+'
+'Public Variables
+PipeLineMode
+
+'I like to use the words "On" and "Off" vs. True and False.
+Const On = True
+Const Off = False
+
+'Constants & Public Variables
+Const SlowScan = 30 'scan rate used with the slow scan section.
+Public PanelTempC 'Datalogger panel temperature: Celsius
+Public Batt_Volt
+
+'Array holding all the three Amp-hour calculations
+Public Amp_Hour(3)
+'Amp-hours used by the entire system.
+Alias Amp_Hour(1) = Sys_Amp_hr
+'Amp-hours used by the datalogger, sensors and any communication options.
+Alias Amp_Hour(2) = Load_Amp_hr
+'Amp-hours going into the battery. Current coming out of the battery is
+'part of the Load_Amp_hr value.
+Alias Amp_Hour(3) = Batt_Amp_hr
+
+Dim n 'Used as a counter.
+
+Public CH200_M0(9) 'Array to hold all the data coming from the PS200/CH200
+'Alias names for array elements.
+Alias CH200_M0(1) = VBatt 'Battery voltage: VDC
+Alias CH200_M0(2) = IBatt 'Current going into, or out of, the battery: Amps
+Alias CH200_M0(3) = ILoad 'Current going to the load: Amps
+Alias CH200_M0(4) = V_in_chg 'Voltage coming into the charger: VDC
+Alias CH200_M0(5) = I_in_chg 'Current coming into the charger: Amps
+Alias CH200_M0(6) = Temp_C 'Charger temperature: Celsius
+Alias CH200_M0(7) = Chg_State 'Charging state: Cycle, Float, Current Limited, or None
+Alias CH200_M0(8) = Chg_Source 'Charging source: None, AC, or Solar
+Alias CH200_M0(9) = Ck_Batt 'Check battery error: 0=normal, 1=check battery
+
+Dim ChargeStateArr(6) As String
+Dim ChargeSourceArr(3) As String
+Dim CheckBatteryArr(2) As String
+Public ChargeState As String
+Public ChargeSource As String
+Public CheckBattery As String
+
+'Array to hold extended data from the PS200/CH200
+Public CH200_MX(4)
+'Alias names for array elements.
+Alias CH200_MX(1) = BattTargV 'Battery charging target voltage.
+Alias CH200_MX(2) = DgtlPotSet 'Digital potentiometer setting.
+Alias CH200_MX(3) = BattCap 'Present battery capacity.
+Alias CH200_MX(4) = Qloss 'Battery charge deficit.
+
+'Define Data Tables
+'Stored hourly data.
+DataTable (Hour,1,-1)
+  DataInterval (0,1,Hr,10)
+  Minimum (6,CH200_M0(),FP2,0,False)
+  Maximum (6,CH200_M0(),FP2,False,False)
+  Minimum (1,PanelTempC(),FP2,0,False)
+  Maximum (1,PanelTempC(),FP2,False,False)
+EndTable
+
+'Stored hourly Amp-hour values and present Qloss value.
+DataTable (Amp_hr,True,-1)
+  DataInterval (0,1,Hr,10)
+  Totalize (3,Amp_Hour(),FP2,False)
+  Sample (1,Qloss,FP2)
+EndTable
+
+'Stored daily Amp-hour values and present Qloss value.
+DataTable (Amp_Day,True,-1)
+  DataInterval (0,1,Day,10)
+  Totalize (3,Amp_Hour(),FP2,False)
+  Sample (1,Qloss,FP2)
+EndTable
+
+'Main Program
+BeginProg
+  ChargeStateArr(1) = "Regulator Fault"
+  ChargeStateArr(2) = "No Charge"
+  ChargeStateArr(3) = "Current Limited"
+  ChargeStateArr(4) = "Cycle Charging"
+  ChargeStateArr(5) = "Float Charging"
+  ChargeStateArr(6) = "Battery Test"
+  ChargeSourceArr(1) = "None"
+  ChargeSourceArr(2) = "Solar"
+  ChargeSourceArr(3) = "Continuous"
+  CheckBatteryArr(1) = "Normal"
+  CheckBatteryArr(2) = "Check Battery"
+
+  Scan (5,Sec,0,0)
+    PanelTemp (PanelTempC,250)
+    Battery (Batt_Volt)
+    CallTable Hour
+  NextScan
+
+  SlowSequence
+  Scan (SlowScan,Sec,3,0)
+    'Get extended status values.
+    SDI12Recorder (CH200_MX(),3,0,"M6!",1.0,0)
+    
+    'Get PS200/CH200 values.
+    SDI12Recorder (CH200_M0(),3,0,"MC!",1.0,0)
+    
+    'Values for the following parameters start at -1 for the charge state and 0 for
+    'the charge source and check battery. Array locations start with one. Have to
+    'shift the returned values so they start with one.
+    ChargeState = ChargeStateArr(Chg_State + 2)
+    ChargeSource = ChargeSourceArr(Chg_Source + 1)
+    CheckBattery = CheckBatteryArr(Ck_Batt + 1)
+    'Add up the current being consumed by the system. Include battery current in
+    'the calculation ONLY when it is positive - going into the battery.
+    'Current values coming from the PS/CH200 are in amps. Have to convert that to
+    'amp-hours based on the slow scan rate.
+    Sys_Amp_hr = Sys_Amp_hr + ILoad
+    
+    If IBatt > 0 Then
+      Sys_Amp_hr = Sys_Amp_hr + IBatt
+      Batt_Amp_hr = IBatt
+    EndIf
+    
+    Load_Amp_hr = ILoad
+    
+    For n = 1 To 3
+      Amp_Hour(n) = Amp_Hour(n) * SlowScan/3600
+    Next n
+    
+    'Must call these tables from the slow scan or the values will be wrong!
+    CallTable Amp_hr
+    CallTable Amp_Day
+  NextScan
+EndProg

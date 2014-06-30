@@ -1,0 +1,421 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'This test will capture the measurments of the power consumption of the
+'Sentalis 1000 panel.  The measurements taken will be the voltage, current
+'and power of the AC/DC power supply, consumed by the panel, charging of the battery
+
+'Voltage Divider Calculation
+'Voutput = Vsource * (Z2 / (Z1 + Z2))
+'Vsource = Voutput * ((Z1 + Z2)) / Z2)
+
+'Current Calculation
+'I = V / R
+'################################################
+
+
+'## Configuration ###############################
+PipelineMode
+
+Public cfg_shunt_ohm(3) As Float = {1, 1, 0.4}
+Alias cfg_shunt_ohm = cfg_shunt_ohm_source, cfg_shunt_ohm_load, cfg_shunt_ohm_batt
+Public cfg_vdiv_ohm(2) As Float = {100386.3, 10000}
+Alias cfg_vdiv_ohm = cfg_vdiv_z1_ohm, cfg_vdiv_z2_ohm
+Public cfg_test_volt(2) As Float = {12.94, 11.75}
+Public cfg_test_charge_rate As Float = {0.000028}
+
+Public pwr_cfg_addr As Long = {0}
+
+'################################################
+
+'## Declarations ################################
+'ch200
+Public draker_pwr_ver As String = "4.01.00 Alpha"
+Const PWR_CFG_SDI_PORT = 7
+
+Public pwr_battery_voltage As Float
+Public pwr_battery_current As Float
+Public pwr_load_current As Float
+Public pwr_charge_voltage As Float
+Public pwr_charge_current As Float
+Public pwr_temp As Float
+Public pwr_charge_stat_code As Float
+Public pwr_charge_status As String * 30
+Public pwr_charge_src_code As Float
+Public pwr_charge_source As String * 30
+Public pwr_battery_stat_code As Float
+Public pwr_battery_status As String * 30
+Public pwr_disable As Boolean
+
+Units pwr_battery_voltage = VDC
+Units pwr_battery_current = Amps
+Units pwr_load_current = Amps
+Units pwr_charge_voltage = VDC
+Units pwr_charge_current = Amps
+Units pwr_temp = Deg C
+
+'battery test
+Const CFG_CH_I_SOURCE = 1
+Const CFG_CH_V_SOURCE = 2
+Const CFG_CH_I_LOAD = 4
+Const CFG_CH_V_LOAD = 3
+Const CFG_CH_I_BATT = 5
+Const CFG_CH_V_BATT = 6
+Const CFG_CH_AC_DISCONNECT = 8
+
+Const RUN = 1
+Const RUN_DISCHARGE = 2
+Const RUN_CHARGE = 3
+Const CHARGE_STOP = 4
+Const TEST_COMPLETE = 5
+Const TEST_ABORT = 6
+
+Public run_test As Boolean
+
+Dim buffer_flt(6) As Float
+Public test_num As Long
+Public source_current_ma As Float
+Public source_volt_v As Float
+Public source_pwr_w As Float
+Public source_disconneted As Boolean
+Public load_current_ma As Float
+Public load_volt_v As Float
+Public load_pwr_w As Float
+Public batt_current_ma As Float
+Public batt_volt_v As Float
+Public batt_pwr_w As Float
+Public batt_charge_rate_a_hr As Float
+Public user_notes As String * 255
+Public test_state As String * 50
+
+Units source_current_ma = mAmps
+Units source_volt_v = Volts
+Units source_pwr_w = Watts
+Units load_current_ma = mAmps
+Units load_volt_v = Volts
+Units load_pwr_w = Watts
+Units batt_current_ma = mAmps
+Units batt_volt_v = Volts
+Units batt_pwr_w = Watts
+Units batt_charge_rate_a_hr = Amp-hour
+
+Dim disconnect_ac_source As Boolean
+Dim initiate_test As Boolean
+Dim mode As Long
+Dim counter As Long
+Dim test_counter As Long
+Dim test_time As Long
+Dim time_stamp_status As String * 25
+
+
+Dim time_utc(9) As Long
+Alias time_utc(1) = time_utc_year
+Alias time_utc(2) = time_utc_month
+Alias time_utc(3) = time_utc_day
+Alias time_utc(4) = time_utc_hr
+Alias time_utc(5) = time_utc_min
+Alias time_utc(6) = time_utc_sec
+Alias time_utc(7) = time_utc_microsec
+Alias time_utc(8) = time_utc_day_of_week
+Alias time_utc(9) = time_utc_day_of_year
+'################################################
+
+'## Data Tables #################################
+DataTable(FiveSec, run_test, -1)
+  DataInterval(0, 5, sec, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  Sample(1, test_num, Long)
+  Minimum(1, source_current_ma, IEEE4, FALSE, TRUE)
+  Average(1, source_current_ma, IEEE4, FALSE)
+  Maximum(1, source_current_ma, IEEE4, FALSE, TRUE)
+  Minimum(1, source_volt_v, IEEE4, FALSE, TRUE)
+  Average(1, source_volt_v, IEEE4, FALSE)
+  Maximum(1, source_volt_v, IEEE4, FALSE, TRUE)
+  Minimum(1, source_pwr_w, IEEE4, FALSE, TRUE)
+  Average(1, source_pwr_w, IEEE4, FALSE)
+  Maximum(1, source_pwr_w, IEEE4, FALSE, TRUE)
+  Sample(1, source_disconneted, Boolean)
+  Minimum(1, load_current_ma, IEEE4, FALSE, TRUE)
+  Average(1, load_current_ma, IEEE4, FALSE)
+  Maximum(1, load_current_ma, IEEE4, FALSE, TRUE)
+  Minimum(1, load_volt_v, IEEE4, FALSE, TRUE)
+  Average(1, load_volt_v, IEEE4, FALSE)
+  Maximum(1, load_volt_v, IEEE4, FALSE, TRUE)
+  Minimum(1, load_pwr_w, IEEE4, FALSE, TRUE)
+  Average(1, load_pwr_w, IEEE4, FALSE)
+  Maximum(1, load_pwr_w, IEEE4, FALSE, TRUE)
+  Minimum(1, batt_current_ma, IEEE4, FALSE, TRUE)
+  Average(1, batt_current_ma, IEEE4, FALSE)
+  Maximum(1, batt_current_ma, IEEE4, FALSE, TRUE)
+  Minimum(1, batt_volt_v, IEEE4, FALSE, TRUE)
+  Average(1, batt_volt_v, IEEE4, FALSE)
+  Maximum(1, batt_volt_v, IEEE4, FALSE, TRUE)
+  Minimum(1, batt_pwr_w, IEEE4, FALSE, TRUE)
+  Average(1, batt_pwr_w, IEEE4, FALSE)
+  Maximum(1, batt_pwr_w, IEEE4, FALSE, TRUE)
+  Minimum(1, batt_charge_rate_a_hr, IEEE4, FALSE, TRUE)
+  Average(1, batt_charge_rate_a_hr, IEEE4, FALSE)
+  Maximum(1, batt_charge_rate_a_hr, IEEE4, FALSE, TRUE)
+  Sample(1, test_state, String)
+  Sample(1, user_notes, String)
+  
+  'ch200/ps200 regulator
+  Sample (1,draker_pwr_ver,String)
+  Average (1,pwr_battery_voltage,IEEE4,pwr_disable)
+  Average (1,pwr_battery_current,IEEE4,pwr_disable)
+  Average (1,pwr_load_current,IEEE4,pwr_disable)
+  Average (1,pwr_charge_voltage,IEEE4,pwr_disable)
+  Average (1,pwr_charge_current,IEEE4,pwr_disable)
+  Average (1,pwr_temp,IEEE4,pwr_disable)
+  Sample (1,pwr_charge_stat_code,Long)
+  Sample (1,pwr_charge_src_code,Long)
+  Sample (1,pwr_battery_stat_code,Long)
+EndTable 'FiveSec
+
+DataTable(OneSec, run_test, -1)
+  DataInterval(0, 1, sec, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  Sample(1, test_num, Long)
+  Sample(1, source_current_ma, IEEE4)
+  Sample(1, source_volt_v, IEEE4)
+  Sample(1, source_pwr_w, IEEE4)
+  Sample(1, source_disconneted, Boolean)
+  Sample(1, load_current_ma, IEEE4)
+  Sample(1, load_volt_v, IEEE4)
+  Sample(1, load_pwr_w, IEEE4)
+  Sample(1, batt_current_ma, IEEE4)
+  Sample(1, batt_volt_v, IEEE4)
+  Sample(1, batt_pwr_w, IEEE4)
+  Sample(1, batt_charge_rate_a_hr, IEEE4)
+  Sample(1, test_state, String)
+  Sample(1, user_notes, String)
+EndTable 'OneSec
+'################################################
+
+'## Functions ###################################
+'ch200/ps200 regulator
+Function getPWRData(addr As Long)
+  Dim sdi_buffer(9) As Float
+
+  SDI12Recorder (sdi_buffer(),PWR_CFG_SDI_PORT,addr,"CC!",1.0,0)
+
+  If sdi_buffer(1) <> NAN Then
+    
+    pwr_battery_voltage = sdi_buffer(1)
+    pwr_battery_current = sdi_buffer(2)
+    pwr_load_current = sdi_buffer(3)
+    pwr_charge_voltage = sdi_buffer(4)
+    pwr_charge_current = sdi_buffer(5)
+    pwr_temp = sdi_buffer(6)
+    pwr_charge_stat_code = sdi_buffer(7)
+    pwr_charge_src_code = sdi_buffer(8)
+    pwr_battery_stat_code = sdi_buffer(9)
+    pwr_disable = FALSE
+    
+    Select Case pwr_charge_stat_code
+    Case Is = -1
+      pwr_charge_status = "Regulator Fault"
+    Case Is = 0
+      pwr_charge_status = "No Charge"
+    Case Is = 1
+      pwr_charge_status = "Current Limited Charging"
+    Case Is = 2
+      pwr_charge_status = "Cycle Charging"
+    Case Is = 3
+      pwr_charge_status = "Float Charging"
+    Case Is = 4
+      pwr_charge_status = "Battery Test Mode"
+    Case Else
+      pwr_charge_status = "No Code"
+    EndSelect
+    
+    Select Case pwr_charge_src_code
+    Case Is = 0
+      pwr_charge_source = "None"
+    Case Is = 1
+      pwr_charge_source = "Solar Panel"
+    Case Is = 2
+      pwr_charge_source = "Continuous"
+    Case Else
+      pwr_charge_source = "No Code"
+    EndSelect
+    
+    Select Case pwr_battery_stat_code
+    Case Is = 0
+      pwr_battery_status = "Normal"
+    Case Is = 1
+      pwr_battery_status = "Check Battery"
+    Case Else
+      pwr_battery_status = "No Code"
+    EndSelect
+    
+  Else
+    
+    pwr_battery_voltage = NAN
+    pwr_battery_current = NAN
+    pwr_load_current = NAN
+    pwr_charge_voltage = NAN
+    pwr_charge_current = NAN
+    pwr_temp = NAN
+    pwr_charge_stat_code = NAN
+    pwr_charge_src_code = NAN
+    pwr_battery_stat_code = NAN
+    pwr_disable = TRUE 
+    
+  EndIf
+EndFunction
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  WriteIO(&B10000000, &B10000000)
+  
+  Scan (1,sec,3,0)
+    'Populate the time_utc array with the current timestamp
+    RealTime(time_utc())
+    
+    
+    VoltDiff(buffer_flt(1), 6, mV2500, 1, TRUE, 0, _60Hz, 1, 0)
+    
+    source_current_ma = buffer_flt(1) / cfg_shunt_ohm_source
+    source_volt_v = (buffer_flt(2) / 1000) * ((cfg_vdiv_z1_ohm + cfg_vdiv_z2_ohm) / cfg_vdiv_z2_ohm)
+    source_pwr_w = source_volt_v * (source_current_ma / 1000)
+    
+    load_current_ma = buffer_flt(4) / cfg_shunt_ohm_load
+    load_volt_v = (buffer_flt(3) / 1000) * ((cfg_vdiv_z1_ohm + cfg_vdiv_z2_ohm) / cfg_vdiv_z2_ohm)
+    load_pwr_w = load_volt_v * (load_current_ma / 1000)
+    
+    batt_current_ma = buffer_flt(5) / cfg_shunt_ohm_batt
+    batt_volt_v = (buffer_flt(6) / 1000) * ((cfg_vdiv_z1_ohm + cfg_vdiv_z2_ohm) / cfg_vdiv_z2_ohm)
+    batt_pwr_w = batt_volt_v * (batt_current_ma / 1000)
+    batt_charge_rate_a_hr = (ABS(batt_current_ma / 1000)) * (1/3600)
+    
+    getPWRData(pwr_cfg_addr)
+    
+    CallTable FiveSec
+    CallTable OneSec
+  NextScan
+  
+   
+  SlowSequence
+    Do While TRUE
+    
+      If run_test Then
+        'Capture time stamp
+        test_time = 0
+        time_stamp_status = Status.TimeStamp(1,1)
+        test_time = SecsSince1990(time_stamp_status, 1)
+      EndIf
+      
+      Do While run_test
+      
+        Select Case mode
+        Case Is = 0
+          WriteIO(&B10000000, &B10000000)
+          source_disconneted = FALSE
+          test_state = "START REQUESTED"
+          
+          'Check battery is not discharged
+          If (batt_volt_v < cfg_test_volt(2)) AND (initiate_test = FALSE) Then
+            mode = TEST_ABORT
+          EndIf
+
+          time_stamp_status = Status.TimeStamp(1,1)
+          If test_time + 30 >= SecsSince1990(time_stamp_status, 1) Then
+            'Check through the last 30 seconds to determine if battery fully charged and just trickle charging
+            For counter = 1 To 30
+              If OneSec.batt_volt_v(counter) >= cfg_test_volt(1) AND OneSec.batt_charge_rate_a_hr(counter) <= cfg_test_charge_rate Then
+                time_stamp_status = Status.TimeStamp(1,1)
+                test_time = SecsSince1990(time_stamp_status, 1)
+                test_state = "START"
+                test_num += test_num
+                mode = RUN
+              EndIf
+            Next
+          EndIf
+        
+        Case RUN
+          test_state = "RUN"
+          
+          'After 60 mins start discharge
+          time_stamp_status = Status.TimeStamp(1,1)
+          If test_time + 3600 >= SecsSince1990(time_stamp_status, 1) Then
+            mode = RUN_DISCHARGE
+            
+            'Capture time stamp
+            time_stamp_status = Status.TimeStamp(1,1)
+            test_time = SecsSince1990(time_stamp_status, 1)
+          EndIf
+          
+        Case RUN_DISCHARGE
+          test_state = "RUN - DISCHARGE"
+          WriteIO(&B10000000, &B00000000)
+          source_disconneted = TRUE
+          
+          'Wait 5 mins before checking low voltage
+          time_stamp_status = Status.TimeStamp(1,1)
+          If test_time + 300 >= SecsSince1990(time_stamp_status, 1) Then
+            mode = RUN_DISCHARGE
+            
+            For counter = 1 To 300
+              If (OneSec.batt_volt_v(counter) < cfg_test_volt(2)) AND (OneSec.batt_volt_v(counter) > 11.6) Then
+                mode = RUN_CHARGE
+              ElseIf OneSec.batt_volt_v(counter) < 11.6 Then
+                mode = RUN_CHARGE
+                ExitFor
+              Else
+                mode = RUN_DISCHARGE
+                ExitFor
+              EndIf
+            Next
+          EndIf
+            
+        Case RUN_CHARGE
+          test_state = "RUN - CHARGE"
+          WriteIO(&B10000000, &B10000000)
+          source_disconneted = FALSE
+          
+          'Check through the last 30 seconds to determine if battery fully charged and just trickle charging
+          For counter = 1 To 30
+            If OneSec.batt_volt_v(counter) >= CFG_TEST_VOLT AND OneSec.batt_charge_rate_a_hr(counter) <= CFG_TEST_CHARGE_RATE Then
+              mode = CHARGE_STOP
+              time_stamp_status = Status.TimeStamp(1,1)
+              test_time = SecsSince1990(time_stamp_status, 1)
+            Else
+              ExitFor
+            EndIf
+          Next
+          
+        Case CHARGE_STOP
+          test_state = "CHARGE STOP"                  
+          
+          time_stamp_status = Status.TimeStamp(1,1)
+          If test_time + 3600 = SecsSince1990(time_stamp_status, 1) Then
+            mode = TEST_COMPLETE
+          EndIf
+
+        Case TEST_COMPLETE
+          'Stop Test and Clear holding variables
+          test_state = "TEST COMPLETE"
+          mode = 0
+          test_time = 0
+          run_test = FALSE
+          
+        Case TEST_ABORT
+          'Stop Test and Clear holding variables
+          test_state = "TEST ABORTED - BATTERY FULLY DISCHARGED"
+          mode = 0
+          test_time = 0
+          run_test = FALSE
+          
+        EndSelect
+      Loop
+    Loop
+  EndSequence
+EndProg

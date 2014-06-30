@@ -1,0 +1,108 @@
+'################################################
+'Property of Draker Laboratories
+
+'Config: 1000-S1a-G1a-I1j-E1b
+'Program Author: Joe Eastman
+'Created On: 11/17/2010
+'################################################
+
+'################  CONFIGURATION ################
+'Solar Performance Sensors
+'Li-COR
+'BOM Temp
+'1 - AC Generation Meter
+'1 - Advanced Energy Solaron 500kW Inverter
+'Environmental Sensors
+'Li-COR
+'CS107 Ambient Temp
+'################################################
+
+'############  PROGRAM EXECUTION MODE ###########
+'Uncomment Mode to use
+'PipeLineMode -> Executes via priority (Main Porgram Measurements,BackGnd Cal, Slow Sequence Measurements, Processing Task)
+PipeLineMode
+'SequentialMode -> Executes program in order written
+'SequentialMode
+'################################################
+
+'1000
+'################  CONSTANTS ####################
+Const SamplingInt 				= 6 				' Sampling interval in seconds
+Const SlowScanInterval		= 30				' used for slow scan
+Const archive_interval 		= 1 				' interval of data table in minutes
+Const freqRejection				= _60Hz			' Integration period for frequency rejection could be 50 herz for EU
+
+'################  VARIABLES ####################
+Public T_ref   												'Internal datalogger terminal strip temperature
+Public V_batt   											'Datalogger battery voltage
+Dim C																	'counter for loops
+Public StatusAlarm
+
+'################  UNITS ####################
+Units T_ref				=	Deg C
+Units V_batt			=	Vdc
+'################################################
+
+
+'Solar Performance Sensors - S1a
+'################  CONSTANTS ####################
+'BOM Temperature
+Const SHA 								= 9.376e-4	'T_bom
+Const SHB 								= 2.208e-4	'T_bom
+Const SHC 								= 1.276e-7	'T_bom
+Const R_fixed 						= 24900  		'T_bom Bridge Rf in ohms
+Const bomSettlingTime			= 0					' in microseconds, default of 0 will = 3000, may need to be more for longer cables
+Const bomChannel					= 14					' standard back panel is 14, PVP inside is 5
+Const bomVxChan        		= Vx1  			' standard is Vx1
+
+'################  VARIABLES ####################
+Public T_BOM_ORIG 													'Measured PV back-of-module temperature
+Public T_BOM_LOG 													'Measured PV back-of-module temperature
+Public T_BOM_LN 													'Measured PV back-of-module temperature
+Public X_BOM 													'Voltage ratio used to calculate R_BOM
+Public R_BOM 													'Resistance of BOM thermistor
+
+'################  UNITS ####################
+Units T_BOM_ORIG				= Deg C
+Units T_BOM_LOG					= Deg C
+Units T_BOM_LN					= Deg C
+Units X_BOM							=	mV
+Units R_BOM							= Ohms
+'################################################
+
+
+'################  TABLE ####################
+DataTable(BOMCompare,True,-1)
+	DataInterval(0,archive_interval,Min,0)	' date_time_utc				0
+	'CardOut (0 ,-1)  ' stores data to CF card in NL115 unit.  newest data overwrites oldest when card is full
+	'1000
+	Average (1,T_ref,FP2,False)				' temp_dl		 			2
+	Minimum (1,V_batt,FP2,False,False)   	' voltage_dl				3
+	'S1a
+	Average (1,T_BOM_ORIG,FP2,T_BOM_ORIG = NAN)  	'BOM Temp Original Calculation
+	Average (1,T_BOM_LOG,FP2,T_BOM_ORIG = NAN)  	'BOM Temp Parentheses Order
+	Average (1,T_BOM_LN,FP2,T_BOM_ORIG = NAN)  		'BOM Temp Using Natural LOG
+	Average (1,R_BOM,FP2,T_BOM_ORIG = NAN)  			'BOM Temp Calculated Resistance
+	Average (1,X_BOM,FP2,T_BOM_ORIG = NAN)  			'BOM Temp Voltage Measured
+EndTable		'End of fifteenMin Table
+
+
+'Main Program
+BeginProg
+	Scan (1,Sec,0,0)
+		'CORE (1000)
+		'Measuring wiring panel Temperature for reference T_ref:
+		PanelTemp(T_ref,freqRejection)
+		'Default datalogger battery Voltage measurement:
+		Battery(V_batt)
+
+		'Measuring Back of Module Temperature T_bom:
+		BrHalf (X_BOM,1,mV2500,bomChannel,bomVxChan,1,2500,True,bomSettlingTime,freqRejection,1.0,0) ' settling time for long lead
+		R_BOM = R_fixed * X_bom / (1 - X_BOM)
+		T_BOM_ORIG = 1/(SHA+SHB*LOG(R_BOM)+SHC*LOG(R_BOM)^3)-273
+		T_BOM_LOG = (1/(SHA + (SHB * LOG(R_BOM)) + (SHC*(LOG(R_BOM)^3)))) - 273
+		T_BOM_LN = (1/(SHA + (SHB * LN(R_BOM)) + (SHC * (LN(R_BOM)^3)))) - 273
+		CallTable BOMCompare
+	NextScan
+EndProg
+

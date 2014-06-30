@@ -1,0 +1,173 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipelineMode
+
+
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Const CFG_TCP_ENABLE = TRUE
+
+'set the maximum number of devices and ports in the config file
+Const CFG_DEVICE_MAX = 1
+Const CFG_PORT_MAX = 5
+
+'set the max comm failures before a tcp socket is closed and reopened
+Const CFG_TCP_FAIL_MAX = 10
+
+
+Dim cfg_counter As Long
+
+Public cfg_port_total As Long = 5
+Public cfg_ports(CFG_PORT_MAX) As Long
+
+Public cfg_tcp_open_override As Long
+
+Public cfg_tcp_open As Long
+Public cfg_tcp_addr(CFG_PORT_MAX) As String = {"10.11.50.10", "10.11.50.26", "10.11.50.51", "10.11.50.53", "10.11.50.56"}
+Public cfg_tcp_port(CFG_PORT_MAX) As Long = {502, 502, 502, 502, 502}
+
+Public cfg_tcp_power_enabled As Boolean = TRUE
+
+Public cfg_device_port_num(CFG_DEVICE_MAX) As Long
+
+Public cfg_datalogger_ip As String * 15
+Public cfg_datalogger_netmask As String * 15
+Public cfg_datalogger_gateway As String * 15
+Dim cfg_datalogger_gateway_ping_fail As Long
+
+
+'################################################
+
+Function parseIpInfo()
+  Dim IPInfo As String * 200
+
+  'Data in CR800 Status.IPInfo = CSIO(1) MAC: 00d02c0209b0  CSIO(1) IP: 10.11.50.26  CSIO(1) mask: 255.255.0.0  CSIO(1) gw: 10.11.1.1  dns: 10.11.10.11  dns: 10.11.10.12
+  'Data in CR1000 Status.IPInfo = eth MAC: 00d02c044e5b  eth IP: 10.11.50.10  eth mask: 255.255.0.0  eth gw: 10.11.1.1
+  'IP Address length is between 7 and 15
+
+  IPInfo = LowerCase(Status.IPInfo)
+
+  #If LoggerType = CR1000
+    cfg_datalogger_ip = Mid(IPInfo, InStr(1, IPInfo, "eth ip: ", 2) + 8, InStr(1, IPInfo, "eth mask: ", 2) - (InStr(1, IPInfo, "eth ip: ", 2) + 8) - 2)
+    cfg_datalogger_netmask = Mid(IPInfo, InStr(1, IPInfo, "eth mask: ", 2) + 10, InStr(1, IPInfo, "eth gw: ", 2) - (InStr(1, IPInfo, "eth mask: ", 2) + 10) - 2)
+    cfg_datalogger_gateway = Mid(IPInfo, InStr(1, IPInfo, "eth gw: ", 2) + 8, Len(IPInfo) - (InStr(1, IPInfo, "eth gw: ", 2) + 8) - 1)
+  #ElseIf LoggerType = CR800
+    cfg_datalogger_ip = Mid(IPInfo, InStr(1, IPInfo, "csio(1) ip: ", 2) + 12, InStr(1, IPInfo, "csio(1) mask: ", 2) - (InStr(1, IPInfo, "csio(1) ip: ", 2) + 12) - 2)
+    cfg_datalogger_netmask = Mid(IPInfo, InStr(1, IPInfo, "csio(1) mask: ", 2) + 14, InStr(1, IPInfo, "csio(1) gw: ", 2) - (InStr(1, IPInfo, "csio(1) mask: ", 2) + 14) - 2)
+    cfg_datalogger_gateway = Mid(IPInfo, InStr(1, IPInfo, "csio(1) gw: ", 2) + 12, InStr(1, IPInfo, "dns: ", 2) - (InStr(1, IPInfo, "csio(1) gw: ", 2) + 12) - 2)
+  #EndIf
+
+EndFunction 'parseIpInfo
+
+
+
+
+
+Function pingKeepAlive(IPInfo As String * 200)
+  Dim cfg_datalogger_gateway As String * 15
+  Public gateway_ping_response As Long
+  Public cfg_datalogger_network_enabled As Boolean = TRUE
+  Dim current_record As Long
+
+  'capture a frozen copy of the record number, used for clearing
+  current_record = fifteenMin.Record
+
+  If current_record <> cfg_datalogger_last_record Then
+
+    'parse datalogger gateway information
+    #If LoggerType = CR1000
+      cfg_datalogger_gateway = Mid(IPInfo, InStr(1, IPInfo, "eth gw: ", 2) + 8, _
+        Len(IPInfo) - (InStr(1, IPInfo, "eth gw: ", 2) + 8) - 1)
+    #ElseIf LoggerType = CR800
+      cfg_datalogger_gateway = Mid(IPInfo, InStr(1, IPInfo, "csio(1) gw: ", 2) + 12, _
+        InStr(1, IPInfo, "dns: ", 2) - (InStr(1, IPInfo, "csio(1) gw: ", 2) + 12) - 2)
+    #EndIf
+
+    gateway_ping_response = pingIpAddress(cfg_datalogger_gateway,5000)
+
+    If NOT gateway_ping_response Then
+      cfg_datalogger_network_enabled = FALSE
+
+      #If CFG_TCP_ENABLE
+        If cfg_port_total > 0 Then
+          For cfg_counter = 1 To cfg_port_total
+            If cfg_ports(cfg_counter) > 100 Then TCPClose(cfg_ports(cfg_counter))
+          Next
+        EndIf
+      #EndIf
+
+      'TRUE = network interface enabled, FALSE = network interface disabled
+      #If LoggerType = CR1000
+        IPNetPower(1, cfg_datalogger_network_enabled)
+      #ElseIf LoggerType = CR800
+        IPNetPower(2, cfg_datalogger_network_enabled)
+      #EndIf
+
+      Delay(1, 1, SEC)
+
+      cfg_datalogger_network_enabled = TRUE
+
+      'TRUE = network interface enabled, FALSE = network interface disabled
+      #If LoggerType = CR1000
+        IPNetPower(1, cfg_datalogger_network_enabled)
+      #ElseIf LoggerType = CR800
+        IPNetPower(2, cfg_datalogger_network_enabled)
+      #EndIf
+    EndIf
+
+    cfg_datalogger_last_record = current_record
+  EndIf
+EndFunction 'pingKeepAlive
+'################################################
+
+'## Shutdown ####################################
+ShutDownBegin
+
+  'base
+    If cfg_port_total > 0 Then
+      For cfg_counter = 1 To cfg_port_total
+        If cfg_ports(cfg_counter) > 100 Then TCPClose(cfg_ports(cfg_counter))
+      Next
+    EndIf
+
+ShutDownEnd
+'################################################
+
+'## Main Program ################################
+BeginProg
+  Scan (5,Sec,3,0)
+
+  NextScan
+
+  SlowSequence
+  Do While TRUE
+
+    pingKeepAlive(LowerCase(Status.IPInfo))
+
+    For cfg_tcp_open = 1 To cfg_port_total
+      'only try to open sockets that aren't already open
+      If cfg_ports(cfg_tcp_open) = 0 Then
+          'CSI updated the TCPOpen command in OS26 to allow the use of it in a loop.
+          cfg_ports(cfg_tcp_open) = TCPOpen(cfg_tcp_addr(cfg_tcp_open), cfg_tcp_port(cfg_tcp_open), 1, 1000, cfg_ports(cfg_tcp_open), 5)
+      EndIf
+    Next
+  Loop
+  EndSequence
+EndProg
+'################################################

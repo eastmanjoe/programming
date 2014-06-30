@@ -1,0 +1,59 @@
+Dim Commands As String * 200
+Public Temp, Time(9), RefTemp
+
+
+DataTable (CR1Temp,True,-1)
+    DataInterval (0,1,Min,10)
+    Sample (1,Temp,FP2)
+    Average (1,Temp,FP2,False)
+EndTable
+
+
+WebPageBegin ("default.html", Commands)
+    HTTPOut("<!DOCTYPE HTML PUBLIC " + CHR(34) + "-//W3C//DTD HTML 4.0 Transitional//EN" + CHR(34)+ ">")
+    HTTPOut("<html>")
+    HTTPOut("<head>")
+    HTTPOut("<title>Dana's CR1000 Datalogger</title>")
+    HTTPOut("<meta http-equiv=" + CHR(34) +"refresh"+ CHR(34) + "content="+ CHR(34) +"60"+ CHR(34)+ ">")
+    HTTPOut("</head>")
+    HTTPOut("<body>")
+    HTTPOut("<img src=" + CHR(34) + "/CPU/SHIELDWEB.jpg" + CHR(34)+ ">")
+    HTTPOut("<h1>Dana's CR1000 Datalogger</h1>")
+    HTTPOut("The time is " + time(4) + ":" + time(5))
+    HTTPOut("<br>")
+    HTTPOut("<br>")
+    HTTPOut("The temperature is " + Temp)
+    HTTPOut("<br>")
+    HTTPOut("<br>")
+    HTTPOut("<a href="+ CHR(34) + "datatables.html" + CHR(34) + ">Go to the Data Tables Link Page</a>")
+    HTTPOut("</body>")
+    HTTPOut("</html>")
+WebPageEnd
+
+
+
+WebPageBegin("datatables.html", Commands)
+    HTTPOut("<!DOCTYPE HTML PUBLIC " + CHR(34) + "-//W3C//DTD HTML 4.0 Transitional//EN" + CHR(34)+ ">")
+    HTTPOut("<HTML>")
+    HTTPOut("<HEAD>")
+    HTTPOut("<TITLE>CR1000 Data Table Links</TITLE>")
+    HTTPOut("</HEAD>")
+    HTTPOut("<BODY>")
+    HTTPOut("<h1>CR1000 Datalogger Data Table Links</h1>")
+    HTTPOut("<ul><li><a href="+ CHR(34) + "command=NewestRecord&table=Status"+ CHR(34) + ">Newest Record from Status</a></li></ul>")
+    HTTPOut("<ul><li><a href="+ CHR(34) + "command=NewestRecord&table=CR1Temp"+ CHR(34) + ">Newest Record from CR1Temp</a></li></ul>")
+    HTTPOut("<ul><li><a href="+ CHR(34) + "command=TableDisplay&table=CR1Temp&records=1"+ CHR(34) + ">Display Last 1 Records from DataTable CR1Temp</a></li></ul>")
+    HTTPOut("<ul><li><a href="+ CHR(34) + "command=NewestRecord&table=Public"+ CHR(34) + ">Newest Record from Public</a></li></ul>")
+    HTTPOut("</BODY>")
+    HTTPOut("</HTML>")
+WebPageEnd
+
+
+BeginProg
+    Scan (1,Sec,3,0)
+      PanelTemp (RefTemp,250)
+      TCDiff (Temp,1,mV2_5,1,TypeT,RefTemp,True ,0,250,1.0,0)
+      RealTime (Time())
+      CallTable (CR1Temp)
+    NextScan
+EndProg

@@ -1,0 +1,50 @@
+'################################################
+'Property of Draker Laboratories
+'
+'Determine the CheckSumType to use for Vaisala CRC calculation
+'
+'current message gives crc value of 54035 or MLS
+'
+'################################################
+
+Public message As String * 160 = "0r0,Dm=161D,Sm=0.1M,Ta=25.3C,Ua=42.0P,Pa=996.0H,Rc=0.00M,Rd=0s,Ri=0.0M,Vs=13.5V"
+Public crc_csi As Long
+Public crc_csi_str As String * 3
+Public crc_comp As Long
+Public crc_comp_str As String * 3
+Dim counter As Long
+Dim crc_counter As Long
+
+BeginProg
+    Scan (1,Sec,3,0)
+    
+      'crc calculation from scratch
+      crc_comp = 0
+      For counter = 1 To Len(message)
+        crc_comp = crc_comp XOR ASCII(message(1, 1, counter))
+        
+        For crc_counter = 1 To 8
+          If crc_comp AND 1 Then
+            crc_comp = (crc_comp >> 1) XOR &HA001
+          Else
+            crc_comp = crc_comp >> 1
+          EndIf
+        Next
+       Next
+
+      crc_comp_str = ""
+       For counter = 12 To 0 Step -6
+        crc_comp_str &= Chr(((crc_comp >> counter) AND &H3F) OR &H40)
+      Next
+       
+      'crc calculation using csi built in function, output are three ascii characters
+      crc_csi = 0
+      crc_csi = CheckSum(message, 10, 0)
+
+      crc_csi_str = ""
+      For counter = 12 To 0 Step -6
+        crc_csi_str &= Chr(((crc_csi >> counter) AND &H3F) OR &H40)
+      Next
+      
+    NextScan
+EndProg

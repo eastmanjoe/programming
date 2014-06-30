@@ -1,0 +1,43 @@
+'################################################
+'Property of Draker Laboratories
+'
+'Determine how to use the ModBusMaster command
+'
+'ModBusMaster command overrides the baud rate specified
+'in the SerialOpen command
+'################################################
+
+Const DEV_TOTAL = 1
+
+
+Const MTR_SHARK_100_BAUD = 57600
+Const MTR_SHARK_100_RETRIES = 2
+Const MTR_SHARK_100_TIMEOUT = 25
+Public addr(DEV_TOTAL) As Long = {33}
+Public port(DEV_TOTAL) As Long = {COM1}
+Public result_code(DEV_TOTAL) As Long
+Public mtr_sn As String * 40
+Dim buffer(8) As Long
+Dim buffer_string As String * 20
+Dim num As Long
+Dim counter As Long
+
+
+BeginProg
+    Scan (5,Sec,3,0)
+      
+      For num = 1 To DEV_TOTAL
+        'query serial number
+        ModBusMaster(result_code(num), port(num), MTR_SHARK_100_BAUD, addr, 3, buffer(1), 9, 8, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+        If result_code(num) = 0 Then
+          buffer_string = ""
+          For counter = 0 To 7
+            MoveBytes(buffer_string, counter * 2, buffer(1 + counter), 2, 2)
+          Next
+
+          mtr_sn(num) = Trim(buffer_string)
+        EndIf
+      Next
+  
+    NextScan
+EndProg

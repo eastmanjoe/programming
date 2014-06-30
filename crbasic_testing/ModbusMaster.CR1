@@ -1,0 +1,73 @@
+'################################################
+'Property of Draker Laboratories
+'
+'Determine how to use the ModBusMaster command
+'
+'ModBusMaster command overrides the baud rate specified
+'in the SerialOpen command
+'################################################
+
+Const DEV_TOTAL = 1
+'#If LoggerType = CR800
+'Const NUM_OF_SERIAL_PORTS = 2
+'#ElseIf LoggerType = CR1000
+'Const NUM_OF_SERIAL_PORTS = 4
+'#EndIf
+
+
+Const MTR_SHARK_100_BAUD = 9600
+'Const MTR_SHARK_100_BAUD_2 = 57600
+Const MTR_SHARK_100_RETRIES = 2
+Const MTR_SHARK_100_TIMEOUT = 25
+Public addr(DEV_TOTAL) As Long = {11}
+Public port(DEV_TOTAL) As Long = {COM1}
+'Public serial_baud(NUM_OF_SERIAL_PORTS) = {57600, 57600}
+Public result_code(DEV_TOTAL) As Long
+Public mtr_sn As String * 40
+Dim buffer(8) As Long
+Dim buffer_string As String * 20
+Dim num As Long
+Dim counter As Long
+
+
+BeginProg
+    Scan (5,Sec,3,0)
+'      SerialOpen(COM1, serial_baud(1), 32, 0, 500)
+'      SerialOpen(COM2, serial_baud(2), 32, 0, 500)
+'      #If LoggerType = CR1000
+'      SerialOpen(COM3, serial_baud(3), 32, 0, 500)
+'      SerialOpen(COM4, serial_baud(4), 32, 0, 500)
+'      #EndIf
+      
+'      Delay(0, 1000, MSEC)
+      
+      For num = 1 To DEV_TOTAL
+        'query serial number
+        ModBusMaster(result_code(num), port(num), MTR_SHARK_100_BAUD, addr, 3, buffer(1), 9, 8, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+        If result_code(num) = 0 Then
+          buffer_string = ""
+          For counter = 0 To 7
+            MoveBytes(buffer_string, counter * 2, buffer(1 + counter), 2, 2)
+          Next
+
+          mtr_sn(num) = Trim(buffer_string)
+        EndIf
+      Next
+      
+'      Delay(0, 1000, MSEC)
+      
+'      For num = 1 To DEV_TOTAL
+'        'query serial number
+'        ModBusMaster(result_code(num), port(num), MTR_SHARK_100_BAUD_2, addr, 3, buffer(1), 9, 8, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+'        If result_code(num) = 0 Then
+'          buffer_string = ""
+'          For counter = 0 To 7
+'            MoveBytes(buffer_string, counter * 2, buffer(1 + counter), 2, 2)
+'          Next
+
+'          mtr_sn(num) = Trim(buffer_string)
+'        EndIf
+'      Next
+  
+    NextScan
+EndProg

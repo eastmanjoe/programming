@@ -1,0 +1,303 @@
+'################################################
+'Property of Draker Laboratories
+'################################################
+
+'// PREFIX CORE /////////////////////////////////////////////////////////
+
+'## Description #################################
+'The core component handles monitoring the datalogger itself.
+'This includes panel temp, battery voltage, and status variables.
+'
+'Components:
+'// COPY DESCRIPTION ////////////////////////////////////////////////////
+'  core
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Change Log ##################################
+'2011-09-14 ITM [v4.01.00] Updated to new template, moved slow scan total into core.
+'2011-07-05 JHE [v4.03] Changed # records for dataloggerStatus table from auto-fill to fixed at 2000
+'2011-06-15 ITM [v4.02] Updated to daft tags.
+'2011-05-11 ITM [v4.01] Updated the draker version naming scheme.
+'2011-05-11 ITM [v4.00] Fixed cardout to only work on cr1000, updated core variable names, fixed status logic.
+'
+'Note: Add changes to the top of the list, using the format:
+'YYYY-MM-DD JQP [vM.mm.pp] Made this change and that change
+'################################################
+
+
+'## Versions ####################################
+Public draker_base_ver As String * 7 = "4.01.00"
+'// COPY VERSION ////////////////////////////////////////////////////////
+Public draker_core_ver As String * 7 = "4.01.00"
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Configuration ###############################
+PipeLineMode
+
+Const NOT_USED = 0
+Const CUSTOM = 1
+Const DL202 = 2
+Const DL208 = 3
+Const DL242 = 4
+Const DL264 = 5
+Const PROSPECTOR = 6
+
+Const DRAKER_PN = DL202
+
+'// COPY CONFIG /////////////////////////////////////////////////////////
+'################################################
+'core
+Const CORE_SLOW_SCAN_TOTAL = 1
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Declarations ################################
+Const FREQ_REJECTION = _60HZ
+Const CR = CHR(13)
+Const LF = CHR(10)
+Const CRLF = CHR(13) & CHR(10)
+
+'// COPY DECLARATION ////////////////////////////////////////////////////
+'################################################
+'core
+Public core_status As Long = 0
+Public core_panel_temp As Float
+Public core_bat_voltage As Float
+Dim core_last_status As Long
+
+Public tls_setting As Boolean
+Public comm_mem_free_01(11) As Long
+Public comm_mem_free_02(2) As Long
+Public comm_mem_free_03(6) As Long
+
+Alias comm_mem_free_01(1) = comm_buffer_tiny_used
+Alias comm_mem_free_01(2) = comm_buffer_tiny_free
+Alias comm_mem_free_01(3) = comm_buffer_little_used
+Alias comm_mem_free_01(4) = comm_buffer_little_free
+Alias comm_mem_free_01(5) = comm_buffer_medium_used
+Alias comm_mem_free_01(6) = comm_buffer_medium_free
+Alias comm_mem_free_01(7) = comm_buffer_large_used
+Alias comm_mem_free_01(8) = comm_buffer_large_free
+Alias comm_mem_free_01(9) = comm_buffer_huge_used
+Alias comm_mem_free_01(10) = comm_buffer_huge_free
+Alias comm_mem_free_02(1) = comm_keep_memory_free
+Alias comm_mem_free_02(2) = comm_keep_memory_used
+Alias comm_mem_free_03(1) = comm_little_ip_packets_used
+Alias comm_mem_free_03(2) = comm_little_ip_packets_free
+Alias comm_mem_free_03(3) = comm_big_ip_packets_used
+Alias comm_mem_free_03(4) = comm_big_ip_packets_free
+Alias comm_mem_free_03(5) = comm_rx_ip_packets_used
+Alias comm_mem_free_03(6) = comm_rx_ip_packets_free
+
+Units core_panel_temp = C
+Units core_bat_voltage = Vdc
+
+#If CORE_SLOW_SCAN_TOTAL > 0
+Public core_slow_scans(CORE_SLOW_SCAN_TOTAL) As Long
+#EndIf
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Data Tables #################################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  Sample(1, draker_base_ver, String)
+
+  '// COPY TABLE 15MIN ////////////////////////////////////////////////////
+  'core
+  Sample(1, draker_core_ver, String)
+  Sample(1, core_status, Long)
+  Average(1, core_panel_temp, FP2, FALSE)
+  Minimum(1, core_bat_voltage, FP2, FALSE, 0)
+
+  '// END /////////////////////////////////////////////////////////////////
+EndTable 'fifteenMin
+
+'// COPY TABLE //////////////////////////////////////////////////////////
+'core
+DataTable(dataloggerStatus, core_status <> core_last_status, 2000)
+  Sample(1, core_status, Long)
+  Sample(1, Status.WatchdogErrors, UINT2)
+  Sample(1, Status.VarOutOfBound, UINT2)
+  Sample(1, Status.SkippedScan, UINT2)
+  Sample(1, Status.SkippedSystemScan, UINT2)
+  #If CORE_SLOW_SCAN_TOTAL > 0
+  Sample(CORE_SLOW_SCAN_TOTAL, core_slow_scans(), UINT2)
+  #EndIf
+
+  Sample(1, Status.Battery, FP2)
+  Sample(1, Status.LithiumBattery, FP2)
+  Sample(1, Status.Low12VCount, UINT2)
+  Sample(1, Status.Low5VCount, UINT2)
+  
+  Sample(10, comm_mem_free_01(1), FP2)
+  Sample(2, comm_mem_free_02(1), FP2)
+  Sample(6, comm_mem_free_03(1), FP2)
+EndTable 'dataloggerStatus
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Display Tables ##############################
+DisplayMenu("LIVE DATA", -2)
+  SubMenu("Datalogger")
+    '// COPY DISPLAY LOG ////////////////////////////////////////////////////
+    'core
+    DisplayValue("Serial Number", Status.SerialNumber)
+    DisplayValue("Temperature", core_panel_temp)
+    DisplayValue("Voltage", core_bat_voltage)
+
+    '// END /////////////////////////////////////////////////////////////////
+  EndSubMenu
+EndMenu
+'################################################
+
+
+'## Functions ###################################
+'// COPY FUNCTION ///////////////////////////////////////////////////////
+'core
+Function getCoreStatus() As Long
+  Dim status As Long, counter As Long
+
+  status = 0
+  If Status.WatchdogErrors > 0 Then status += &H0001
+  If Status.VarOutOfBound > 0 Then status += &H0002
+  If Status.SkippedScan > 0 Then status += &H0004
+  If Status.SkippedSystemScan > 0 Then status += &H0008
+  If Status.Battery < 12.3 Then status += &H0100
+  If Status.LithiumBattery < 3.3 Then status += &H0200
+  If Status.Low12VCount > 0 Then status += &H0400
+  If Status.Low5VCount > 0 Then status += &H0800
+
+  #If CORE_SLOW_SCAN_TOTAL = 1
+  If Status.SkippedSlowScan > 0 Then status += &H0010
+  core_slow_scans(1) = Status.SkippedSlowScan
+
+  #ElseIf CORE_SLOW_SCAN_TOTAL > 1
+  For counter = 1 To CORE_SLOW_SCAN_TOTAL
+    If Status.SkippedSlowScan(counter) > 0 Then status += (&H0008 << counter)
+    core_slow_scans(counter) = Status.SkippedSlowScan(counter)
+  Next
+  #EndIf
+
+  Return status
+EndFunction 'getCoreStatus
+
+Function parseCommsMemFree(tls_values As Boolean, tiny_free_last As Long)
+  Dim buffer_string(2) As String * 10
+  'comms_mem_free_01_default Array Index Description = {tiny, little, medium, large, huge}
+  Dim comms_mem_free_01_default(2, 5) As Long = {5, 15, 25, 15, 0, 160, 99, 99, 30, 2}
+  'comms_mem_free_03_default Array Index Description = {little ip packets, big ip packets, rx packets}
+  Dim comms_mem_free_03_default(2, 3) As Long = {30, 15, 0, 60, 32, 0}
+
+  'clear buffer
+  buffer_string = ""
+  
+  'Convert CommsMemFree(1) to a string
+  buffer_string(1) = FormatLong(Status.CommsMemFree(1), "%010u")
+  
+  'Convert CommsMemFree(3) to a string
+  buffer_string(2) = FormatLong(Status.CommsMemFree(3), "%06u")
+
+  Select Case tls_values
+  Case FALSE
+    
+    comm_buffer_tiny_free = Mid(buffer_string(1), 9, 2)
+    comm_buffer_little_free = Mid(buffer_string(1), 7, 2)
+    comm_buffer_medium_free = Mid(buffer_string(1), 5, 2)
+    comm_buffer_large_free = Mid(buffer_string(1), 3, 2)
+    comm_buffer_huge_free = Mid(buffer_string(1), 1, 2)
+    
+    comm_buffer_tiny_used = comms_mem_free_01_default(1, 1) - comm_buffer_tiny_free
+    comm_buffer_little_used = comms_mem_free_01_default(1, 2) - comm_buffer_little_free
+    comm_buffer_medium_used = comms_mem_free_01_default(1, 3) - comm_buffer_medium_free
+    comm_buffer_large_used = comms_mem_free_01_default(1, 4) - comm_buffer_large_free
+    comm_buffer_huge_used = comms_mem_free_01_default(1, 5) - comm_buffer_huge_free
+
+    comm_keep_memory_free = Status.CommsMemFree(2)
+        
+    comm_little_ip_packets_free = Mid(buffer_string(2), 5, 2)
+    comm_big_ip_packets_free = Mid(buffer_string(2), 3, 2)
+    comm_rx_ip_packets_free = Mid(buffer_string(2), 1, 2)
+    
+    comm_little_ip_packets_used = comms_mem_free_03_default(1, 1) - comm_little_ip_packets_free
+    comm_big_ip_packets_used = comms_mem_free_03_default(1, 2) - comm_big_ip_packets_free
+    comm_rx_ip_packets_used = comms_mem_free_03_default(1, 3) - comm_rx_ip_packets_free
+  
+  Case TRUE
+    
+    comm_buffer_tiny_free = Mid(buffer_string(1), 9, 2)
+    comm_buffer_little_free = Mid(buffer_string(1), 7, 2)
+    comm_buffer_medium_free = Mid(buffer_string(1), 5, 2)
+    comm_buffer_large_free = Mid(buffer_string(1), 3, 2)
+    comm_buffer_huge_free = Mid(buffer_string(1), 1, 2)
+    
+    comm_buffer_tiny_used = comms_mem_free_01_default(2, 1) - comm_buffer_tiny_free
+    comm_buffer_little_used = comms_mem_free_01_default(2, 2) - comm_buffer_little_free
+    comm_buffer_medium_used = comms_mem_free_01_default(2, 3) - comm_buffer_medium_free
+    comm_buffer_large_used = comms_mem_free_01_default(2, 4) - comm_buffer_large_free
+    comm_buffer_huge_used = comms_mem_free_01_default(2, 5) - comm_buffer_huge_free
+
+    comm_keep_memory_free = Status.CommsMemFree(2)
+    
+    comm_little_ip_packets_free = Mid(buffer_string(2), 5, 2)
+    comm_big_ip_packets_free = Mid(buffer_string(2), 3, 2)
+    comm_rx_ip_packets_free = Mid(buffer_string(2), 1, 2)
+    
+    comm_little_ip_packets_used = comms_mem_free_03_default(2, 1) - comm_little_ip_packets_free
+    comm_big_ip_packets_used = comms_mem_free_03_default(2, 2) - comm_big_ip_packets_free
+    comm_rx_ip_packets_used = comms_mem_free_03_default(2, 3) - comm_rx_ip_packets_free
+  EndSelect
+  
+EndFunction 'parseCommsMemFree
+
+Function determineTls() As Boolean
+  If Status.CommsMemFree(1) = 230999960
+    Return TRUE
+  ElseIf Status.CommsMemFree(1) = 15251505
+    Return FALSE
+  EndIf
+EndFunction
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  tls_setting = determineTls()
+  
+  Scan(6, SEC, 3, 0)
+    '// COPY SCAN ///////////////////////////////////////////////////////////
+    'core
+    PanelTemp(core_panel_temp, FREQ_REJECTION)
+    Battery(core_bat_voltage)
+
+    core_last_status = core_status
+    core_status = getCoreStatus()
+    parseCommsMemFree(tls_setting, comm_buffer_tiny_free)
+    
+    CallTable(dataloggerStatus)
+
+    '// END /////////////////////////////////////////////////////////////////
+    CallTable(fifteenMin)
+  NextScan
+
+  SlowSequence
+  Scan(30, Sec, 1, 0)
+
+  NextScan
+  EndSequence
+EndProg

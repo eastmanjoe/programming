@@ -1,0 +1,277 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+'################################################
+'192.168.13.100,255.255.0.0,192.168.13.2,209.244.0.3,8.8.4.4
+'192.168.13.100,255.255.0.0,192.168.13.2,209.244.0.3,209.244.0.4
+
+'Commands to test getting IP Address via browser
+'http://10.11.40.23/?command=dataquery&uri=dl:status.ipinfo&mode=most-recent&format=json
+'http://10.11.50.26/?command=dataquery&uri=dl:public.pnl_logger_ip&mode=most-recent&format=json
+'http://10.11.50.26/?command=dataquery&uri=dl:public.pnl_logger_netmask&mode=most-recent&format=json
+'http://10.11.50.26/?command=dataquery&uri=dl:public.pnl_logger_gateway&mode=most-recent&format=json
+
+'Commands to test setting IP Address via browser
+'Requires the .csipasswd file to be set or &security=2278 needs to be put on the end of the command
+'http://10.11.50.26/?command=setvalueex&uri=dl:public.pnl_logger_ip&value=10.11.50.150&format=json
+'http://10.11.50.26/?command=setvalueex&uri=dl:public.pnl_logger_netmask&value=255.255.0.0&format=json
+'http://10.11.50.26/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
+'http://10.11.50.26/?command=setvalueex&uri=dl:public.pnl_logger_dns1&value=8.8.8.8&format=json
+'http://10.11.50.26/?command=setvalueex&uri=dl:public.pnl_logger_dns2&value=8.8.4.4&format=json
+'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_dns1&value=8.8.8.8&format=json
+'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_dns2&value=8.8.4.4&format=json
+
+'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
+'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipeLineMode
+
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+Const QN = Chr(34)
+
+Include "CPU:network_settings.dld"
+
+Public pnl_network_settings_error As String * 1024
+Dim ip_info(8) As String * 32
+Alias ip_info = datalogger_mac, datalogger_ip, datalogger_netmask, _
+  datalogger_gateway, datalogger_dns1, datalogger_dns2, datalogger_dns3, _
+  datalogger_dns4
+Dim counter As Long
+
+'################################################
+
+'## Data Tables #################################
+' DataTable(fifteenMin, TRUE, -1)
+'   DataInterval(0, 15, MIN, 0)
+'   #If LoggerType = CR1000
+'   CardOut(0, -1)
+'   #EndIf
+
+' EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+Function parseIpInfo()
+  Dim counter As Long
+  Dim buffer_str As String * 32
+  Dim line_buffer As String * 200
+
+  Move(buffer_str, Len(buffer_str), "", 1)
+
+  For counter = 1 to ArrayLength(ip_info)
+    Move(ip_info(counter), Len(ip_info(counter)), "", 1)
+  Next
+
+  'parse Status.IPInfo to get current settings
+  line_buffer = LowerCase(Status.IPInfo)
+  line_buffer = Replace(line_buffer, SP, "")
+  line_buffer = Replace(line_buffer, CRLF, ",")
+
+  SplitStr(ip_info(), line_buffer, ",", ArrayLength(ip_info), 5)
+
+  #If LoggerType = CR1000 Then
+    datalogger_ip = Status.IPAddressEth
+    datalogger_netmask = Status.IPMaskEth
+    datalogger_gateway = Status.IPGateway
+  #ElseIf LoggerType = CR800 Then
+    datalogger_ip = Status.IPAddressCSIO(1)
+    datalogger_netmask = Status.IPMaskCSIO(1)
+    datalogger_gateway = Status.IPGatewayCSIO(1)
+  #EndIf
+
+  'change mac address format from 00d02c0209b0 to 00:D0:2C:02:09:B0
+  datalogger_mac = Right(datalogger_mac, Len(datalogger_mac) - InStr(1, datalogger_mac, ":", 2))
+  datalogger_mac = UpperCase(datalogger_mac)
+
+  For counter = 1 To Len(datalogger_mac) Step 2
+    buffer_str &= Mid(datalogger_mac, counter, 2)
+
+    If counter < 11 Then buffer_str &= ":"
+  Next
+
+  datalogger_mac = buffer_str
+  datalogger_dns1 = Right(datalogger_dns1, Len(datalogger_dns1) - InStr(1, datalogger_dns1, ":", 2))
+  datalogger_dns2 = Right(datalogger_dns2, Len(datalogger_dns2) - InStr(1, datalogger_dns2, ":", 2))
+  datalogger_dns3 = Right(datalogger_dns3, Len(datalogger_dns3) - InStr(1, datalogger_dns3, ":", 2))
+  datalogger_dns4 = Right(datalogger_dns4, Len(datalogger_dns4) - InStr(1, datalogger_dns4, ":", 2))
+EndFunction 'parseIpInfo
+
+
+
+
+
+Function checkIpFormat(type As String * 24, ip_string As String * 24) As String * 1024
+  Dim buffer_str(4) As String * 3
+  Dim counter As Long
+  Dim chr_counter As Long
+
+  If ip_string = "" Then
+    Return type & " is missing"
+
+  ElseIf Len(ip_string) > 15 Then
+    Return type & " contains too many characters"
+
+  Else
+    'check for valid ip address format
+    SplitStr(buffer_str(1), ip_string, ".", 4, 5)
+
+    For counter = 1 To 4
+      If buffer_str(counter) = "" Then
+        Return type & " is missing octet number: " & counter
+      EndIf
+
+      If Len(buffer_str(counter)) > 3 Then
+        Return type & " has too many characters in octet number: " & counter
+      EndIf
+
+      For chr_counter = 1 To Len(buffer_str(counter))
+        If ASCII(buffer_str(counter, 1, chr_counter)) < 48 OR ASCII(buffer_str(counter, 1, chr_counter)) > 57 Then
+          Return type & " contains illegal character in octet number: " & counter
+        EndIf
+      Next
+    Next
+  EndIf
+
+  Return ""
+EndFunction 'checkIpFormat
+
+
+
+
+
+Function writeNetworkSettingsFile(network_settings_dld As String * 8, change_network_settings As String * 8, _
+  ip_addr As String * 24, netmask As String * 24, gateway As String * 24, dns1 As String * 24)
+
+  Dim file_handle As Long
+  Dim line_buffer As String * 500
+
+    'create network settings.dld file in line_buffer
+    line_buffer = "Public network_settings_dld_updated As Boolean = " & network_settings_dld & LF
+    line_buffer &= "Public pnl_cfg_change_network_settings As Boolean = " & change_network_settings & LF
+    line_buffer &= "Public pnl_logger_ip As String * 32 = " & QN & ip_addr & QN & LF
+    line_buffer &= "Public pnl_logger_netmask As String * 32 = " & QN & netmask & QN & LF
+    line_buffer &= "Public pnl_logger_gateway As String * 32 = " & QN & gateway & QN & LF
+    line_buffer &= "Public pnl_logger_dns1 As String * 32 = " & QN & dns1 & QN & LF
+    line_buffer &= LF
+    line_buffer &= "Const DNS1_ADDRESS = " & QN & dns1 & QN & LF
+    line_buffer &= LF
+
+    'open the file and write out the serialized parameters
+    file_handle = FileOpen("CPU:network_settings.dld", "w", 0)
+    FileWrite(file_handle, line_buffer, 0)
+    FileClose(file_handle)
+
+    'restart the program to pull in the new values
+    FileManage(Status.ProgName, 6)
+EndFunction 'writeNetworkSettingsFile
+
+
+
+
+
+Function setNetworkSettings(ip_addr As String * 24, netmask As String * 24, _
+  gateway As String * 24, dns1 As String * 24) As Boolean
+
+  Dim counter As Long
+
+  Move(pnl_network_settings_error, Len(pnl_network_settings_error), "", 1)
+
+  pnl_network_settings_error = checkIpFormat("ip_addr", ip_addr)
+  If pnl_network_settings_error <> "" Then ExitFunction
+
+  pnl_network_settings_error = checkIpFormat("dns1 address", dns1)
+  If pnl_network_settings_error <> "" Then Return FALSE
+
+  If StrComp(datalogger_ip, ip_addr) <> 0 Then
+    #If LoggerType = CR1000
+      SetStatus("IPAddressEth", ip_addr)
+    #ElseIf LoggerType = CR800
+      SetStatus("IPAddressCSIO(1)", ip_addr)
+    #EndIf
+
+  EndIf
+
+  'if setting to DHCP, set the default DNS addresses and skip setting the other network settings
+  If ip_addr <> "0.0.0.0" Then
+    pnl_network_settings_error = checkIpFormat("netmask", netmask)
+    If pnl_network_settings_error <> "" Then Return FALSE
+
+    pnl_network_settings_error = checkIpFormat("gateway", gateway)
+    If pnl_network_settings_error <> "" Then Return FALSE
+
+
+    If StrComp(datalogger_netmask, netmask) <> 0 Then
+      #If LoggerType = CR1000
+        SetStatus("IPMaskEth", netmask)
+      #ElseIf LoggerType = CR800
+        SetStatus("IPMaskCSIO(1)", netmask)
+      #EndIf
+    EndIf
+
+    If StrComp(datalogger_gateway, gateway) <> 0 Then
+      #If LoggerType = CR1000
+        SetStatus("IPGateway", gateway)
+      #ElseIf LoggerType = CR800
+        SetStatus("IPGatewayCSIO(1)", gateway)
+      #EndIf
+    EndIf
+  EndIf
+
+  SetStatus("Domain Name Server", DNS1_ADDRESS)
+
+  Return TRUE
+EndFunction 'setNetworkSettings
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  parseIpInfo()
+
+  If pnl_cfg_change_network_settings Then
+    If setNetworkSettings(pnl_logger_ip, pnl_logger_netmask, pnl_logger_gateway, pnl_logger_dns1) Then
+      'reset the flags to defaults
+      writeNetworkSettingsFile("FALSE", "FALSE", "", "", "", "")
+    EndIf
+  EndIf
+
+  Scan (30,Sec,3,0)
+
+    parseIpInfo()
+
+    If pnl_cfg_change_network_settings Then
+      If network_settings_dld_updated Then
+        If setNetworkSettings(pnl_logger_ip, pnl_logger_netmask, pnl_logger_gateway, pnl_logger_dns1) Then
+          'reset the flags to defaults
+          writeNetworkSettingsFile("FALSE", "FALSE", "", "", "", "")
+        EndIf
+      Else
+        If pnl_logger_ip = "0.0.0.0" AND pnl_logger_dns1 = "" Then
+          writeNetworkSettingsFile("TRUE", "TRUE", pnl_logger_ip, pnl_logger_netmask, _
+            pnl_logger_gateway, "8.8.8.8")
+        Else
+          writeNetworkSettingsFile("TRUE", "TRUE", pnl_logger_ip, pnl_logger_netmask, _
+            pnl_logger_gateway, pnl_logger_dns1)
+        EndIf
+      EndIf
+    EndIf
+
+  NextScan
+EndProg
+'################################################

@@ -1,0 +1,9 @@
+Public network_settings_dld_updated As Boolean = FALSE
+Public pnl_cfg_change_network_settings As Boolean = FALSE
+Public pnl_logger_ip As String * 32 = ""
+Public pnl_logger_netmask As String * 32 = ""
+Public pnl_logger_gateway As String * 32 = ""
+Public pnl_logger_dns1 As String * 32 = ""
+Public pnl_logger_dns2 As String * 32 = ""
+
+Const DNS1_ADDRESS = "8.8.8.8"

@@ -1,0 +1,222 @@
+'################################################
+'Property of Draker Laboratories
+'Testing Carlos Gavazzi EOS Lite Modules
+'Config: 1000-
+'Program Author: Joe Eastman
+'Created On: 01/16/2011
+'################################################
+
+'################  CONFIGURATION ################
+'Carlo Gavazzi EOS Lite Sting Measurement Development Program
+'Developed for Mercury Solar - Graver's Building (Plymouth Meeting) project
+'Each EOS Lite Array ASM is (1) Master Module and (2) String Measurement Modules
+'################################################
+
+'Uncomment to use PipeLineMode
+PipeLineMode
+
+'############  CONSTANTS ###########
+'800
+Const SamplingInt 				= 1 				' Sampling interval in seconds
+'Const SlowScanInterval		= 10				' used for slow scan
+Const archive_interval		= 15 				' interval of data table in minutes
+Const freqRejection				= _60Hz			' Integration period for frequency rejection could be 50 herz for EU
+
+'############  VARIABLES ###########
+Public T_ref   					' Internal datalogger terminal strip temperature
+Public V_batt   				' Datalogger battery voltage
+Dim C										'counter for loops
+
+'############  UNITS ###########
+Units T_ref				=	Deg C
+Units V_batt			=	Vdc
+'################################################
+
+
+'############  CONSTANTS ###########
+'D1o
+Const NumofVMU_MModules = 3
+Dim VMU_M_Addr(NumofVMU_MModules) = {31, 32, 34}
+
+Const EOSScanInterval		= 15				'Used for EOS Scan
+Const EOSComPort				= Com3
+Const EOSBaudRate				= 38400
+
+'Layout of Modules
+'S = VMU_S, P = VMU_P, O = VMU_O
+Const	NumofVMU_SModules		= 2					'Number of VMU-SO Modules (String Voltage and Current)
+Const	NumofVMU_PModules			= 0						'Number of VMU-P Modules (Pyranometer)
+Const	NumofVMU_OModules			= 0						'Number of VMU-O Modules (Relay)
+Dim Module_Map(NumofVMU_MModules, NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1) As String * 1 = {"M", "S", "S","M", "S", "S","M", "S", "S"}
+'############  VARIABLES ###########
+Dim D
+Public V_String(NumofVMU_MModules,NumofVMU_SModules)
+Public I_String(NumofVMU_MModules,NumofVMU_SModules)
+'################################################
+
+
+
+
+'############  TABLE ###########
+DataTable(fifteenMin,True,-1)
+	DataInterval(0,archive_interval,Min,0)	' date_time_utc						0
+	'800
+	Average (1,T_ref,FP2,False)				' temp_dl		 					2
+	Minimum (1,V_batt,FP2,False,False)   	' voltage_dl						3
+	'D1o
+	Average(NumofVMU_MModules * NumofVMU_SModules,V_String(1,1),IEEE4,V_String(1,1) = NAN)
+	Average(NumofVMU_MModules * NumofVMU_SModules,I_String(1,1),IEEE4,I_String(1,1) = NAN)
+	'800
+	Sample(1,Status.WatchdogErrors,FP2)
+	Sample(1,Status.SkippedScan,FP2)
+	Sample(1,Status.SkippedSystemScan,FP2)
+	'Sample(1,Status.SkippedSlowScan,FP2)
+	Sample(1,Status.LithiumBattery,FP2)
+EndTable	'End of fifteenMin Table
+'################################################
+
+
+
+
+'############  DISPLAY MENU ###########
+'DisplayMenu("LIVE DATA",-2)	'Create Custom Menu named LIVE DATA; set as main menu
+'	'800
+'	SubMenu("Status")
+'		DisplayValue("DAS Temperature",T_ref)
+'		DisplayValue("Battery V",V_batt)
+'
+'	EndSubMenu
+'
+'EndMenu	'End of Display Menu
+'################################################
+
+
+
+
+'#################  SUB-ROUTINE #################
+'D1o "Carlo Gavazzi EOS Lite Array"
+Sub callEOSLite (EOSAddr, EOSnum)
+	'############  CONSTANTS ###########
+	Const EOSRegisterOffsets	= 8		'&H008
+
+	'VMU-M Modbus Map
+	Const EOSVMU_MValues 				= 2
+	Dim EOS_Module_Data_Map(16)		= {769, 777, 785, 793, 801, 809, 817, 825, 833, 841, 849, 857, 865, 873, 881, 889}
+	Const EOSVMU_MAddr_Password			=	81	'&H0050
+	Const EOSVMU_MAddr_StringCtrl		= 94	'&H005D
+	Const EOSVMU_MAddr_StringAlrm		= 95	'&H005E
+	Const EOSVMU_MAddr_RS485Addr		=	99	'&H0062
+	'Const EOSVMU_MAddr_PhysAlrm			= 131 '&H0082
+	Const EOSVMU_Firmware					= 1025 '&H400
+
+	'VMU-S Modbus Map
+	Const EOSVMU_SValues 		= 4
+	'VMU-P Modbus Map
+	Const EOSVMU_PValues 			= 4
+	'VMU-O Modbus Map
+	Const EOSVMU_OValues 			= 3
+	'############  VARIABLES ###########
+	Dim E, E1, E2								'counter for loops
+'	Public ResetCounter(NumofVMU_MModules)
+	Dim EOSRawData(NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1,8) As Long
+	Dim EOSRawStatus(16) As Long
+	Public EOSArrayStatus(NumofVMU_MModules,NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1) As Long
+	Public EOSFirmware(NumofVMU_MModules,NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1) As Long
+	Public EOSVMU_MInfo(NumofVMU_MModules,4) As Long
+	Public EOSResultCode(NumofVMU_MModules,NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1)
+	'############  UNITS ###########
+	Units I_String	=	Adc
+	Units V_String	=	Vdc
+	'################################################
+	
+	For E2 = 1 To (NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1)
+		For E = 1 To 8
+			EOSRawData(E2,E) = NAN
+		Next
+	Next
+	
+	For E2 = 1 To 16
+		EOSRawStatus(E2) = NAN
+	Next
+	
+	For E2 = 1 To (NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1)
+		V_String(EOSnum,E2) = NAN
+		I_String(EOSnum,E2) = NAN
+	Next
+
+	For E = 1 To (NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1)
+		Select Case Module_Map(E)
+		Case "M"
+			'Query Master Module Status
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawData(E,1),EOS_Module_Data_Map(1),2,2,50,1)
+			EOSArrayStatus(EOSnum,E) = EOSRawData(E,2)
+'			If EOSArrayStatus(EOSnum,E) >= 1
+'				ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,06,1,12289,1,2,50,0)
+'				ResetCounter(EOSnum) = ResetCounter(EOSnum) + 1
+'			EndIf
+			'Query VMU_M Information
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSVMU_MInfo(EOSnum,1),EOSVMU_MAddr_RS485Addr,1,2,50,1)	'MODBUS Address
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSVMU_MInfo(EOSnum,2),EOSVMU_MAddr_Password,1,2,50,1)		'VMU M Password
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSVMU_MInfo(EOSnum,3),EOSVMU_MAddr_StringCtrl,1,2,50,1)	'String Control Enabling
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSVMU_MInfo(EOSnum,4),EOSVMU_MAddr_StringAlrm,1,2,50,1)	'String Alarm
+			
+			'Query Firmware Version
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawStatus(1),EOSVMU_Firmware,NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1,2,50,1)
+			For E1 = 1 To (NumofVMU_SModules + NumofVMU_PModules + NumofVMU_OModules + 1)
+				EOSFirmware(EOSnum, E1) = EOSRawStatus(E1)
+			Next
+		Case "S"
+			'Query String Voltage and Current
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawData(E,2),EOS_Module_Data_Map(E) + 1,1,2,50,1)
+			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawData(E,3),EOS_Module_Data_Map(E) + 2,2,2,50,1)
+			EOSArrayStatus(EOSnum,E) = EOSRawData(E,2)
+			'Voltage and Current reported in INT.  Divide by 10 to get decimal value for Voltage and divide by 100 to get decimal value for Current.
+			V_String(EOSnum,E - 1) = EOSRawData(E,3) / 10
+			I_String(EOSnum,E - 1) = EOSRawData(E,4) / 100
+			'P and O are untested and undeveloped
+'		Case "P"
+'			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawData(E,1),EOS_Module_Data_Map(E),8,2,50,0)
+'		Case "O"
+'			ModBusMaster(EOSResultCode(EOSnum,E),EOSComPort,EOSBaudRate,EOSAddr,04,EOSRawData(E,1),EOS_Module_Data_Map(E),8,2,50,0)
+		EndSelect
+	Next
+EndSub	'End of callEOSLite Sub-Routine
+
+'################################################
+
+
+
+
+'############  MAIN PROGRAM ###########
+BeginProg
+	'## UNCOMMENT TO TURN ON SWITCHED 12VDC OUTPUT
+	'	SW12(1)
+
+	'## CALCULATIONS
+
+
+	'## SCAN
+	Scan(SamplingInt,Sec,3,0)
+
+		'CORE (800)
+		'Measuring wiring panel Temperature for reference T_ref:
+		PanelTemp(T_ref,freqRejection)
+		'Default datalogger battery Voltage measurement:
+		Battery(V_batt)
+
+
+		'Call Data Tables and Store Data
+		CallTable(fifteenMin)
+	NextScan
+
+	'### SLOW SCAN
+	SlowSequence
+	Scan (EOSScanInterval,Sec,3,0)
+
+		For D = 1 To NumofVMU_MModules
+			callEOSLite(VMU_M_Addr(D), D)
+		Next
+
+	NextScan
+EndProg	'End of MainProgram
+

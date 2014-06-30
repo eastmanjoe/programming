@@ -1,0 +1,180 @@
+'################################################
+'Property of Draker Laboratories
+'
+'################################################
+
+
+'################# Change Log ###################
+'
+'Note: Add changes to the top of the list, using the format:
+'2001-01-01 ITM [v0.01] Made this change and that change
+'################################################
+
+
+'################# Configuration ################
+PipeLineMode
+
+'// COPY CONFIG /////////////////////////////////////////////////////////
+'################################################
+'electro shark 100
+Const MTR_TOTAL = 1
+Const MTR_SHARK_100_BAUD = 57600
+
+Public mtr_cfg_port(MTR_TOTAL) As Long = {COM1}
+Public mtr_cfg_addr(MTR_TOTAL) As Long = {11}
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'################# Declarations #################
+Const FREQ_REJECTION = _60HZ
+Const TOTAL_SLOW_SCANS = 1
+Const SLOW_SCAN_INTERVAL_01 = 30
+Const SLOW_SCAN_INTERVAL_02 = 30
+Const SLOW_SCAN_INTERVAL_03 = 30
+Const SLOW_SCAN_INTERVAL_04 = 30
+Const CR = CHR(13)
+Const LF = CHR(10)
+Const CRLF = CHR(13) & CHR(10)
+Dim counter As Long
+
+'// COPY DECLARATION ////////////////////////////////////////////////////
+'################################################
+'electro shark 100
+Public draker_shark_100_reprogram_ver As String * 7 = "4.00.01"
+Public mtr_comm_code(MTR_TOTAL) As Long
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'################# Data Tables ##################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  '// IGNORE //////////////////////////////////////////////////////////////
+  Sample(1, "DELETE ME", String)
+  '// END /////////////////////////////////////////////////////////////////
+
+  '// COPY TABLE 15MIN ////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndTable 'fifteenMin
+
+'// COPY TABLE //////////////////////////////////////////////////////////
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'################ Display Tables ################
+DisplayMenu("LIVE DATA", -2)
+  SubMenu("Datalogger")
+    '// IGNORE //////////////////////////////////////////////////////////////
+    DisplayValue("DELETE ME", Status.TimeStamp)
+    '// END /////////////////////////////////////////////////////////////////
+
+    '// COPY DISPLAY LOG ////////////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+  EndSubMenu
+  SubMenu("Environmental")
+    '// IGNORE //////////////////////////////////////////////////////////////
+    DisplayValue("DELETE ME", Status.TimeStamp)
+    '// END /////////////////////////////////////////////////////////////////
+
+    '// COPY DISPLAY ENV ////////////////////////////////////////////////////
+
+    '// END /////////////////////////////////////////////////////////////////
+  EndSubMenu
+  '// COPY DISPLAY ////////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndMenu
+'################################################
+
+
+'################## Functions ###################
+'// COPY FUNCTION ///////////////////////////////////////////////////////
+Function setShark100PwrEnergyFormat(num As Long, addr As Long, port As Long, comm_code_prev As Long) As Long
+  Const MTR_SHARK_100_RETRIES = 2
+  Const MTR_SHARK_100_TIMEOUT = 25
+  
+  Dim comm_code_cur As Long
+  Public format_value(2) As Long
+  
+  Alias format_value(1) = format_value_read
+  Alias format_value(2) = format_value_set
+  
+  'From Page MM-6 of Electro Shark100 Manual (03/08/2010)
+  'Register &H7535 Bit-mapping
+  '&B0000000000000000pppp--nn-eee-ddd
+  'pppp = power scale (0-unit, 3-kilo, 6-mega, 8-auto)
+  'nn = number of energy digits (5-8 --> 0-3)
+  'eee = energy scale (0-unit, 3-kilo, 6-mega)
+  'ddd = energy digits after decimal point (0-6)
+  'Draker default: power scale = auto, energy digits = 8, energy scale = kilo, decimal point = 0
+  'NOTE: Electro recommends registers be reset after a format change
+  
+  'Draker default decimal value = 33548 OR Binary Value = 00000000000000001000001100110000
+  Public power_scale As Long = &B00000000000000001000000000000000
+  Public energy_digits As Long = &B00000000000000000000001100000000
+  Public energy_scale As Long = &B00000000000000000000000000110000
+  Public decimal_places As Long = &B00000000000000000000000000000000
+  
+  format_value_set = power_scale OR energy_digits OR energy_scale OR decimal_places
+  
+  
+  ModBusMaster(comm_code_cur, port, MTR_SHARK_100_BAUD, addr, 3, format_value_read, &H7535, 1, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+  
+  'Only Set the value if differnet from Draker default
+  If format_value_read <> format_value_set
+    ModBusMaster(comm_code_cur, port, MTR_SHARK_100_BAUD, addr, 6, format_value_set, &H7535, 1, MTR_SHARK_100_RETRIES, MTR_SHARK_100_TIMEOUT, 1)
+    If comm_code_cur > 0 Then
+      Return(comm_code_prev + comm_code_cur)
+    ElseIf comm_code_cur < 0
+      Return(comm_code_cur)
+    EndIf
+  EndIf
+
+
+Return(comm_code_cur)
+EndFunction
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'################# Main Program #################
+BeginProg
+  '// COPY PROGRAM ////////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+  Scan(6, SEC, 3, 0)
+    '// COPY SCAN ///////////////////////////////////////////////////////////
+    'electro shark 100
+    For counter = 1 To MTR_TOTAL
+      mtr_comm_code(counter) = setShark100PwrEnergyFormat(counter, mtr_cfg_addr(counter), mtr_cfg_port(counter), mtr_comm_code(counter))
+    Next
+    '// END /////////////////////////////////////////////////////////////////
+    CallTable(fifteenMin)
+  NextScan
+
+  #If TOTAL_SLOW_SCANS >= 1
+  SlowSequence
+  Scan(SLOW_SCAN_INTERVAL_01, Sec, 1, 0)
+    '// COPY SLOW SCAN 1 ////////////////////////////////////////////////////
+    'electro shark 100
+    'For counter = 1 To MTR_TOTAL
+      'mtr_comm_code(counter) = setShark100PwrEnergyFormat(counter, mtr_cfg_addr(counter), mtr_cfg_port(counter), mtr_comm_code(counter))
+    'Next
+    '// END /////////////////////////////////////////////////////////////////
+  NextScan
+  EndSequence
+  #EndIf
+
+  '// COPY SLOW SCANS /////////////////////////////////////////////////////
+
+  '// END /////////////////////////////////////////////////////////////////
+EndProg

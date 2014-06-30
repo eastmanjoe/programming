@@ -1,0 +1,183 @@
+'CR1000 Series Datalogger
+'Program: SDI12_Battery_Load_Test.CR1
+'Date: 7.October.2010
+'Ver: A
+'
+'Notes: This program performs a battery test on a set day into
+'each month and at a particular time.
+'
+'PS200/CH200 configured with SDI-12 address 0 (zero).
+'Use Campbell Scientific SDI-12 cable part # 20769.
+'
+'SDI-12 CABLE TO CR1000 WIRING
+'-----------------------------
+'WHITE: C3
+'BLACK: G
+'CLEAR: G
+'
+PipeLineMode
+
+
+'Public Variables
+'I like to use the words "on" and "off" vs. "true" and "false" when
+'working with Boolean variables.
+Const On = True
+Const Off = False
+
+
+Public PanelTempC 'Datalogger panel temperature: Celsius
+'Store the present time information.
+Public rTime(9) 'Array to store present time
+Alias rTime(1) = Year 'assign the alias Year to rTime(1)
+Alias rTime(2) = Month 'assign the alias Month to rTime(2)
+Alias rTime(3) = DOM 'assign the alias Day to rTime(3)
+Alias rTime(4) = Hour 'assign the alias Hour to rTime(4)
+Alias rTime(5) = Minute 'assign the alias Minute to rTime(5)
+Alias rTime(6) = Second 'assign the alias Second to rTime(6)
+Alias rTime(7) = uSecond 'assign the alias uSecond to rTime(7)
+Alias rTime(8) = WeekDay 'assign the alias WeekDay to rTime(8)
+Alias rTime(9) = Day_of_Year 'assign the alias Day_of_Year to rTime(9)
+'Array to hold all the data coming from the PS200/CH200
+Public CH200_M0(9)
+'Alias names for array elements.
+'Battery voltage: VDC
+Alias CH200_M0(1)=VBatt
+'Current going into, or out of, the battery: Amps
+Alias CH200_M0(2)=IBatt
+'Current going to the load: Amps
+Alias CH200_M0(3)=ILoad
+'Voltage coming into the charger: VDC
+Alias CH200_M0(4)=V_in_chg
+'Current coming into the charger: Amps
+Alias CH200_M0(5)=I_in_chg
+'Charger temperature: Celsius
+Alias CH200_M0(6)=Chg_TmpC
+'Charging state: Cycle, Float, Current Limited, or None
+Alias CH200_M0(7)=Chg_State
+'Charging source: None, AC, or Solar
+Alias CH200_M0(8)=Chg_Source
+'Check battery error: 0=normal, 1=check battery
+Alias CH200_M0(9)=Ck_Batt
+'Arrays to hold the associated words for the charge state, charge source,
+'and check battery values.
+Dim ChargeStateArr(6) As String
+Dim ChargeSourceArr(3) As String
+Dim CheckBatteryArr(2) As String
+'Variables to hold the words for charge state, charge source, and check
+'battery.
+Public ChargeState As String
+Public ChargeSource As String
+Public CheckBattery As String
+Public CH200_MX(4) 'Array to hold extended data from the PS200/CH200
+'Alias names for array elements.
+Alias CH200_MX(1) = BattTargV 'Battery charging target voltage.
+Alias CH200_MX(2) = DgtlPotSet 'Digital potentiometer setting.
+Alias CH200_MX(3) = BattCap 'Present battery capacity.
+Alias CH200_MX(4) = Qloss 'Battery charge deficit.
+'Setting this value to true, or on, causes a manual battery test.
+Public ManualTest As Boolean
+'When value is true the battery is being tested.
+Public TestBatt As Boolean
+'Stores the results from the PC/CH200 query. In this case nothing is returned.
+Public SDI12Result As String
+'Elapsed time of test in hours
+Public ElapsedHrs As Long
+'Do not leave "TestLengthHrs" at zero, or test will stop after sending command
+'once.
+Public TestLengthHrs As Long
+'Define Data Tables
+'Stored hourly data.
+DataTable (Hour,1,-1)
+  DataInterval (0,1,Hr,10)
+  Minimum (6,CH200_M0(),FP2,0,False)
+  Maximum (6,CH200_M0(),FP2,False,False)
+  Minimum (1,PanelTempC(),FP2,0,False)
+  Maximum (1,PanelTempC(),FP2,False,False)
+EndTable
+
+'Only save this information when the TestBatt flag
+'is on.
+DataTable (DischargeTest,TestBatt,144)
+  DataInterval (0,10,Min,10)
+  Sample (1,ElapsedHrs,FP2)
+  Average (1,Chg_TmpC,FP2,False)
+  Average (1,VBatt,FP2,False)
+  Average (1,IBatt,FP2,False)
+  Minimum (1,VBatt,FP2,False,False)
+  Sample (1,Qloss,FP2)
+  Sample (1,ChargeState,String)
+  Sample (1,ChargeSource,String)
+  Sample (1,CheckBattery,String)
+EndTable
+
+
+'Main Program
+BeginProg
+  'Put length of battery test in hours here. Can also be modified on
+  'the fly.
+  TestLengthHrs = 3
+  'Load arrays with words to associate with the charge state, charge
+  'source and check battery values from the PS/CH200.
+  ChargeStateArr(1) = "Regulator Fault"
+  ChargeStateArr(2) = "No Charge"
+  ChargeStateArr(3) = "Current Limited"
+  ChargeStateArr(4) = "Cycle Charging"
+  ChargeStateArr(5) = "Float Charging"
+  ChargeStateArr(6) = "Battery Test"
+  ChargeSourceArr(1) = "None"
+  ChargeSourceArr(2) = "Solar"
+  ChargeSourceArr(3) = "Continuous"
+  CheckBatteryArr(1) = "Normal"
+  CheckBatteryArr(2) = "Check Battery"
+  
+  Scan (5,Sec,0,0)
+    PanelTemp (PanelTempC,250)
+    CallTable Hour
+  NextScan
+  
+  SlowSequence
+    Scan (30,Sec,3,0)
+    RealTime (rTime())
+    ElapsedHrs = Timer (1,Hr,4) 'timer for elapsed time of test.
+    'Run this section of code if elapsed time is less than the
+    'set amount of time for the test and the battery voltage has not
+    'dropped below 11.7 vdc. The PS/CH200 will not let the battery drop
+    'below 11.5 vdc.
+    If ElapsedHrs <= TestLengthHrs AND VBatt >= 11.7 Then
+      'For this exercise the datalogger will automatically
+      'start a test on the 17th of each month @ 8 AM OR when
+      'the ManualTest flag is set to on. Have to turn on the
+      'timer when the test begins.
+      If ManualTest = On OR (DOM = 17 AND Hour = 8) Then
+        ManualTest=Off
+        TestBatt = On
+        Timer (1,Hr,0)
+      EndIf
+      'Battery test command will be sent every 30 seconds. Must send it at
+      'least every 90 seconds or the PS/CH200 will automatically reset!
+      If TestBatt Then
+        SDI12Recorder (SDI12Result,3,0,"XB!",1.0,0)
+      EndIf
+    Else
+      'When the test is over reset the timer and turn of the TestBatt flag.
+      Timer (1,Hr,3)
+      TestBatt = Off
+    EndIf
+    
+    'Get PS200/CH200 values.
+    SDI12Recorder (CH200_M0(),3,0,"MC!",1.0,0)
+    'Array values start with one. Values for charge state start with -1.
+    'Have to shift the value by two to line it up with the correct words
+    'in the array.
+    ChargeState = ChargeStateArr(Chg_State + 2)
+    'Values for charge source start with zero. Have to shift the value
+    'by one to line it up with the correct words in the array.
+    ChargeSource = ChargeSourceArr(Chg_Source + 1)
+    'Values for check battery start with zero. Have to shift the value
+    'by one to line it up with the correct words in the array.
+    CheckBattery = CheckBatteryArr(Ck_Batt + 1)
+    'Get extended battery capacity settings.
+    SDI12Recorder (CH200_MX(),3,0,"M6!",1.0,0)
+    CallTable (DischargeTest) 'write data before zeroing ElapsedHrs
+  NextScan
+EndProg

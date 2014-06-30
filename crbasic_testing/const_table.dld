@@ -1,0 +1,247 @@
+'################################################
+'Property of Draker Laboratories
+'Client:
+'Project:
+'
+'################################################
+
+
+'################# Change Log ###################
+'
+'Note: Add changes to the top of the list, using the format:
+'2001-01-01 ITM [v0.01] Made this change and that change
+'################################################
+'
+'## Configuration ###############################
+PipeLineMode
+
+'################################################
+'constTable
+ConstTable
+  Const PNL_CFG_LATITUDE = 44.467613
+  Const PNL_CFG_LONGITUDE = -73.215358
+  Const PNL_CFG_ALTITUDE = 30
+EndConstTable
+
+Public pnl_cfg_latitude_var As Float = 44.467613
+Public pnl_cfg_longitude_var As Float  = -73.215358
+Public pnl_cfg_altitude_var As Float = 30
+
+'################################################
+
+
+'################# Declarations #################
+Const FREQ_REJECTION = _60HZ
+Const TOTAL_SLOW_SCANS = 0
+Const SLOW_SCAN_INTERVAL_01 = 6
+Const SLOW_SCAN_INTERVAL_02 = 6
+Const SLOW_SCAN_INTERVAL_03 = 30
+Const SLOW_SCAN_INTERVAL_04 = 30
+Const CR = CHR(13)
+Const LF = CHR(10)
+Const CRLF = CHR(13) & CHR(10)
+Dim counter As Long
+
+'################################################
+'core
+Public draker_core_ver As String * 7 = "4.00.03"
+Public core_status As Long = 0
+Public core_panel_temp As Float
+Public core_bat_voltage As Float
+Dim core_last_status As Long
+
+Units core_panel_temp = C
+Units core_bat_voltage = Vdc
+
+#If TOTAL_SLOW_SCANS > 0
+Public core_slow_scans(TOTAL_SLOW_SCANS) As Long
+#EndIf
+
+'################################################
+'dataloggerDebug
+Dim dbg_message As String * 100
+Public dbg_level As Long
+
+'solar position
+Dim pnl_control_daytime As Boolean
+Dim pnl_control_sunrise As Boolean
+Dim pnl_control_sunset As Boolean
+
+'################################################
+
+
+'################# Data Tables ##################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  
+  'core
+  Sample(1, draker_core_ver, String)
+  Sample(1, core_status, Long)
+  Average(1, core_panel_temp, FP2, FALSE)
+  Minimum(1, core_bat_voltage, FP2, FALSE, 0)
+EndTable 'fifteenMin
+
+'core
+DataTable(dataloggerStatus, core_status <> core_last_status, 2000)
+  Sample(1, core_status, Long)
+  Sample(1, Status.WatchdogErrors, UINT2)
+  Sample(1, Status.VarOutOfBound, UINT2)
+  Sample(1, Status.SkippedScan, UINT2)
+  Sample(1, Status.SkippedSystemScan, UINT2)
+  #If TOTAL_SLOW_SCANS > 0
+  Sample(TOTAL_SLOW_SCANS, core_slow_scans(), UINT2)
+  #EndIf
+
+  Sample(1, Status.Battery, FP2)
+  Sample(1, Status.LithiumBattery, FP2)
+  Sample(1, Status.Low12VCount, UINT2)
+  Sample(1, Status.Low5VCount, UINT2)
+EndTable 'dataloggerStatus
+
+'dataloggerDebug
+DataTable(dataloggerDebug, TRUE, 2000)
+  Sample(1, dbg_message, String)
+  Sample(1, PNL_CFG_LATITUDE, Long)
+  Sample(1, PNL_CFG_LONGITUDE, Long)
+  Sample(1, PNL_CFG_ALTITUDE, Long)
+  Sample(5, sol_pos, IEEE4)
+  Sample(5, sol_pos_var, IEEE4)
+  
+EndTable
+
+'// PASTE TABLE /////////////////////////////////////////////////////////
+'################################################
+
+
+'################ Display Tables ################
+
+'################################################
+
+
+'################## Functions ###################
+'dataloggerDebug
+Sub WriteDebugTable(level As Long, string_to_write As String * 105)
+    
+    Select Case level
+    Case 1
+      'Error Level
+      dbg_message = "ERR: " & string_to_write
+    Case 2
+      'Warning Level
+      dbg_message = "WARN: " & string_to_write
+    Case 3
+      'Status Level
+      dbg_message = "STAT: " & string_to_write
+    Else
+      dbg_message = ""
+    EndSelect
+    
+    If level <= dbg_level Then CallTable(dataloggerDebug)
+EndSub
+
+'core
+Function getCoreStatus() As Long
+  Dim status As Long, counter As Long
+
+  status = 0
+  If Status.WatchdogErrors > 0 Then status += &H0001
+  If Status.VarOutOfBound > 0 Then status += &H0002
+  If Status.SkippedScan > 0 Then status += &H0004
+  If Status.SkippedSystemScan > 0 Then status += &H0008
+  If Status.Battery < 12.3 Then status += &H0100
+  If Status.LithiumBattery < 3.3 Then status += &H0200
+  If Status.Low12VCount > 0 Then status += &H0400
+  If Status.Low5VCount > 0 Then status += &H0800
+
+  #If TOTAL_SLOW_SCANS = 1
+  If Status.SkippedSlowScan > 0 Then status += &H0010
+  core_slow_scans(1) = Status.SkippedSlowScan
+
+  #ElseIf TOTAL_SLOW_SCANS > 1
+  For counter = 1 To TOTAL_SLOW_SCANS
+    If Status.SkippedSlowScan(counter) > 0 Then status += (&H0008 << counter)
+    core_slow_scans(counter) = Status.SkippedSlowScan(counter)
+  Next
+  #EndIf
+
+  Return status
+EndFunction
+
+
+
+
+'panel control
+Function checkDaytime()
+  Public sol_pos(5) As Float
+  Public sol_pos_var(5) As Float
+  Dim was_daytime As Boolean
+
+  'capture the previous daytime state
+  was_daytime = pnl_control_daytime
+
+  'calculate the suns elevation and check if its above the horizon
+  SolarPosition(sol_pos(), 0, 0, PNL_CFG_LATITUDE, PNL_CFG_LONGITUDE, PNL_CFG_ALTITUDE, -1, 20)
+  SolarPosition(sol_pos_var(), 0, 0, pnl_cfg_latitude_var, pnl_cfg_longitude_var, pnl_cfg_altitude_var, -1, 20)
+  pnl_control_daytime = (sol_pos(2) > 0)
+
+  'check if the sun just came up
+  pnl_control_sunrise = (pnl_control_daytime AND NOT was_daytime)
+
+  'check if the sun just went down
+  pnl_control_sunset = (was_daytime AND NOT pnl_control_daytime)
+EndFunction 'checkDaytime
+
+'################################################
+
+
+'################# Main Program #################
+BeginProg
+  Scan(6, SEC, 3, 0)
+    'core
+    PanelTemp(core_panel_temp, FREQ_REJECTION)
+    Battery(core_bat_voltage)
+
+    core_last_status = core_status
+    core_status = getCoreStatus()
+    CallTable(dataloggerStatus)
+    
+    checkDaytime()
+    
+    If dbg_level > 0 Then
+      Call WriteDebugTable(1, FormatLong(dataloggerDebug.Record(1) + 1, "Hello Main Scan - Record Number: %u"))
+      If core_bat_voltage <> fifteenMin.core_bat_voltage_Min(1, 1) Then
+        Call WriteDebugTable(3, FormatFloat(core_bat_voltage, "Battery Voltage Changed to: %.3f"))
+      EndIf
+    EndIf
+
+    CallTable(fifteenMin)
+  NextScan
+
+  #If TOTAL_SLOW_SCANS >= 1
+  SlowSequence
+  Scan(SLOW_SCAN_INTERVAL_01, Sec, 1, 0)
+  
+    If dbg_level > 0 Then
+      Call WriteDebugTable(1 ,"Hello Slow Scan 1 - Record Number: " & FormatLong(dataloggerDebug.Record(1) + 1, "%u"))
+    EndIf
+    
+  NextScan
+  EndSequence
+  #EndIf
+  
+  #If TOTAL_SLOW_SCANS >= 2
+  SlowSequence
+  Scan(SLOW_SCAN_INTERVAL_02, Sec, 1, 0)
+  
+    If dbg_level > 0 Then
+      Call WriteDebugTable(1 ,"Hello Slow Scan 2 - Record Number: " & FormatLong(dataloggerDebug.Record(1) + 1, "%u"))
+    EndIf
+
+  NextScan
+  EndSequence
+  #EndIf
+
+EndProg

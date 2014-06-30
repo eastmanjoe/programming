@@ -1,0 +1,20 @@
+'location info '## Configuration ###############################
+'location info PipeLineMode
+
+'#CRC Ping keep alive
+ Public serverIP As String = "8.8.8.8"
+
+'##### COMMUNICATIONS PING SERVER and RESTART TCP CONNECTION IF NO REPLY within 5 sec.
+If PingIP(serverIP,5000)  = 0 Then
+  #If LoggerType = CR1000
+    IPNetPower(1, 0)
+  #ElseIf LoggerType = CR800
+    IPNetPower(2, 0)
+  #EndIf
+  Delay (1,5000,mSec)
+  #If LoggerType = CR1000
+    IPNetPower(1, 1)
+  #ElseIf LoggerType = CR800
+    IPNetPower(2, 1)
+  #EndIf
+EndIf

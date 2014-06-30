@@ -1,0 +1,70 @@
+'################################################
+'Property of Draker Laboratories
+'
+'Determine how to use the MoveBytes command
+'
+'MoveBytes command is used to move byte around.  Useful
+'to convert from big endian to little endian format or
+'concatonating two 16-bit Modbus registers into a single
+'32-bit value
+'
+'Definition
+'               |   A    |    B    |    C    |    D    |
+'Byte #         |   1    |    2    |    3    |    4    |
+'Offset         |   0    |    1    |    2    |    3    |
+'buffer_1       0000 0000 0000 0000 0001 0011 1011 1111
+'################################################
+'
+'################################################
+'#### Converting from big endian to little endian format  ####
+'CRBasic Instructions
+'      MoveBytes(buffer_2, 0, buffer_1, 2, 2)
+'      MoveBytes(buffer_2, 2, buffer_1, 0, 2)
+'               |   C    |    D    |    A    |    B    |
+'buffer_2       0001 0011 1011 1111 0000 0000 0000 0000
+'
+'################################################
+'#### Reversing two single bytes ####
+'CRBasic Instructions
+'      MoveBytes(buffer_2, 2, buffer_1, 3, 1)
+'      MoveBytes(buffer_2, 3, buffer_1, 2, 1)
+'               |   A    |    B    |    D    |    C    |
+'buffer_2       0000 0000 0000 0000 1011 1111 0001 0011
+'
+'################################################
+'#### Moving a single byte into a two holding variables ####
+'CRBasic Instructions
+'      MoveBytes(buffer_2(1), 3, buffer_1, 2, 1)
+'               |        |         |         |    C    |
+'buffer_2(1)    0000 0000 0000 0000 0000 0000 0001 0011
+'
+'CRBasic Instructions
+'      MoveBytes(buffer_2(2), 3, buffer_1, 3, 1)
+'               |        |         |         |    D    |
+'buffer_2(2)    0000 0000 0000 0000 0000 0000 1011 1111
+
+
+
+Public serial_number As String * 40 = "0027A9CD865402VZ"
+'Public serial_number As String * 40 = "36171018"
+Public buffer(24) As Long = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12336, 12855, 16697, 17220, 14390, 13620, 12338, 22106}
+'Public buffer(24) As Long = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13110, 12599, 12592, 12600, 8224, 8224, 8224, 3}
+Public buffer_string As String * 20
+Public string_match As Boolean
+Public mtr_sn As String * 40
+Dim counter As Long
+
+
+BeginProg
+    Scan (1,Sec,3,0)
+      
+      'Create Serial Number String from 8 Modbus register
+      buffer_string = ""
+      For counter = 0 To 7
+        MoveBytes(buffer_string, counter * 2, buffer(11 + counter), 2, 2)
+      Next
+      mtr_sn = Trim(buffer_string)
+                    
+      string_match = IIF(StrComp(serial_number, mtr_sn) <> 0, FALSE, TRUE)
+    NextScan
+EndProg
