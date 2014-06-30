@@ -4,6 +4,270 @@
 		"selected_items":
 		[
 			[
+				"pn",
+				"pnl_logger_dns1"
+			],
+			[
+				"fil",
+				"file_list"
+			],
+			[
+				"E",
+				"EndFunction"
+			],
+			[
+				"pnl",
+				"pnl_logger_ip"
+			],
+			[
+				"S",
+				"String"
+			],
+			[
+				"Else",
+				"Else"
+			],
+			[
+				"EN",
+				"EndIf"
+			],
+			[
+				"ne",
+				"network_settings_dld_updated"
+			],
+			[
+				"wr",
+				"writeNetworkSettingsFile"
+			],
+			[
+				"chan",
+				"change_network_setting"
+			],
+			[
+				"w",
+				"writeNetworkSettingsFile"
+			],
+			[
+				"da",
+				"datalogger_dns2"
+			],
+			[
+				"net",
+				"network_settings"
+			],
+			[
+				"dn",
+				"dns1"
+			],
+			[
+				"DNS",
+				"DNS1_ADDRESS"
+			],
+			[
+				"pnl_logger_dns",
+				"pnl_logger_dns2"
+			],
+			[
+				"dl",
+				"dld"
+			],
+			[
+				"DN",
+				"DNS1_ADDRESS"
+			],
+			[
+				"n",
+				"domain_name_server"
+			],
+			[
+				"C",
+				"Const"
+			],
+			[
+				"network",
+				"network_settings"
+			],
+			[
+				"cfg",
+				"cfg_ip_info"
+			],
+			[
+				"writ",
+				"writeIpFile"
+			],
+			[
+				"Ne",
+				"Next"
+			],
+			[
+				"pnl_ne",
+				"pnl_network_settings_error"
+			],
+			[
+				"IP",
+				"IPGatewayCSIO"
+			],
+			[
+				"I",
+				"IPGateway"
+			],
+			[
+				"Lo",
+				"LoggerType"
+			],
+			[
+				"pa",
+				"parseIpInfo"
+			],
+			[
+				"network_settings_diff_",
+				"network_settings_diff_each"
+			],
+			[
+				"buff",
+				"buffer_chr"
+			],
+			[
+				"c",
+				"chr_counter"
+			],
+			[
+				"buf",
+				"buffer_chr"
+			],
+			[
+				"nu",
+				"NUM_OF_IPS"
+			],
+			[
+				"st",
+				"strings_match"
+			],
+			[
+				"Stri",
+				"string1"
+			],
+			[
+				"che",
+				"checkIpFormat"
+			],
+			[
+				"End",
+				"EndIf"
+			],
+			[
+				"valid",
+				"valid_ip"
+			],
+			[
+				"s",
+				"string1"
+			],
+			[
+				"stri",
+				"strings_match"
+			],
+			[
+				"d",
+				"dns2"
+			],
+			[
+				"g",
+				"gateway"
+			],
+			[
+				"datalogger_d",
+				"datalogger_dns2"
+			],
+			[
+				"netwo",
+				"network_settings"
+			],
+			[
+				"ip",
+				"ip_addr"
+			],
+			[
+				"A",
+				"ArrayLength"
+			],
+			[
+				"datalogger_dn",
+				"datalogger_dns2"
+			],
+			[
+				"L",
+				"Len"
+			],
+			[
+				"ip_in",
+				"ip_info_array"
+			],
+			[
+				"cfg_datalogger_dn",
+				"cfg_datalogger_dns1"
+			],
+			[
+				"ch",
+				"chr_counter"
+			],
+			[
+				"dns",
+				"dns1"
+			],
+			[
+				"ga",
+				"gateway"
+			],
+			[
+				"wri",
+				"writeIpFile"
+			],
+			[
+				"new",
+				"new_logger_dns1"
+			],
+			[
+				"ping",
+				"ping_status"
+			],
+			[
+				"pin",
+				"ping_status"
+			],
+			[
+				"CFG",
+				"CFG_PORT_MAX"
+			],
+			[
+				"htt",
+				"httpGetHeader"
+			],
+			[
+				"ht",
+				"httpGetHeader"
+			],
+			[
+				"http",
+				"httpGetHeader"
+			],
+			[
+				"FI",
+				"FIRMWAREFILENAME"
+			],
+			[
+				"hea",
+				"header"
+			],
+			[
+				"fi",
+				"firmwareFileUri"
+			],
+			[
+				"fim",
+				"firmwareFileName"
+			],
+			[
 				"ema",
 				"email_addl_message"
 			],
@@ -30,10 +294,6 @@
 			[
 				"line",
 				"line_buffer"
-			],
-			[
-				"fil",
-				"file_handle"
 			],
 			[
 				"emai",
@@ -76,10 +336,6 @@
 				"underscore_location"
 			],
 			[
-				"cfg",
-				"cfg_email_result"
-			],
-			[
 				"curre",
 				"current_time"
 			],
@@ -90,14 +346,6 @@
 			[
 				"bas",
 				"basestation"
-			],
-			[
-				"new",
-				"new_email_sent"
-			],
-			[
-				"End",
-				"EndIf"
 			],
 			[
 				"projec",
@@ -136,10 +384,6 @@
 				"cfg_email_server_addr"
 			],
 			[
-				"c",
-				"com"
-			],
-			[
 				"DRAK",
 				"DRAKER_BASESTATION_DATA_STORAGE"
 			],
@@ -172,28 +416,12 @@
 				"DRAKER_MODEL"
 			],
 			[
-				"ch",
-				"checkIpFormat"
-			],
-			[
-				"pnl",
-				"pnl_logger_ip"
-			],
-			[
 				"val",
 				"valid_ip"
 			],
 			[
 				"va",
 				"valid_ip"
-			],
-			[
-				"Lo",
-				"Long"
-			],
-			[
-				"pn",
-				"pnl_cfg_change_network_settings"
 			],
 			[
 				"ExitF",
@@ -220,24 +448,12 @@
 				"counter2"
 			],
 			[
-				"buff",
-				"buffer_str"
-			],
-			[
-				"Else",
-				"Else"
-			],
-			[
 				"pnl_cfg",
 				"pnl_cfg_change_network_settings"
 			],
 			[
 				"Exit",
 				"ExitFor"
-			],
-			[
-				"buf",
-				"buffer_str"
 			],
 			[
 				"set",
@@ -256,14 +472,6 @@
 				"ping_response"
 			],
 			[
-				"pin",
-				"pingIpAddress"
-			],
-			[
-				"ip",
-				"ip_octet"
-			],
-			[
 				"uti",
 				"util_pinging"
 			],
@@ -276,20 +484,8 @@
 				"ping_response_time"
 			],
 			[
-				"ping",
-				"ping_response"
-			],
-			[
 				"oc",
 				"oct_4"
-			],
-			[
-				"da",
-				"datalogger_ip"
-			],
-			[
-				"S",
-				"String"
 			],
 			[
 				"cfg_data",
@@ -316,209 +512,69 @@
 				"MIN"
 			],
 			[
-				"Ne",
-				"NextScan"
-			],
-			[
-				"s",
-				"scan"
-			],
-			[
 				"slo",
 				"SlowSequence"
-			],
-			[
-				"I",
-				"IPGateway"
-			],
-			[
-				"IP",
-				"IPMaskEth"
-			],
-			[
-				"cfg_da",
-				"cfg_datalogger_gateway_ping_fail"
-			],
-			[
-				"OS",
-				"OS_VERSION"
-			],
-			[
-				"mask",
-				"mask"
-			],
-			[
-				"SP",
-				"SP"
-			],
-			[
-				"ra",
-				"raw_datalogger_ip"
-			],
-			[
-				"r",
-				"raw_datalogger_ip"
-			],
-			[
-				"Logger",
-				"LoggerModel"
-			],
-			[
-				"he",
-				"hex_num"
-			],
-			[
-				"mo",
-				"modbus_address"
-			],
-			[
-				"ex",
-				"extractPitcher"
-			],
-			[
-				"re",
-				"readline"
-			],
-			[
-				"file",
-				"file_id_write"
-			],
-			[
-				"data",
-				"datafile"
-			],
-			[
-				"modbus",
-				"modbus_tk"
-			],
-			[
-				"l",
-				"level"
-			],
-			[
-				"ad",
-				"add_argument"
-			],
-			[
-				"Mod",
-				"ModbusSlaveContext"
-			],
-			[
-				"if",
-				"ifmain	if __name__ == '__main__'"
-			],
-			[
-				"reg",
-				"regs_1"
-			],
-			[
-				"no",
-				"novdc5_start"
-			],
-			[
-				"e",
-				"else"
-			],
-			[
-				"Gen",
-				"Gen_ETot_Rcvd"
-			],
-			[
-				"Fa",
-				"Fac_PEM"
-			],
-			[
-				"Pa",
-				"Pac_PEM"
-			],
-			[
-				"Ia",
-				"Iac_A_PEM"
-			],
-			[
-				"Va",
-				"Vac_CN_PEM"
-			],
-			[
-				"Skip",
-				"SkipScans"
-			],
-			[
-				"mod",
-				"modbus_data"
-			],
-			[
-				"row_",
-				"row_data_in_line_data"
-			],
-			[
-				"row",
-				"row_data_in_line_data"
-			],
-			[
-				"colum",
-				"column_to_search"
-			],
-			[
-				"col",
-				"column_to_search"
-			],
-			[
-				"csv",
-				"csv_file_2_reader"
-			],
-			[
-				"log",
-				"logger"
-			],
-			[
-				"wri",
-				"writer"
-			],
-			[
-				"setting",
-				"setting_string"
-			],
-			[
-				"sett",
-				"setting_string"
-			],
-			[
-				"gat",
-				"gateway_fields"
-			],
-			[
-				"subne",
-				"subnet_fields"
-			],
-			[
-				"a",
-				"auth"
-			],
-			[
-				"in",
-				"info"
-			],
-			[
-				"ambient",
-				"ambient_temp_id"
-			],
-			[
-				"ret",
-				"return"
-			],
-			[
-				"x320",
-				"x320_mac"
-			],
-			[
-				"am",
-				"ambient_temp_id"
 			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/base.dld",
+			"settings":
+			{
+				"buffer_size": 45348,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/home/jeastman/firmware-lib/.draker_id",
+			"settings":
+			{
+				"buffer_size": 62,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/home/jeastman/LiveTerminalSheet/README.md",
+			"settings":
+			{
+				"buffer_size": 627,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/solar_resource_sensor.dld",
+			"settings":
+			{
+				"buffer_size": 42030,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/SWIApplyTemplate (1).xml",
+			"settings":
+			{
+				"buffer_size": 3605,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/SWIApplyTemplate.xml",
+			"settings":
+			{
+				"buffer_size": 4817,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/jeastman/Desktop/esystems_test-pv250.CR8",
+			"settings":
+			{
+				"buffer_size": 83374,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "Packages/User/CRBasic.sublime-build",
 	"command_palette":
@@ -543,7 +599,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 400.0
+		"width": 416.0
 	},
 	"console":
 	{
@@ -560,6 +616,94 @@
 	},
 	"file_history":
 	[
+		"/C/home/jeastman/LiveTerminalSheet/Gemfile",
+		"/C/home/jeastman/LiveTerminalSheet/Gemfile.lock",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/Carlo_Gavazzi/Carlo_Gavazzi_EOS_Lite.CR1",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/Carlo_Gavazzi/Carlo_Gavazzi_EOS_Lite.CR8",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/Wireless_Sensor_Testing.CR8",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/veris-E51C2-meter-testing.CR1",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/CR1000_Compile_File.CR1",
+		"/C/home/jeastman/firmware-lib/.draker_id",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/BOMCalcCompare.CR1",
+		"//file002/home/jeastman/Draker/Firmware/Testing/testing/800_Compile_File.CR8",
+		"//file002/home/jeastman/Draker/Firmware/Testing/str_comp_testing.dld",
+		"/C/home/jeastman/firmware-lib/utils/network_settings.dld",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/C/home/jeastman/firmware-lib/utils/change_network_settings.dld",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/Default/Default (Windows).sublime-keymap",
+		"//file002/home/jeastman/Draker/Firmware/Testing/ip_info_parsing.dld",
+		"//file002/home/jeastman/Draker/Firmware/Testing/pingScan.dld",
+		"/C/Users/jeastman/Desktop/network_settings.dld",
+		"/C/home/jeastman/firmware-lib/.network_settings",
+		"/C/home/jeastman/firmware-lib/utils/domain_name_server.dld",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/raven_xe.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/SWIApplyTemplate.xml",
+		"//file002/home/jeastman/Draker/Firmware/Testing/Test_Template.dld",
+		"//file002/home/jeastman/Draker/Firmware/Testing/PingIP.CR1",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_229.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_228.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_230.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_42_29.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_42_31.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_42_36.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_98_129_111_74.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_161_134.xml",
+		"//file002/home/jeastman/Draker/Datasheets and Manuals/Sierra Wireless/Raven/ace_web.js",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/Javascript Beautify/Default (Windows).sublime-keymap",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/CR800_Cell_Modem.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/raven_xe.xml",
+		"/C/Users/jeastman/Desktop/CR800 Series-14877-20140620.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_Cell_Modem.xml",
+		"/C/Campbellsci/DevConfig/sys/inifiles/DevConfig.xml",
+		"/C/Campbellsci/DevConfig/sys/cora/CsiLgrNet.xml",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/wind_sensor.dld",
+		"/C/Campbellsci/Lib/DevConfigLib/en/v2/summary.xsl",
+		"/C/home/jeastman/hardware-config/raven_xe.xml",
+		"/C/home/jeastman/project-firmware/projects/p1999999-01_esystems_test-pv250.cfg",
+		"/C/home/jeastman/project-firmware/projects/p1999999-01_esystems_test-pv250.CR8",
+		"/C/home/jeastman/project-firmware/projects/p1999999-02_esystems_test-pv2000.cfg",
+		"/C/Users/jeastman/Desktop/20140616 Engineering Device Settings Back-up/CR1000/backup.draker_id",
+		"/C/home/jeastman/project-firmware/projects/p1999999-02_esystems_test-pv2000.CR1",
+		"/C/Draker/Firmware/Testing/setIP.dld",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_67_192_199_228.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_67_192_199_229.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_67_192_199_230.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_98_129_42_29.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_98_129_42_31.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_98_129_42_26.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_98_129_111_74.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling_67_192_161_134.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_LAN_Calling.xml",
+		"/C/home/jeastman/hardware-config/BaseStations/PV2000_Gen3_(DL315)/CR1000_Cell_Modem_minimal.xml",
+		"/C/Users/jeastman/Desktop/p3267_info",
+		"/C/Windows/System32/$TempDeviceReportSaveFile.txt",
+		"/C/home/jeastman/firmware-lib/p1999999-02_esystems_test-pv2000.CR1",
+		"/C/Users/jeastman/Desktop/20140616 Engineering Device Settings Back-up/CR800/backup.draker_id",
+		"/C/home/jeastman/project-firmware/projects/p3154-01_windsor-cooper-hill.cfg",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/base.dld",
+		"/C/home/jeastman/project-firmware/projects/esystems_test-pv2000.CR1",
+		"/C/home/jeastman/project-firmware/projects/esystems_test-pv250.CR8",
+		"/C/home/jeastman/project-firmware/projects/esystems_test-pv2000.cfg",
+		"/C/home/jeastman/project-firmware/projects/esystems_test-pv250.cfg",
+		"/C/Users/jeastman/Desktop/20140616 Engineering Device Settings Back-up/$TempDeviceReportSaveFile.txt",
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/template.dld",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/LiveTerminalSheet_TB2/application.js",
+		"/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/LiveTerminalSheet_TB1/index.html",
+		"/C/Draker/Firmware/Testing/TCPOpen.dld",
+		"/C/home/jeastman/project-firmware/testing/p0000000-00_draker_test.cfg",
+		"/C/home/jeastman/firmware-lib/testing.dld",
+		"/C/Draker/Firmware/Testing/PingIP.CR1",
+		"/C/Users/jeastman/Desktop/p2592-01_north-high-school.CR8",
+		"/C/Users/jeastman/Desktop/p2592-01_north-high-school.cfg",
+		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.tmLanguage",
+		"/C/home/jeastman/Python/scripts/query_gitHub.py",
+		"/C/Draker/Firmware/Testing/gitHub_download.dld",
+		"/C/home/jeastman/Python/scripts/query_raven.py",
+		"/C/home/jeastman/hardware-config/README.textile",
+		"/C/home/jeastman/hardware-config/SWIApplyTemplate.xml",
+		"/C/home/jeastman/hardware-config/MediaConverter/raven_xe.xml",
+		"/C/home/jeastman/programming_repo/sublime_text/projects/draker_generic_project.sublime-project",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/raven_xe.xml",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV2000_Gen3_(DL315)/raven_xe.xml",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/raven_xe.xml",
@@ -575,17 +719,9 @@
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_230.xml",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_228.xml",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV250_Gen3_(DL328)/CR800_LAN_Calling_67_192_199_229.xml",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.tmLanguage",
-		"/C/home/jeastman/project-firmware/testing/p0000000-00_draker_test.cfg",
-		"/C/home/jeastman/firmware-lib/.draker_id",
 		"/C/home/jeastman/firmware-lib/backup.draker_id",
 		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/ambient_temp_sensor.dld",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/wind_sensor.dld",
 		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/panel_status.dld",
-		"/C/home/jeastman/firmware-lib/testing.dld",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/template.dld",
-		"/C/home/jeastman/LiveTerminalSheet/Gemfile.lock",
-		"/C/home/jeastman/LiveTerminalSheet/Gemfile",
 		"/C/home/jeastman/LiveTerminalSheet/README.md",
 		"/C/Users/jeastman/Desktop/Traing PV250/CR800 Series-25413-20140530_training.xml",
 		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/application.js",
@@ -607,87 +743,7 @@
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_98_129_42_29.xml",
 		"/C/home/jeastman/Draker Hardware Configurations/BaseStations/PV5000_Gen2_(DL202)/CR1000_LAN_Calling_98_129_42_31.xml",
 		"/C/home/jeastman/firmware-lib/testing2.dld",
-		"/C/Draker/Firmware/Testing/setIP.dld",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/email.dld",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328_TB2.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328_TB1.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl315.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/terminal_sheet.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/views/device_terminal.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/utils/formatters.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/collections/terminals.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/devices.js",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/terminals.js.erb",
-		"/C/home/jeastman/LiveTerminalSheet/app/javascripts/defs/dl328.js",
-		"/C/home/jeastman/project-firmware/testing/draker_test.cfg",
-		"/C/Users/jeastman/Desktop/Raven_X.xml",
-		"/C/Users/jeastman/Desktop/Raven_X_new.xml",
-		"/C/Campbellsci/Lib/Languages/coratools/1.11/coratools_1.11_english.str",
-		"/C/home/jeastman/RvnX_28_V4228_4.0.11.003.ini",
-		"/C/home/jeastman/bash.exe.stackdump",
-		"/C/Users/jeastman/Desktop/draker_id",
-		"/C/Users/jeastman/Desktop/backup.draker_id",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.tmPreferences",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.sublime-build",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.sublime-settings",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/Plain text.sublime-settings",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/cell_temp_sensor.dld",
-		"/S/Engineering/Parts&Vendors/P&V Installation Executable/README.txt",
-		"/C/Draker/Firmware/Testing/RDP120.DLD",
-		"/C/Draker/Firmware/Testing/CFG.DLD",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility.dld",
-		"/C/Draker/Firmware/Testing/TCPOpen.dld",
-		"/C/Draker/Firmware/Testing/pingScan.dld",
-		"/C/Draker/Firmware/Testing/panel_status-set_IP-Address.cr8",
-		"/C/Draker/Datasheets and Manuals/Campbell Scientific/.csipasswd",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/ac_meter/electro_shark_100.dld",
-		"/C/Users/jeastman/AppData/Roaming/Sublime Text 2/Packages/User/CRBasic.JSON-tmLanguage",
-		"/C/Draker/Firmware/Testing/PingIP.CR1",
-		"/C/Users/jeastman/Desktop/Export1.csv",
-		"/C/Users/jeastman/Desktop/Export2.csv",
-		"/C/Draker/Firmware/Testing/const_table.dld",
-		"/C/Users/jeastman/Desktop/20140507_meeting_notes.txt",
-		"/C/Users/jeastman/Desktop/listDLLs.txt",
-		"/C/home/jeastman/.bash_functions",
-		"/C/home/jeastman/.bashrc",
-		"/C/home/jeastman/.bash_aliases",
-		"/C/cygwin/usr/share/doc/rebase/README",
-		"/C/home/jeastman/.ssh/environment",
-		"/C/home/jeastman/project-firmware/projects/newkirk_edgeboro-landfill.CR1",
-		"/C/home/jeastman/Python/scripts/configure_x320.py",
-		"/C/home/jeastman/DataAcquisition/tools/siteserver-preen",
-		"/C/home/jeastman/project-firmware/projects/belectric_bruceville-das-1.CR1",
-		"/C/home/jeastman/project-firmware/projects/ace_vineland_1000.CR1",
-		"/C/Users/jeastman/Desktop/mac_id_scanned.txt",
-		"/C/home/jeastman/diag_tunnel.sh",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility_2.ndc",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/utility_1.ndc",
-		"/C/home/jeastman/engineering-hw/trunk/Hardware/SMI10V80 V1 Panel Monitor/PCB/500-00016C/500-00014E.OutJob",
-		"/C/Draker/Products/PV250 GEN 3/Batteryless & TB changes/BOM's/Batteryless_and_tb_change_boms.csv",
-		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/180-00001C.NET",
-		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/Pick Place for 180-00001C(SPM80V12A_500-00002H).txt",
-		"/S/Engineering/Parts&Vendors/Documents(Draker)/PCB Release Files/CM-500-00002H/Fabrication Testpoint Report for 180-00001C.csv",
-		"/C/Draker/Products/Clarity/Mesh_Util/Python_Tools/usb.py",
-		"/C/Draker/Products/Clarity/Mesh_Util/Python_Tools/MeshTool.py",
-		"/C/Draker/Datasheets and Manuals/Sierra Wireless/LS300/LS300_Global/LS300_OpenSIM_Inc_UpdatePack_4.3.3a.014_to_4.3.5/README.txt",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/obvius_dc_current_monitor.dld",
-		"/S/Engineering/Datasheets and Manuals/Dataloggers/Campbell Scientific/CampbellSci Software/Loggernet Install/README.txt",
-		"/C/Draker/Firmware/Testing/TCPOpen.CR1",
-		"/C/Users/jeastman/Desktop/Draker Merger Issues.txt",
-		"/C/home/jeastman/Python/scripts/loggernetDatFile_extract.py",
-		"/C/home/jeastman/Python/scripts/modbus_slave_modbus-tk.py",
-		"/C/Users/jeastman/Desktop/daq_queries_at_BM1.py",
-		"/C/Draker/Firmware/Testing/webpage.dld",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/advantech_adam.dld",
-		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/dc_combiner/icp_7017.dld",
-		"/C/home/jeastman/project-firmware/projects/solular_living-faith-cc.CR8",
-		"/C/home/jeastman/project-firmware/projects/solular_living-faith-cc.cfg",
-		"/C/home/jeastman/Draker Hardware Configurations/SWIApplyTemplate.xml",
-		"/C/Campbellsci/LoggerNet/Data/solular_living-faith-cc_fifteenMin.dat",
-		"/C/Draker/PandV/Draker_Labs-to-Draker_Inc/cross.csv",
-		"/C/Campbellsci/LoggerNet/Lab-1000_fifteenMin.dat",
-		"/C/Users/jeastman/Desktop/629.html"
+		"/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/email.dld"
 	],
 	"find":
 	{
@@ -698,6 +754,7 @@
 		"height": 0.0,
 		"where_history":
 		[
+			"C:\\home\\jeastman\\Draker Hardware Configurations"
 		]
 	},
 	"find_state":
@@ -705,134 +762,134 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"gem",
-			"Public",
-			"Dim",
-			"Public",
-			"email_line_buffer",
-			"email_message_additional",
-			"email_subject_additional",
-			"email_addtl_addrs",
-			"email_addrs_additional",
-			"line_buffer",
-			"Dim",
-			"parseObviusFlexIoModule",
-			"Public",
-			"<component name=\"Domain Name Servers\" repeat-count=\"0\">0</component>\n    <component name=\"Domain Name Servers\" repeat-count=\"1\">0</component>",
-			"new_email_sent",
-			"new_program_compile",
-			"pnl_current_time",
-			"Mid(Status.TimeStamp, 7, 4) & \"-\" & ",
-			"pnl_current_time",
-			"current_time",
-			"cfg_logger_compile_time",
-			"String",
-			"sendPowerUpEmail",
-			"pnl",
-			"server_addr",
-			"1062",
-			"draker_id",
-			"readDrakerID",
-			"DRAKER_ID_FILE",
-			"readIpFile",
-			"readDrakerID",
-			"Electro",
-			"electro",
-			"DRAKER_ID_FILE",
-			"DRAKER_BATTERY_BACKUP_OPTION",
-			"pingKeepAlive",
-			"cfg_datalogger_network_enabled",
-			"cfg_datalogger_gateway",
-			"cfg_datalogger_network_enabled",
-			"pingKeepAlive",
-			"1006",
-			"writeDrakerID",
-			"DRAKER_BASESTATION_TERMIAL_BLOCK_LAYOUT",
-			"DRAKER_BATTERY_BACKUP_OPTION",
-			"DRAKER_BASESTATION_TERMIAL_BLOCK_LAYOUT",
-			"DRAKER_BASESTATION_NUM_OF_MODBUS_PORTS",
-			"_OF_MODBUS_PORTS",
-			"DRAKER_BASESTATION_",
-			"_OF_MODBUS_PORTS",
-			"DRAKER",
-			"DRAKER_MODEL",
-			"DRAKER_PN",
-			"AND",
-			">=",
+			"16",
+			"datalogger_dns2",
+			"16",
+			"pnl_logger_dns2",
+			"pnl_logger_dns1",
+			"pnl_logger_netmask",
+			"CR",
+			"update_network_settings_dld",
+			"uptadetnetwork_settings_dld_u",
+			"update_network_settings_dld",
+			"network_settings_dld_updated",
+			"change_network_settings",
+			"ip_addr",
+			"checkIpFormat",
+			"writeNetworkSettingsFile",
+			"setNetworkSettings",
+			"cfg_change_network_settings",
+			"QH",
+			"pnl_logger_ip",
+			"gateway",
+			"cfg_datalogger_ip",
+			"cfg_datalogger_mac",
+			"cfg_ip_info",
+			"pnl_datalogger_mac",
+			"cfg_datalogger_ip",
+			"CFG_DATALOGGER_DNS1",
+			"CFG_DATALOGGER_GATEWAY",
+			"CFG_DATALOGGER_DNS1",
+			"CFG_DATALOGGER_NETMASK",
+			"CFG_DATALOGGER_DNS1",
+			"CFG_DATALOGGER_IP",
+			"DNS1_ADDRESS",
+			"DNS2_ADDRESS",
+			"CFG_DATALOGGER_DNS2",
+			"cfg_datalogger_ip",
+			"cfg",
+			"DNS1_ADDRESS",
+			"DNS2_DEFAULT_ADDRESS",
+			"DNS1_DEFAULT_ADDRESS",
+			"DNS2_ADDRESS",
+			"DNS1_ADDRESS",
+			"dld",
+			"buffer_str",
+			"4",
+			"buffer_str",
+			"If",
+			"' pnl_datalogger_mac = Right(pnl_datalogger_mac, Len(pnl_datalogger_mac) - InStr(1, pnl_datalogger_mac, \":\", 2))\n  ' pnl_logger_ip = Right(pnl_logger_ip, Len(pnl_logger_ip) - InStr(1, pnl_logger_ip, \":\", 2))\n  ' pnl_logger_netmask = Right(pnl_logger_netmask, Len(pnl_logger_netmask) - InStr(1, pnl_logger_netmask, \":\", 2))\n  ' pnl_logger_gateway = Right(pnl_logger_gateway, Len(pnl_logger_gateway) - InStr(1, pnl_logger_gateway, \":\", 2))\n  ' pnl_logger_dns1 = Right(pnl_logger_dns1, Len(pnl_logger_dns1) - InStr(1, pnl_logger_dns1, \":\", 2))\n  ' pnl_logger_dns2 = Right(pnl_logger_dns2, Len(pnl_logger_dns2) - InStr(1, pnl_logger_dns2, \":\", 2))\n\n  ",
+			"pnl_logger_network",
+			"ip_info",
 			"pnl_cfg_change_network_settings",
-			"valid_ip",
-			"DRAKER_TB_OPTION",
-			"DRAKER_BB_OPTION",
-			"DRAKER_TB_OPTION",
-			"DRAKER_BB_OPTION",
-			"IP Address",
-			"counter",
-			"Public",
-			"cfg_datalogger",
-			"IPInfo",
-			"ping_response",
-			"pingSingleIpAddress",
-			"response_time",
-			"util_ping_results",
-			"ping_scan_results",
-			"ip_octet(1) & ",
-			"cfg_datalogger_ip",
-			"Ping_Scan",
-			"Ping_Single",
-			"util_ping_response",
-			"util_ping_response_time",
-			"util_pingD_tcp_addr",
-			"ping_response_time",
-			"ping_tcp_addr",
-			"String",
-			"pingIpAddress",
-			"pingKeepAlive",
-			"cfg_datalogger_network_enabled",
-			"pingDevice",
-			"cfg_datalogger_ip",
-			"getAmbientTempCs215",
-			"DRAKER_PN",
-			"DRAKER_BB_OPTION",
-			"parseIpInfo",
-			"cygwin",
-			"cyge",
-			"SSH_AGENT_PID",
-			"cygwin",
-			"cfg_tcp_power_enabled",
-			"14",
-			"12",
-			"cfg_datalogger_gateway_fail",
+			"cfg_datalogger_dns2",
+			"cfg_datalogger_dns1",
 			"cfg_datalogger_gateway",
-			"cfg_tcp_server_ip_ping",
-			"Find_DAS_Ip",
-			"cfg_gw_search_string",
-			"cfg_mask_search_string",
-			"cfg_ip_search_string",
-			"cfg_gw_search_string",
-			"cfg_mask_search_string",
-			"cfg_ip_search_string",
-			"As String",
-			"+",
-			"raw_datalogger_ip",
-			"space_count",
-			"count_to_space",
-			"pnl_logger_ip_info",
-			"cfg_tcp_server_ip",
-			"filemod_logrotate_rsyslog",
-			"utility",
-			"base-addr",
-			"BASE_MAC",
-			"\"10.11.50.10\", ",
-			"index.html",
-			"execute",
-			"ups_control",
-			"ups-control",
-			"avahi-daemon",
-			"ups_control",
-			"shut",
-			"shutdown",
-			"shut",
-			"shutdown"
+			"cfg_datalogger_netmask",
+			"cfg_datalogger_ip",
+			"cfg_datalogger_mac",
+			"datalogger_dns2",
+			"datalogger_dns1",
+			"datalogger_gateway",
+			"datalogger_netmask",
+			"datalogger_ip",
+			"datalogger_netmask",
+			"datalogger_mac",
+			"5",
+			"FALSE",
+			"network_settings_diff",
+			"1",
+			"network_settings_diff",
+			"row",
+			"column",
+			"valid_ip",
+			"pnl_network_settings_error",
+			"column",
+			"num",
+			"ctrl+d",
+			"num",
+			"pnl_network_settings_error",
+			"10",
+			"buffer_str",
+			"\"192.168.13.100\", ",
+			"pnl_logger_netmask",
+			"pnl_logger_ip",
+			"datalogger_ip",
+			"Public",
+			"line_buffer",
+			"buffer_str",
+			"datalogger_ip",
+			"ip_info",
+			"eth gw:",
+			"eth mask",
+			"eth ip:",
+			"eth ip",
+			"eth",
+			"IPInfo",
+			"line_buffer",
+			"cfg_datalogger_dns2",
+			"cfg_datalogger_dns1",
+			"cfg_datalogger_gateway",
+			"cfg_datalogger_netmask",
+			"cfg_datalogger_ip",
+			"chr_counter",
+			"writeIpFile",
+			"ars",
+			"aRs",
+			"ars",
+			"aRs",
+			"ars",
+			"aRs",
+			"aLSs",
+			"mgs",
+			"GenReq",
+			"Reset",
+			"reboot",
+			"Reboot",
+			"reboot",
+			"192.168.13.100",
+			"CTS_CFG_01_VX",
+			"VX1",
+			"8025785919",
+			"p1",
+			"html",
+			"value",
+			"setvalueex",
+			"Float",
+			"ping_response_valid",
+			"Long",
+			"firmwareFileUrl",
+			"firmwareFileName"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -840,6 +897,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"0.0.0.0",
 			"<component name=\"Domain Name Servers\" repeat-count=\"0\">8.8.8.8</component>\n    <component name=\"Domain Name Servers\" repeat-count=\"1\">8.8.4.4</component>",
 			"'",
 			"log.info(",
@@ -854,8 +912,199 @@
 	"groups":
 	[
 		{
+			"selected": 6,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/base.dld",
+					"settings":
+					{
+						"buffer_size": 45348,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4513,
+								4513
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/User/CRBasic.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4212.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/home/jeastman/firmware-lib/.draker_id",
+					"settings":
+					{
+						"buffer_size": 62,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								62,
+								62
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/C/home/jeastman/LiveTerminalSheet/README.md",
+					"settings":
+					{
+						"buffer_size": 627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								627,
+								627
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/C/home/jeastman/firmware-lib/lib/cr800_and_cr1000/env/solar_resource_sensor.dld",
+					"settings":
+					{
+						"buffer_size": 42030,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								833,
+								833
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/User/CRBasic.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/SWIApplyTemplate (1).xml",
+					"settings":
+					{
+						"buffer_size": 3605,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3605,
+								3605
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/C/home/jeastman/hardware-config/BaseStations/PV250_Gen3_(DL328)/SWIApplyTemplate.xml",
+					"settings":
+					{
+						"buffer_size": 4817,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								33,
+								33
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/C/Users/jeastman/Desktop/esystems_test-pv250.CR8",
+					"settings":
+					{
+						"buffer_size": 83374,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								34340,
+								34340
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/User/CRBasic.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -892,7 +1141,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 88.0
+		"height": 148.0
 	},
 	"replace":
 	{
@@ -919,6 +1168,6 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 159.0,
+	"side_bar_width": 308.0,
 	"status_bar_visible": true
 }
