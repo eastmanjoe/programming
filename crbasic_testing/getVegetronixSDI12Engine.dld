@@ -1,0 +1,64 @@
+'################################################
+'Property of Draker Laboratories
+'
+' Test Description
+'
+'################################################
+
+Public test_ver As String = "4.01.00"
+
+
+'## Configuration ###############################
+PipeLineMode
+
+Const PNL_CFG_SDI_PORT = 7
+'################################################
+
+'## Declarations ################################
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Public vegtronix_identification As String * 24
+Public vegtronix_data(4) As Float
+Alias vegtronix_data(1) = vegtronix_sensor1
+Alias vegtronix_data(2) = vegtronix_sensor2
+Alias vegtronix_data(3) = vegtronix_sensor3
+Alias vegtronix_data(4) = vegtronix_tempsensor
+'################################################
+
+'## Data Tables #################################
+' DataTable(fifteenMin, TRUE, -1)
+'   DataInterval(0, 15, MIN, 0)
+'   #If LoggerType = CR1000
+'   CardOut(0, -1)
+'   #EndIf
+
+' EndTable 'fifteenMin
+'################################################
+
+'## Functions ###################################
+Function getVetetronixSDI12Engine(addr As Long)
+  ' SDI12Recorder(vegtronix_identification, PNL_CFG_SDI_PORT, addr, "A3!", 1.0, 0)
+
+  'query identification string (0VEGETRONIXEN16\r\n)
+  SDI12Recorder(vegtronix_identification, PNL_CFG_SDI_PORT, addr, "I!", 1.0, 0)
+
+
+  'query sensor values
+  SDI12Recorder(vegtronix_data(), PNL_CFG_SDI_PORT, addr, "CC!", 1.0, 0)
+EndFunction 'getVetetronixSDI12Engine
+'################################################
+
+
+'## Main Program ################################
+BeginProg
+  Scan (5,Sec,3,0)
+    ' getVetetronixSDI12Engine(0)
+    getVetetronixSDI12Engine(3)
+
+  NextScan
+EndProg
+'################################################
