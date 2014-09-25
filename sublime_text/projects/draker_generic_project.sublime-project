@@ -33,6 +33,9 @@
 		},
 		{
 			"path": "//file002/home/jeastman/Draker/Firmware/Testing"
+		},
+		{
+			"path": "/C/home/jeastman/engineering-hw"
 		}
 	]
 }
