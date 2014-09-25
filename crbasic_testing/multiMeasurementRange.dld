@@ -9,9 +9,11 @@ Public test_ver As String = "4.01.00"
 
 
 '## Configuration ###############################
-PipeLineMode
+' PipeLineMode
+SequentialMode
 
-
+Const SRS_CFG_01_DIFF_CH = 1
+Const FREQ_REJECTION = _60Hz
 '################################################
 
 '## Declarations ################################
@@ -21,21 +23,22 @@ Const CR = Chr(13)
 Const LF = Chr(10)
 Const CRLF = CR & LF
 
-Public draker_id(5) As String * 44 = {"Not set", "2014-09-18", "DAS-1", "", "FALSE"}
-Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
-  draker_model_number, draker_email_sent
+Public srs_voltage_25(2) As Float
+Public srs_voltage_250(2) As Float
 
-
+Dim counter As Long
 '################################################
 
 '## Data Tables #################################
-' DataTable(fifteenMin, TRUE, -1)
-'   DataInterval(0, 15, MIN, 0)
-'   #If LoggerType = CR1000
-'   CardOut(0, -1)
-'   #EndIf
+DataTable(voltageCompare, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
 
-' EndTable 'fifteenMin
+  Sample(2, srs_voltage_25(), IEEE4)
+  Sample(2, srs_voltage_250(), IEEE4)
+EndTable 'voltageCompare
 '################################################
 
 '## Functions ###################################
@@ -45,8 +48,16 @@ Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
 
 '## Main Program ################################
 BeginProg
-  Scan (5,Sec,3,0)
+  Scan (1,Sec,3,0)
 
+    For counter = 1 To 100
+      ExciteV(VX1, counter, 0)
+    Next
+
+    VoltDiff(srs_voltage_25(1), 2, mV25C, SRS_CFG_01_DIFF_CH, TRUE, 0, FREQ_REJECTION, 1.0, 0)
+    VoltDiff(srs_voltage_250(1), 2, mV250C, SRS_CFG_01_DIFF_CH, TRUE, 0, FREQ_REJECTION, 1.0, 0)
+
+    CallTable(voltageCompare)
   NextScan
 EndProg
 '################################################

@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+    <head>
+        <meta http-equiv="Content-Type"
+        content="text/html; charset=iso-8859-1">
+        <title>Upload Template</title>
+        <style type="text/css">
+        body{font-family:Verdana,Arial,Helvetica,sans-serif;font-size:8px;}
+        .flatbutton{font-size:12px;font-family:Tahoma ,Arial;height:20px;BORDER-RIGHT:1px outset;BORDER-TOP:1px outset;background-color:steelblue;color:white;font-weight:bold;BORDER-LEFT:1px outset;BORDER-BOTTOM:1px outset;cursor:hand;overflow:hidden;}
+        input{font-size:12px; overflow:visible;}
+        </style>
+        <script>
+            function reqUpload() {
+                if (document.up['upload-file'].value != "") {
+                    parent.ssdisp(parent.docEId('stsMsg'), "block");
+                    parent.sIH(parent.docEId('stsMsg'), "Loading Template. Please wait....");
+                    if (confirm("Loading Template may take few minutes. Click on OK to load template.")) {
+                        document.up['save-as-filename'].value = "SWITemplate.xml";
+                        document.up.action = "/UpLoad";
+                        document.up.submit();
+                        return true;
+                    } else {
+                        parent.hidehelp();
+                        return false;
+                    }
+                } else {
+                    alert("Please select file to load.");
+                    return false;
+                }
+            }
+
+            function applyUpload() {
+                if (document.up['upload-file'].value != "") {
+                    parent.notTShow = true;
+                    parent.tempSucc = true;
+                    parent.ssdisp(parent.docEId('stsMsg'), "block");
+                    parent.sIH(parent.docEId('stsMsg'), "Loading Template. Please wait....");
+                    document.up['save-as-filename'].value = "Template.xml";
+                    document.up.action = "/UpLoad";
+                    document.up.submit();
+                    return true;
+                } else {
+                    alert("Please select file to load.");
+                    return false;
+                }
+            }
+
+            function lapplyUpload() {
+                if (document.up['upload-file'].value != "") {
+                    parent.notTShow = false;
+                    parent.tempSucc = true;
+                    parent.ssdisp(parent.docEId('stsMsg'), "block");
+                    parent.sIH(parent.docEId('stsMsg'), "Loading Template. Please wait....");
+                    document.up['save-as-filename'].value = "Template.xml";
+                    document.up.action = "/UpLoad";
+                    document.up.submit();
+                    return true;
+                } else {
+                    alert("Please select file to load.");
+                    return false;
+                }
+            }
+            window.onload = function() {
+                if (!parent.isIE) {
+                    parent.ssdisp(document.up['Apply'], "none");
+                    parent.ssdisp(document.up['lApply'], "none");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <br>
+        <form name="up" enctype="multipart/form-data"  method=POST>
+            <p>
+            <br>  <input type="hidden" id="save-as-filename" name="save-as-filename">
+            </p>
+            <p><font size="2"><b>IP Address of Cell Modem</b></font> &nbsp; : &nbsp; <input name="cell-url"  type="text">
+            </p>
+            <p><font size="2"><b>Select a Template file</b></font> &nbsp; : &nbsp; <input name="upload-file"  type="file">
+            </p>
+            <p>&nbsp;</p>
+            <p align="center">
+            <input type="Button" value="Load to Screen" name="Load" onclick="return reqUpload();" class ="flatbutton">&nbsp;&nbsp;
+            <input type="Button" value="Preview" name="Apply" onclick="return applyUpload();" class ="flatbutton">&nbsp;&nbsp;
+            <input type="Button" value="Load & Apply" name="lApply" onclick="return lapplyUpload();" class ="flatbutton">
+            </p>
+        </form>
+    </body>
+</html>

@@ -25,7 +25,11 @@ Public draker_id(5) As String * 44 = {"Not set", "2014-09-18", "DAS-1", "", "FAL
 Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
   draker_model_number, draker_email_sent
 
+Public draker_mfg_date_sec As Long
+Public pnl_current_date As String * 28
+Public pnl_current_date_sec As Long
 
+Public sendEmail As Boolean
 '################################################
 
 '## Data Tables #################################
@@ -47,6 +51,16 @@ Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
 BeginProg
   Scan (5,Sec,3,0)
 
+    draker_mfg_date_sec = SecsSince1990(draker_mfg_date & " 00:00:00", 4)
+    pnl_current_date = Status.TimeStamp
+    pnl_current_date_sec = SecsSince1990(pnl_current_date, 1)
+
+    'send if at least 3 days has passed since the mfg date and the email has not been sent previously
+    If (draker_mfg_date_sec + 259200) < pnl_current_date_sec Then
+      sendEmail = TRUE
+    Else
+      sendEmail = FALSE
+    EndIf
   NextScan
 EndProg
 '################################################
