@@ -1,57 +1,44 @@
 '################################################
 'Property of Draker Laboratories
 '
-'Determine how to use the PingIP command
-'
-'PingIP command returns the response time of a ping
-'in milliseconds.  The PingIP commands requires the
-'IP Address and a response timeout.
-
-'Can be used in a For loop to cycle through all available
-'IP Addresses
 '################################################
 
-Const NUM_OF_IPS = 4
-Public ip_addr(NUM_OF_IPS) As String * 15 = {"10.11.50.10", "10.11.50.21", "10.11.50.53", "10.11.50.24"}
-Public tcp_port(NUM_OF_IPS) As Long = {502, 502, 502, 502}
-Public ip_addr_length As Long
-Public tcp_port_length As Long
+Const NUM_OF_IPS = 10
+Public ip_addr(NUM_OF_IPS) As String * 15 = {"10.11.50.10", "10.11.50.21", "10.11.50.53", "10.11.50.24", "10.11.50.56", "10.11.50.61", "10.11.50.23", "10.11.50.180", "166.143.29.138", "10.11.40.24"}
+Public ip_addr_array_length As Long
 
-Public ping_response_time(NUM_OF_IPS) As Long
-Public mod_ping_response(NUM_OF_IPS)
-'ping_time_out is in milliseconds
-Dim ping_time_out As Long = {1000}
-Dim counter As Long
+Public ping_response_time(NUM_OF_IPS) As Float
+Dim scan_counter As Long
 
 Units ping_response_time = msec
-Units mod_ping_response = msec
 
-Function PingDevice(ip_addr As String) As Long
-  Dim ping_response_time As Long
+Function PingDevice(ip_addr As String) As Float
+  Const NUM_OF_PINGS = 10
+  Dim ping_response_time As Float = 0
   Dim counter
-  Dim result_code(16) As Long
-  Public result_code_length As Long
-  
-  ping_response_time = 0
+  'ping_time_out is in milliseconds
+  Dim ping_time_out As Long = 1000
 
-  For counter = 1 To ArrayLength(result_code)
-    ping_response_time += PingIP(ip_addr, 1000)
+
+  For counter = 1 To NUM_OF_PINGS
+    ping_response_time += PingIP(ip_addr, ping_time_out)
   Next
 
-  result_code_length = ArrayLength(result_code)
-  
-  Return ping_response_time / 10
+  Return ping_response_time / NUM_OF_PINGS
 EndFunction
 
 BeginProg
-    Scan (30,Sec,3,0)
-      For counter = 1 to NUM_OF_IPS
-        ping_response_time(counter) = PingIP(ip_addr(counter), ping_time_out)
-        mod_ping_response(counter) = PingDevice(ip_addr(counter))
+    Scan (60,Sec,3,0)
+
+      For scan_counter = 1 to ArrayLength(ping_response_time)
+        ping_response_time = 0
       Next
-      
-      ip_addr_length = ArrayLength(ip_addr)
-      tcp_port_length = ArrayLength(tcp_port)
-    
+
+      For scan_counter = 1 to ArrayLength(ip_addr)
+        ping_response_time(scan_counter) = PingDevice(ip_addr(scan_counter))
+      Next
+
+      ip_addr_array_length = ArrayLength(ip_addr)
+
     NextScan
 EndProg
