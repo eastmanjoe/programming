@@ -25,6 +25,10 @@ Public draker_id(5) As String * 44 = {"Not set", "2014-09-18", "DAS-1", "", "FAL
 Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
   draker_model_number, draker_email_sent
 
+Dim counter As Long
+Dim step_size As Long = 2
+Public number As Long
+
 
 '################################################
 
@@ -46,6 +50,13 @@ Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name, _
 '## Main Program ################################
 BeginProg
   Scan (5,Sec,3,0)
+
+  counter = 0
+
+  For counter = 1 To 10 Step step_size
+    number = counter
+  Next
+
 
   NextScan
 EndProg
