@@ -57,6 +57,9 @@ BeginProg
     number = counter
   Next
 
+  ExciteV(VX1, 640, 0)
+  ExciteV(VX2, 73, 0)
+
 
   NextScan
 EndProg

@@ -12,6 +12,52 @@ Dim scan_counter As Long
 
 Units ping_response_time = msec
 
+'electro shark 200
+Const MTR_TOTAL = 1
+Const MTR_SHARK_200_BAUD = 9600
+Const MTR_SHARK_200_TRIES = 1
+Const MTR_SHARK_200_TIMEOUT = 100
+
+Public shark_port As Long
+Public mtr_comm_code(MTR_TOTAL) As Long
+
+Public mtr_ac_voltage_an(MTR_TOTAL) As Float
+Public mtr_ac_voltage_bn(MTR_TOTAL) As Float
+Public mtr_ac_voltage_cn(MTR_TOTAL) As Float
+Public mtr_ac_voltage_ab(MTR_TOTAL) As Float
+Public mtr_ac_voltage_bc(MTR_TOTAL) As Float
+Public mtr_ac_voltage_ca(MTR_TOTAL) As Float
+Public mtr_ac_current_a(MTR_TOTAL) As Float
+Public mtr_ac_current_b(MTR_TOTAL) As Float
+Public mtr_ac_current_c(MTR_TOTAL) As Float
+Public mtr_ac_current_n(MTR_TOTAL) As Float
+Public mtr_ac_power(MTR_TOTAL) As Float
+Public mtr_ac_power_rcvd(MTR_TOTAL) As Float
+Public mtr_ac_power_delv(MTR_TOTAL) As Float
+Public mtr_ac_va(MTR_TOTAL) As Float
+Public mtr_ac_vars(MTR_TOTAL) As Float
+Public mtr_ac_pf(MTR_TOTAL) As Float
+Public mtr_ac_freq(MTR_TOTAL) As Float
+
+Public mtr_ac_energy_rcvd(MTR_TOTAL) As Float
+Public mtr_ac_energy_delv(MTR_TOTAL) As Float
+Public mtr_ac_energy_rcvd_raw(MTR_TOTAL) As Float
+Public mtr_ac_energy_delv_raw(MTR_TOTAL) As Float
+Public mtr_ac_energy_net(MTR_TOTAL) As Float
+Public mtr_ac_energy_total(MTR_TOTAL) As Float
+Public mtr_ac_va_hrs_total(MTR_TOTAL) As Float
+Public mtr_ac_var_hrs_pos(MTR_TOTAL) As Float
+Public mtr_ac_var_hrs_neg(MTR_TOTAL) As Float
+Public mtr_ac_var_hrs_net(MTR_TOTAL) As Float
+Public mtr_ac_var_hrs_total(MTR_TOTAL) As Float
+
+Public mtr_ac_voltage_ab_angle(MTR_TOTAL) As Float
+Public mtr_ac_voltage_bc_angle(MTR_TOTAL) As Float
+Public mtr_ac_voltage_ca_angle(MTR_TOTAL) As Float
+Public mtr_ac_current_a_angle(MTR_TOTAL) As Float
+Public mtr_ac_current_b_angle(MTR_TOTAL) As Float
+Public mtr_ac_current_c_angle(MTR_TOTAL) As Float
+
 Function PingDevice(ip_addr As String) As Float
   Const NUM_OF_PINGS = 10
   Dim ping_response_time As Float = 0
@@ -27,6 +73,92 @@ Function PingDevice(ip_addr As String) As Float
   Return ping_response_time / NUM_OF_PINGS
 EndFunction
 
+
+'electro shark 200
+Function getElectroShark200(num As Long, port As Long, addr As Long) As Long
+  Dim result_every(5) As Long
+
+  Dim buffer_lng(9) As Long
+  Dim buffer_flt(15) As Float
+
+  Dim counter As Long
+
+  'reset the result codes
+  For counter = 1 To ArrayLength(result_every)
+  ' For counter = 1 To 5
+    result_every(counter) = 0
+  Next
+
+  'query! instantaneous voltage, current, power, vars, power factor and frequency
+  ModBusMaster(result_every(1), port, MTR_SHARK_200_BAUD, addr, 3, buffer_flt(1), 1000 - 1, 15, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT)
+    mtr_ac_voltage_an(num) = buffer_flt(1)
+    mtr_ac_voltage_bn(num) = buffer_flt(2)
+    mtr_ac_voltage_cn(num) = buffer_flt(3)
+    mtr_ac_voltage_ab(num) = buffer_flt(4)
+    mtr_ac_voltage_bc(num) = buffer_flt(5)
+    mtr_ac_voltage_ca(num) = buffer_flt(6)
+    mtr_ac_current_a(num) = buffer_flt(7)
+    mtr_ac_current_b(num) = buffer_flt(8)
+    mtr_ac_current_c(num) = buffer_flt(9)
+    mtr_ac_power(num) = buffer_flt(10)
+    mtr_ac_power_rcvd(num) = IIf(buffer_flt(10) < 0, Abs(buffer_flt(10)), 0)
+    mtr_ac_power_delv(num) = IIf(buffer_flt(10) > 0, Abs(buffer_flt(10)), 0)
+    mtr_ac_vars(num) = buffer_flt(11)
+    mtr_ac_va(num) = buffer_flt(12)
+    mtr_ac_pf(num) = buffer_flt(13)
+    mtr_ac_freq(num) = buffer_flt(14)
+    mtr_ac_current_n(num) = buffer_flt(15)
+
+
+  'query energy
+  ModBusMaster(result_every(2), port, MTR_SHARK_200_BAUD, addr, 3, buffer_lng(1), -1500, 9, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT, 2)
+    mtr_ac_energy_rcvd_raw(num) = buffer_lng(1)
+    mtr_ac_energy_delv_raw(num) = buffer_lng(2)
+
+    mtr_ac_energy_net(num) = buffer_lng(3)
+    mtr_ac_energy_total(num) = buffer_lng(4)
+    mtr_ac_var_hrs_pos(num) = buffer_lng(5)
+    mtr_ac_var_hrs_neg(num) = buffer_lng(6)
+    mtr_ac_var_hrs_net(num) = buffer_lng(7)
+    mtr_ac_var_hrs_total(num) = buffer_lng(8)
+    mtr_ac_va_hrs_total(num) = buffer_lng(9)
+
+  'query voltage and current phase angles
+  ModBusMaster(result_every(3), port, MTR_SHARK_200_BAUD, addr, 3, buffer_lng(1), 4100, 6, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT, 1)
+    mtr_ac_current_a_angle(num) = buffer_lng(1) * 0.1
+    mtr_ac_current_b_angle(num) = buffer_lng(2) * 0.1
+    mtr_ac_current_c_angle(num) = buffer_lng(3) * 0.1
+    mtr_ac_voltage_ab_angle(num) = buffer_lng(4) * 0.1
+    mtr_ac_voltage_bc_angle(num) = buffer_lng(5) * 0.1
+    mtr_ac_voltage_ca_angle(num) = buffer_lng(6) * 0.1
+
+  'use instantaneous measurement query as indicator for comm code
+  If result_every(1) = 0 Then
+    mtr_comm_code(num) = 0
+
+  ElseIf result_every(1) < 0 Then
+    mtr_comm_code(num) = result_every(1)
+
+  Else
+    'only increment comm code if it hadn't been negative
+    If mtr_comm_code(num) >= 0 Then
+      mtr_comm_code(num) += 1
+    Else
+      mtr_comm_code(num) = 1
+    EndIf
+  EndIf
+
+  Return mtr_comm_code(num)
+EndFunction 'getElectroShark200
+
+'## Shutdown ####################################
+ShutDownBegin
+
+  'base
+  If shark_port > 100 Then TCPClose(shark_port)
+
+ShutDownEnd
+
 BeginProg
     Scan (60,Sec,3,0)
 
@@ -39,6 +171,10 @@ BeginProg
       Next
 
       ip_addr_array_length = ArrayLength(ip_addr)
+
+      If shark_port < 100 Then shark_port = TCPOpen("10.11.50.56", 502, 1, 1000, shark_port, 1)
+
+      getElectroShark200(1, shark_port, 1)
 
     NextScan
 EndProg
