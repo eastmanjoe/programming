@@ -6,17 +6,26 @@
 clear
 
 echo "Utility to create SD card from image"
-echo "Please enter image filename:"
-read dd_if
+read -e -p "Please enter image filename: " dd_if
 
 filesize=$(stat -c%s $dd_if)
 
 lsblk
 
-echo "Please enter drive:"
-read drive
+read -e -p "Please enter drive: " drive
 
-echo "Please enter dd options:"
-read dd_options
+read -e -p "Please enter dd options: " dd_options
 
-dd if=$dd_if | pv --size $filesize | dd of=$drive $dd_options
+echo "Image file is: $dd_if"
+echo "Image filesize is: $filesize"
+echo "Image is to be copied to: $drive"
+echo "DD options are: $dd_options"
+
+read -p "proceed? (y|n): " proceed
+
+if [[ ${proceed,,} = "y" -o ${proceed,,} = "yes" ]]; then
+    dd if=$dd_if | pv --size $filesize | dd of=$drive $dd_options
+else
+    echo "Exiting script"
+    exit 0
+fi
