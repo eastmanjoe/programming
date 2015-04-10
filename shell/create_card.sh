@@ -23,7 +23,14 @@ echo "DD options are: $dd_options"
 
 read -p "proceed? (y|n): " proceed
 
-if [[ ${proceed,,} = "y" -o ${proceed,,} = "yes" ]]; then
+proceed=${proceed,,}
+
+# simplifies the check below
+if [[ $proceed == "yes" ]]; then
+    proceed="y"
+fi
+
+if [[ $proceed == "y" ]]; then
     dd if=$dd_if | pv --size $filesize | dd of=$drive $dd_options
 else
     echo "Exiting script"
