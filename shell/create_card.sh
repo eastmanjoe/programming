@@ -33,11 +33,17 @@ read -p "proceed? (y|n): " proceed
 proceed=${proceed,,}
 
 # simplifies the check below
-if [[ $proceed == "yes" ]]; then
-    proceed="y"
-fi
+# if [[ $proceed == "yes" ]]; then
+#     proceed="y"
+# fi
 
-if [[ $proceed == "y" ]]; then
+if [[ $proceed == "y" ]] || [[ $proceed == "yes" ]]; then
+    read -p "zero card? (y|n): " zero
+
+    if [[ $zero == "y" ]] || [[ $zero == "yes" ]]; then
+        dd if=/dev/zero | pv --size $filesize | dd of=$dd_of $dd_options
+    fi
+
     echo -e "\n"
     dd if=$dd_if | pv --size $filesize | dd of=$dd_of $dd_options
 else
