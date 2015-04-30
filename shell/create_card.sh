@@ -41,7 +41,7 @@ if [[ $proceed == "y" ]] || [[ $proceed == "yes" ]]; then
     read -p "zero card? (y|n): " zero
 
     if [[ $zero == "y" ]] || [[ $zero == "yes" ]]; then
-        dd if=/dev/zero | pv --size $filesize | dd of=$dd_of $dd_options
+        dd if=/dev/zero | pv | dd of=$dd_of bs=32M
     fi
 
     echo -e "\n"
