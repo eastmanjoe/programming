@@ -17,7 +17,13 @@ echo -e "\n"
 
 read -e -p "Please enter location to write file: " dd_of
 
+echo "Please select from dd option or enter your own"
+echo "1: bs=32M conv=fsync -- Used for TS-4710 image duplication"
 read -e -p "Please enter dd options: " dd_options
+
+if [ $dd_options == "1" ]; then
+	dd_options="bs=32M conv=fsync"
+fi
 
 echo -e "\n"
 echo "Image file is: $dd_if"
