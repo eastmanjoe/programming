@@ -13,8 +13,9 @@ if [ "$(uname -s)" == "Linux" ]; then
 
 elif [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
 
-    mkgroup -d -l > /etc/group
-    mkpasswd -d -l -p $home_folder > /etc/password
+    # mkgroup -d -l > /etc/group
+    # mkpasswd -d -l -p $home_folder > /etc/password
+
 
     lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg
 
@@ -27,6 +28,17 @@ elif [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
     apt-cyg openssl openssl-devel libyaml-devel sqlite3 libtool autoconf \
             automake bison m4 mingw64-i686-gcc mingw64-x86_64-gcc readline
 
+    #setup python
+    ln -sf /cygdrive/c/Python27/python.exe /usr/bin/python
+    ln -s /cygdrive/c/Python27/mkvirtualenv.bat /usr/bin/mkvirtualenv
+    ln -s /cygdrive/c/Python27/lsvirtualenv.bat /usr/bin/lsvirtualenv
+    ln -s /cygdrive/c/Python27/rmvirtualenv.bat /usr/bin/rmvirtualenv
+    ln -s /cygdrive/c/Python27/workon.bat /usr/bin/workon
+    ln -s /cygdrive/c/Python27/deactivate.bat /usr/bin/deactivate
+    ln -s /cygdrive/c/Python27/add2virtualenv.bat /usr/bin/add2virtualenv
+
+
+    # install ruby
     curl -#L https://get.rvm.io | bash -s stable --autolibs=3 --ruby=1.9.3
 
 
