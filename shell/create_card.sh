@@ -38,16 +38,11 @@ read -p "proceed? (y|n): " proceed
 
 proceed=${proceed,,}
 
-# simplifies the check below
-# if [[ $proceed == "yes" ]]; then
-#     proceed="y"
-# fi
-
 if [[ $proceed == "y" ]] || [[ $proceed == "yes" ]]; then
     read -p "zero card? (y|n): " zero
 
     if [[ $zero == "y" ]] || [[ $zero == "yes" ]]; then
-        dd if=/dev/zero | pv | dd of=$dd_of bs=32M
+        dd if=/dev/zero | pv --size $(lsblk -bnido SIZE $dd_if) | dd of=$dd_of bs=32M
     fi
 
     echo -e "\n"
