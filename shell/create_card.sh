@@ -42,7 +42,7 @@ if [[ $proceed == "y" ]] || [[ $proceed == "yes" ]]; then
     read -p "zero card? (y|n): " zero
 
     if [[ $zero == "y" ]] || [[ $zero == "yes" ]]; then
-        dd if=/dev/zero | pv --size $(lsblk -bnido SIZE $dd_if) | dd of=$dd_of bs=32M
+        dd if=/dev/zero | pv --size $(lsblk -bnido SIZE $dd_of) | dd of=$dd_of bs=32M
     fi
 
     echo -e "\n"
