@@ -1,0 +1,783 @@
+'################################################
+'Property of Draker Laboratories
+'################################################
+
+'// PREFIX PNL //////////////////////////////////////////////////////////
+
+'## Description #################################
+'Manufacturer: Draker
+'Model(s): dl202, dl208, dl242, dl264, dl274, dl315, dl328
+'
+'Components:
+'// COPY DESCRIPTION ////////////////////////////////////////////////////
+'  panel control
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+'## Change Log ##################################
+'2012-11-12 [v4.03.00] Release
+'2012-10-11   ITM: Added support for dl315 and dl328
+'
+'2012-08-29 [v4.02.01] JHE: Added flag to control cell modem cycling during
+'                             the daytime and moved latitude, longitude and
+'                             altiltude to config file
+'2012-05-07 [v4.02.00] Release
+'2012-02-10   ITM: Created component to control cell modem and srs heater
+'
+'Note: Add changes to the top of the list, using the format:
+'YYYY-MM-DD [vM.mm.pp] JQP: Made this change and that change
+'################################################
+
+
+'## Versions ####################################
+Public draker_base_ver As String = "4.03.00"
+'// COPY VERSION ////////////////////////////////////////////////////////
+Public draker_pnl_control_ver As String = "4.03.00"
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Configuration ###############################
+PipeLineMode
+
+'part number macros (do not edit)
+Const NOT_USED = 0
+Const CUSTOM = 1
+Const DL202 = 2
+Const DL208 = 3
+Const DL242 = 4
+Const DL264 = 5
+Const DL274 = 6
+Const DL315 = 7
+Const DL328 = 8
+
+'draker part number for the basestation
+Const DRAKER_PN = DL274
+
+'name of the configuration file
+Const CFG_FILE = "draker_test.cfg"
+
+'set the maximum number of devices and ports in the config file
+Const CFG_DEVICE_MAX = 1
+Const CFG_PORT_MAX = 1
+
+'set to true if any serial device communicates over tcp
+Const CFG_TCP_ENABLE = TRUE
+
+'set interval time in seconds for each scan and slow sequence do/while loop
+Const CFG_SCAN_INTERVAL_MAIN = 5
+Const CFG_SCAN_INTERVAL_CLEAN = 30
+Const CFG_SCAN_INTERVAL_DIRTY = 60
+Const CFG_SCAN_INTERVAL_UTIL = 30
+
+'Note: ONLY FOR TCP DEVICES
+'  CFG_TCP_FAIL_MAX should be set to limit the time between refreshing
+'  tcp sockets to no less then 5 minutes. If the util scan interval is
+'  30 seconds, then refresh the socket after 10 failed attempts.
+
+'set the max comm failures before a tcp socket is closed and reopened
+Const CFG_TCP_FAIL_MAX = 10
+
+'// COPY CONFIG /////////////////////////////////////////////////////////
+'################################################
+'panel control
+Const PNL_CFG_CYCLE_MODEM = FALSE
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Declarations ################################
+Const FREQ_REJECTION = _60HZ
+Const SP = Chr(32)
+Const TB = Chr(9)
+Const CR = Chr(13)
+Const LF = Chr(10)
+Const CRLF = CR & LF
+
+Const DRAKER_ID_FILE = ".draker_id"
+
+Public draker_id(3) As String * 12 = {"Not set", "YYYY-MM-DD", "DAS-1"}
+Alias draker_id = draker_panel_sn, draker_mfg_date, draker_das_name
+Public draker_das_name_save As Boolean
+
+Public draker_id_backup As Boolean
+Dim draker_id_updated As Boolean
+
+Public cfg_scan_timer_clean As Float
+Public cfg_scan_timer_dirty As Float
+Public cfg_scan_timer_util As Float
+Dim cfg_scan_delay_clean As Long
+Dim cfg_scan_delay_dirty As Long
+Dim cfg_scan_delay_util As Long
+
+Public cfg_reload As Boolean = TRUE
+Public cfg_reload_error As String * 1024
+Public cfg_device_total As Long
+Public cfg_device_current_clean As String * 32
+Public cfg_device_current_dirty As String * 32
+Dim cfg_counter_clean As Long
+Dim cfg_counter_dirty As Long
+Dim cfg_counter As Long
+
+Public cfg_port_total As Long
+Public cfg_ports(CFG_PORT_MAX) As Long
+Dim cfg_port_busy(CFG_PORT_MAX) As Boolean
+
+#If CFG_TCP_ENABLE
+Public cfg_tcp_open As Long
+Public cfg_tcp_open_override As Long
+
+Public cfg_tcp_addr(CFG_PORT_MAX) As String
+Public cfg_tcp_port(CFG_PORT_MAX) As Long
+#EndIf
+
+Public cfg_device_prefix(CFG_DEVICE_MAX) As String * 8
+Public cfg_device_index(CFG_DEVICE_MAX) As Long
+Public cfg_device_type(CFG_DEVICE_MAX) As String * 32
+Public cfg_device_port_num(CFG_DEVICE_MAX) As Long
+Public cfg_device_addr(CFG_DEVICE_MAX) As Long
+Dim cfg_device_result(CFG_DEVICE_MAX) As Long
+
+Dim time_utc(9) As Float
+Alias time_utc(1) = time_utc_year
+Alias time_utc(2) = time_utc_month
+Alias time_utc(3) = time_utc_day
+Alias time_utc(4) = time_utc_hr
+Alias time_utc(5) = time_utc_min
+Alias time_utc(6) = time_utc_sec
+Alias time_utc(7) = time_utc_microsec
+Alias time_utc(8) = time_utc_day_of_week
+Alias time_utc(9) = time_utc_day_of_year
+
+Units cfg_scan_timer_clean = Sec
+Units cfg_scan_timer_dirty = Sec
+Units cfg_scan_timer_util = Sec
+
+'// COPY DECLARATION ////////////////////////////////////////////////////
+'################################################
+'panel control
+#If DRAKER_PN = CUSTOM
+
+'configuration for PV2000 gen3
+#ElseIf DRAKER_PN = DL315
+  Const PNL_CFG_MODEM_PORT = 0
+  Const PNL_CFG_SRS_HEATER = TRUE
+
+'configuration for PV5000 gen2 RMT and utility
+#ElseIf DRAKER_PN = DL242 OR DRAKER_PN = DL264
+  Const PNL_CFG_MODEM_PORT = 0
+  Const PNL_CFG_SRS_HEATER = TRUE
+
+'configuration for prospector
+#ElseIf DRAKER_PN = DL274
+  Const PNL_CFG_MODEM_PORT = 8
+  Const PNL_CFG_SRS_HEATER = TRUE
+
+#Else
+  Const PNL_CFG_MODEM_PORT = 0
+  Const PNL_CFG_SRS_HEATER = FALSE
+#EndIf
+
+Const PNL_CFG_NTP_SERVER = "us.pool.ntp.org"
+
+Public pnl_cfg_latitude As Float
+Public pnl_cfg_longitude As Float
+Public pnl_cfg_altitude As Float
+
+Public pnl_control_modem_override As Long = 10
+Dim pnl_control_modem_disabled As Boolean
+Dim pnl_control_heater_timer As Long
+
+Dim pnl_control_daytime As Boolean
+Dim pnl_control_sunrise As Boolean
+Dim pnl_control_sunset As Boolean
+Dim pnl_control_check_ntp As Boolean
+
+Units pnl_cfg_latitude = Deg
+Units pnl_cfg_longitude = Deg
+Units pnl_cfg_altitude = m
+
+Units pnl_control_modem_override = Min
+
+'// END /////////////////////////////////////////////////////////////////
+'################################################
+
+
+
+
+
+'## Data Tables #################################
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+  #If LoggerType = CR1000
+  CardOut(0, -1)
+  #EndIf
+  Sample(1, draker_base_ver, String)
+  Sample(1, draker_panel_sn, String)
+
+EndTable 'fifteenMin
+
+'table for testing functionality
+DataTable(panelControl, TRUE, -1)
+  DataInterval(0, 60, SEC, 0)
+
+  Sample(1, pnl_control_modem_override, Long)
+  Sample(1, pnl_control_modem_disabled, Boolean)
+  Sample(1, pnl_control_heater_timer, Long)
+
+  Sample(1, pnl_control_daytime, Boolean)
+  Sample(1, pnl_control_sunrise, Boolean)
+  Sample(1, pnl_control_sunset, Boolean)
+  Sample(1, pnl_control_check_ntp, Boolean)
+
+  #If PNL_CFG_MODEM_PORT > 0
+    Sample(1, Status.PortStatus(PNL_CFG_MODEM_PORT), Boolean)
+  #EndIf
+
+  Sample(1, Status.SW12Volts, Boolean)
+  Sample(1, Status.Battery, IEEE4)
+
+EndTable 'panelControl
+'################################################
+
+
+
+
+
+'## Display Tables ##############################
+DisplayMenu("LIVE DATA", -2)
+
+  '// COPY DISPLAY ////////////////////////////////////////////////////////
+  'panelControl
+  SubMenu("Location")
+    DisplayValue("Latitude", pnl_cfg_latitude)
+    DisplayValue("Longitude", pnl_cfg_longitude)
+    DisplayValue("Altitude", pnl_cfg_altitude)
+  EndSubMenu
+
+  '// END /////////////////////////////////////////////////////////////////
+EndMenu
+'################################################
+
+
+
+
+
+'## Functions ###################################
+
+'// COPY FUNCTION ///////////////////////////////////////////////////////
+'panel control
+Function checkDaytime()
+  Public sol_pos(5) As Float
+  Alias sol_pos(1) = SolarAzimuth
+  Alias sol_pos(2) = SunElevation
+  Alias sol_pos(3) = HourAngle
+  Alias sol_pos(4) = Declination
+  Alias sol_pos(5) = AirMass
+
+  Dim was_daytime As Boolean
+
+  'capture the previous daytime state
+  was_daytime = pnl_control_daytime
+
+  'calculate the suns elevation and check if its above the horizon
+  SolarPosition(sol_pos, time_utc(), 0, pnl_cfg_latitude, pnl_cfg_longitude, pnl_cfg_altitude, -1, 20)
+  pnl_control_daytime = (sol_pos(2) > 0)
+
+  'check if the sun just came up
+  pnl_control_sunrise = (pnl_control_daytime AND NOT was_daytime)
+
+  'check if the sun just went down
+  pnl_control_sunset = (was_daytime AND NOT pnl_control_daytime)
+EndFunction 'checkDaytime
+
+
+
+
+
+'// END /////////////////////////////////////////////////////////////////
+'base
+Function readDrakerID() As Boolean
+  Dim file_handle As Long
+  Dim line_buffer As String * 64
+
+  'try to open the draker id file, exit if file doesn't exist
+  file_handle = FileOpen("CPU:" & DRAKER_ID_FILE, "r", 0)
+  If file_handle = 0 Then Return FALSE
+
+  'if the file is not empty, parse the contents into the draker id array
+  If FileRead(file_handle, line_buffer, 64) > 0 Then
+    SplitStr(draker_id(), line_buffer, ",", ArrayLength(draker_id), 5)
+  EndIf
+
+  FileClose(file_handle)
+  Return TRUE
+EndFunction 'readDrakerID
+
+
+
+
+
+Function writeDrakerID()
+  Dim file_handle As Long
+  Dim new_das_name As String * 12
+  Dim line_buffer As String * 64
+  Dim counter As Long
+
+  'preserve the new das name before we potentially overwrite it
+  new_das_name = draker_das_name
+
+  'read in the current file, restore the new das name if successful
+  If readDrakerID() Then draker_das_name = new_das_name
+
+  'serialize the draker id parameters
+  line_buffer = ""
+  For counter = 1 To ArrayLength(draker_id)
+
+    'use a comma delimiter between parameters
+    If counter > 1 Then line_buffer &= ","
+
+    'filter out any commas in the next parameter and append it
+    draker_id(counter) = Replace(draker_id(counter), ",", "")
+    line_buffer &= draker_id(counter)
+  Next
+
+  'open the file and write out the serialized parameters
+  file_handle = FileOpen("CPU:" & DRAKER_ID_FILE, "w", 0)
+  FileWrite(file_handle, line_buffer, 0)
+  FileClose(file_handle)
+
+  'hide the file to protect it
+  FileManage("CPU:" & DRAKER_ID_FILE, 32)
+EndFunction 'writeDrakerID
+
+
+
+
+
+Function compatibleConfigFile(file_handle As Long) As Boolean
+  Dim line_buffer As String * 32
+
+  'loop through each line of the file until we find the config version
+  Do While TRUE
+
+    'read the next line, if we reach the end then the file has no version
+    If FileReadLine(file_handle, line_buffer, 32) = -1 Then
+      cfg_reload_error = "Config file has no version"
+      Return FALSE
+    EndIf
+
+    'change the line to lower case and remove tabs and spaces
+    line_buffer = LowerCase(line_buffer)
+    line_buffer = Replace(line_buffer, TB, "")
+    line_buffer = Replace(line_buffer, SP, "")
+
+    'check if this line has the version
+    If Left(line_buffer, 9) = "##version" Then
+
+      'isolate just the version and check it against the component version
+      If Mid(line_buffer, 10, 4) = Left(draker_base_ver, 4) Then Return TRUE
+
+      'otherwise the file is incompatible
+      cfg_reload_error = "Config file version does not match parser"
+      Return FALSE
+    EndIf
+  Loop
+EndFunction 'compatibleConfigFile
+
+
+
+
+
+Function getNextLine(file_handle As Long) As String * 128
+  Dim line_buffer As String * 128
+  Dim position As Long
+  Dim das_list As String * 64
+  Dim this_das As String
+
+  'normalize this das's name by stripping the hyphan and adding a colon to the end
+  this_das = Replace(LowerCase(draker_das_name), "-", "") & ":"
+
+  'loop through each line of the file until we find a valid device
+  Do While TRUE
+
+    'read the next line, if we reach the end then return
+    If FileReadLine(file_handle, line_buffer, 128) = -1 Then Return "EOF"
+
+    'change the line to lower case and remove tabs, spaces and line ending characters
+    line_buffer = LowerCase(line_buffer)
+    line_buffer = Replace(line_buffer, TB, "")
+    line_buffer = Replace(line_buffer, SP, "")
+    line_buffer = Replace(line_buffer, CR, "")
+    line_buffer = Replace(line_buffer, LF, "")
+
+    'find the position of the first comma in the line
+    position = InStr(1, line_buffer, ",", 2)
+
+    'if the line begins with das and contains a comma before the last character
+    If Left(line_buffer, 3) = "das" AND position > 0 AND position < Len(line_buffer) Then
+
+      'then isolate and normalize the das list using the form "das##:das##:"
+      das_list = Replace(Left(line_buffer, position - 1), "-", "") & ":"
+
+      'if this das is in the list then return the rest of the line
+      If InStr(1, das_list, this_das, 2) <> 0 Then Return line_buffer(1, 1, position + 1)
+    EndIf
+  Loop
+EndFunction 'getNextLine
+
+
+
+
+
+Function registerPort(port As String * 24) As Long
+  Dim params(2) As String
+  Dim tcp_addr As String
+  Dim tcp_port As Long
+  Dim comm_port As Long
+  Dim counter As Long
+
+  If port = "" Then Return 0
+
+  tcp_addr = ""
+  tcp_port = 0
+  comm_port = 0
+
+  'check for tcp device
+  If InStr(1, port, ":", 2) > 0 Then
+
+    If NOT CFG_TCP_ENABLE Then
+      cfg_reload_error = "Tcp device was specified but is not enabled"
+      Return 0
+    EndIf
+
+    'clear params array
+    For counter = 1 To ArrayLength(params)
+      params(counter) = ""
+    Next
+
+    SplitStr(params(), port, ":", 2, 5)
+    tcp_addr = params(1)
+    tcp_port = params(2)
+
+    'validate the tcp address and port
+    If Len(tcp_addr) < 7 OR Len(tcp_addr) > 15 OR tcp_port = NAN Then
+      cfg_reload_error = "Invalid tcp address or port specified"
+      Return 0
+    EndIf
+
+  'otherwise check for comm port
+  Else
+    Select Case Left(port, 4)
+    Case "com1"
+      #If DRAKER_PN = DL328
+        comm_port = COMRS232
+      #Else
+        comm_port = COM1
+      #EndIf
+    Case "com2"
+      comm_port = COM2
+    Case "com3"
+      comm_port = COM3
+    Case "com4"
+      comm_port = COM4
+    Else
+      cfg_reload_error = "Invalid port specified"
+      Return 0
+    EndSelect
+  EndIf
+
+  'check if port is already registered and if so return port num
+  If cfg_port_total > 0 Then
+    For counter = 1 To cfg_port_total
+      If comm_port > 0 AND cfg_ports(counter) = comm_port Then
+        Return counter
+      EndIf
+
+      #If CFG_TCP_ENABLE
+        If tcp_addr <> "" AND cfg_tcp_addr(counter) = tcp_addr AND cfg_tcp_port(counter) = tcp_port Then
+          Return counter
+        EndIf
+      #EndIf
+    Next
+  EndIf
+
+  'check number of ports defined, exit if all port slots are used
+  If cfg_port_total = CFG_PORT_MAX Then
+    cfg_reload_error = "Ran out of slots in port array"
+    Return 0
+  EndIf
+
+  'register port and return port num
+  cfg_port_total += 1
+  cfg_ports(cfg_port_total) = comm_port
+  #If CFG_TCP_ENABLE
+    cfg_tcp_addr(cfg_port_total) = tcp_addr
+    cfg_tcp_port(cfg_port_total) = tcp_port
+  #EndIf
+
+  Return cfg_port_total
+EndFunction 'registerPort
+
+
+
+
+
+Sub parseConfig(file As String * 64)
+  Dim file_handle As Long
+  Dim line_buffer As String * 128
+  Dim counter As Long
+
+  Dim params(10) As String * 32
+  Alias params(1) = prefix
+  Alias params(3) = type
+
+  Dim index As Long
+  Dim port_num As Long
+  Dim addr As Long
+  Dim include_device As Boolean
+
+  'clear device information and reset device total
+  If cfg_device_total > 0 Then
+    For counter = 1 To cfg_device_total
+      cfg_device_prefix(counter) = ""
+      cfg_device_index(counter) = 0
+      cfg_device_type(counter) = ""
+      cfg_device_port_num(counter) = 0
+      cfg_device_addr(counter) = 0
+      cfg_device_result(counter) = 0
+    Next
+    cfg_device_total = 0
+  EndIf
+
+  'close tcp socket if open and reset port information
+  If cfg_port_total > 0 Then
+    For counter = 1 To cfg_port_total
+      #If CFG_TCP_ENABLE
+        If cfg_ports(counter) > 100 Then TCPClose(cfg_ports(counter))
+        cfg_tcp_addr(counter) = ""
+        cfg_tcp_port(counter) = 0
+      #EndIf
+      cfg_ports(counter) = 0
+      cfg_port_busy(counter) = FALSE
+    Next
+    cfg_port_total = 0
+  EndIf
+
+  'clear the error message
+  cfg_reload_error = ""
+
+  '// COPY CONFIG PARSE INIT //////////////////////////////////////////////
+  'panel control
+  pnl_cfg_latitude = NAN
+  pnl_cfg_longitude = NAN
+  pnl_cfg_altitude = NAN
+
+  '// END /////////////////////////////////////////////////////////////////
+  'try to open config file
+  file_handle = FileOpen(file, "r", 0)
+  If file_handle = 0 Then
+    cfg_reload_error = "Config file missing"
+    ExitSub
+  EndIf
+
+  'check if config file version matches the parser version
+  If NOT compatibleConfigFile(file_handle) Then
+    FileClose(file_handle)
+    ExitSub
+  EndIf
+
+  'continue through the file, any devices before the version line will be ignored
+  Do While cfg_reload_error = ""
+
+    'get the next device, check if we have reached the end of the file
+    line_buffer = getNextLine(file_handle)
+    If line_buffer = "EOF" Then ExitDo
+
+    'clear params array
+    For counter = 1 To ArrayLength(params)
+      params(counter) = ""
+    Next
+
+    'parse the device parameters
+    SplitStr(params(), line_buffer, ",", 10, 5)
+
+    'store index and addr as long
+    index = params(2)
+    port_num = registerPort(params(4))
+    addr = params(5)
+
+    'check if an error occured
+    If cfg_reload_error <> "" Then ExitDo
+
+    'check that the index is valid
+    If index = NAN OR index < 1 Then
+      cfg_reload_error = "Invalid index for " & type
+      ExitDo
+    EndIf
+
+    'reset add device flag
+    include_device = FALSE
+
+    'prefix specific config
+    'Select Case prefix
+    'EndSelect
+
+    'type specific config
+    Select Case type
+    '// COPY CONFIG PARSE TYPE //////////////////////////////////////////////
+    'panel status
+    Case "sol_pos"
+      pnl_cfg_latitude = params(6)
+      pnl_cfg_longitude = params(7)
+      pnl_cfg_altitude = params(8)
+
+      If pnl_cfg_latitude = NAN OR pnl_cfg_latitude < -90 OR pnl_cfg_latitude > 90 Then
+        cfg_reload_error = "Invalid latitude value for " & type
+
+      ElseIf pnl_cfg_longitude = NAN OR pnl_cfg_longitude < -180 OR pnl_cfg_longitude > 360 Then
+        cfg_reload_error = "Invalid longitude value for " & type
+
+      ElseIf pnl_cfg_altitude = NAN OR pnl_cfg_altitude < -500 OR pnl_cfg_altitude > 9000 Then
+        cfg_reload_error = "Invalid altitude value for " & type
+      EndIf
+
+    '// END /////////////////////////////////////////////////////////////////
+    EndSelect
+
+    'check if device should be added
+    If include_device AND cfg_reload_error = "" Then
+
+      If port_num = 0 Then
+        cfg_reload_error = "No port given for " & type
+
+      ElseIf addr = NAN OR addr < 0 Then
+        cfg_reload_error = "Invalid address for " & type
+
+      ElseIf cfg_device_total = CFG_DEVICE_MAX Then
+        cfg_reload_error = "Ran out of slots in device array"
+
+      Else
+        cfg_device_total += 1
+        cfg_device_prefix(cfg_device_total) = prefix
+        cfg_device_index(cfg_device_total) = index
+        cfg_device_type(cfg_device_total) = type
+        cfg_device_port_num(cfg_device_total) = port_num
+        cfg_device_addr(cfg_device_total) = addr
+      EndIf
+    EndIf
+  Loop
+
+  'close the file before exiting
+  FileClose(file_handle)
+EndSub 'parseConfig
+'################################################
+
+
+
+
+
+'## Shutdown ####################################
+ShutDownBegin
+
+ShutDownEnd
+'################################################
+
+
+
+
+
+'## Main Program ################################
+BeginProg
+
+  readDrakerID()
+
+  Scan(CFG_SCAN_INTERVAL_MAIN, SEC, 3, 0)
+    'Populate the time_utc array with the current timestamp
+    RealTime(time_utc())
+
+    '// COPY SCAN ///////////////////////////////////////////////////////////
+    'panel control
+    If TimeIntoInterval(0, 60, SEC) Then
+
+      'update the sun state flags
+      checkDaytime()
+    EndIf
+
+    'set modem control port
+    #If PNL_CFG_MODEM_PORT > 0
+      'cell modem relay is normally closed
+      PortSet(PNL_CFG_MODEM_PORT, pnl_control_modem_disabled)
+    #EndIf
+
+    'set heater control port unless battery is low
+    #If PNL_CFG_SRS_HEATER
+      SW12(pnl_control_heater_timer > 0 AND Status.Battery > 12)
+    #EndIf
+
+    '// END /////////////////////////////////////////////////////////////////
+    CallTable(fifteenMin)
+
+    'used for testing
+    CallTable(panelControl)
+  NextScan
+
+
+
+
+
+  'slow scan for checking user input flags and maintaining tcp sockets if enabled
+  SlowSequence
+  Do While TRUE
+    Timer(3, MSEC, 2)
+
+    'check if the draker id file should be updated
+    If draker_das_name_save Then
+      writeDrakerID()
+      draker_das_name_save = FALSE
+
+      'set flag to reparse the config file
+      cfg_reload = TRUE
+    EndIf
+
+    'check if the draker id file should be backed up
+    If draker_id_backup Then
+      FileCopy("CPU:" & DRAKER_ID_FILE, "CPU:backup" & DRAKER_ID_FILE)
+      draker_id_backup = FALSE
+    EndIf
+
+    'check if config file needs to be reloaded
+    If cfg_reload Then
+      Call parseConfig("CPU:" & CFG_FILE)
+      cfg_reload = FALSE
+    EndIf
+
+
+    'panel control
+    If pnl_control_check_ntp Then
+      NetworkTimeProtocol(PNL_CFG_NTP_SERVER, 0, 1000)
+      pnl_control_check_ntp = FALSE
+    EndIf
+
+    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
+    cfg_scan_timer_util = Timer(3, MSEC, 4) * 0.001
+
+    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
+    cfg_scan_delay_util = (CFG_SCAN_INTERVAL_UTIL - cfg_scan_timer_util) * 1000
+
+    'only delay the scan if the calculated value is positive time
+    If cfg_scan_delay_util > 0 Then Delay(1, cfg_scan_delay_util, MSEC)
+  Loop
+  EndSequence
+
+EndProg
+'################################################
+
