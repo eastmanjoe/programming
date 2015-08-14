@@ -5,7 +5,7 @@
 '## Configuration ###############################
 PipeLineMode
 
-Const NUM_OF_IPS = 10
+' Const NUM_OF_IPS = 10
 
 'set interval time in seconds for each scan and slow sequence do/while loop
 Const CFG_SCAN_INTERVAL_MAIN = 6
@@ -69,75 +69,31 @@ Units cfg_scan_timer_clean = Sec
 Units cfg_scan_timer_dirty = Sec
 Units cfg_scan_timer_util = Sec
 
-' Units ping_response_time = msec
-
-'electro shark 200
-' Const MTR_TOTAL = 1
-' Const MTR_SHARK_200_BAUD = 9600
-' Const MTR_SHARK_200_TRIES = 1
-' Const MTR_SHARK_200_TIMEOUT = 100
-
-' Public shark_port As Long
-' Public mtr_comm_code(MTR_TOTAL) As Long
-
-' Public mtr_ac_voltage_an(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_bn(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_cn(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_ab(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_bc(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_ca(MTR_TOTAL) As Float
-' Public mtr_ac_current_a(MTR_TOTAL) As Float
-' Public mtr_ac_current_b(MTR_TOTAL) As Float
-' Public mtr_ac_current_c(MTR_TOTAL) As Float
-' Public mtr_ac_current_n(MTR_TOTAL) As Float
-' Public mtr_ac_power(MTR_TOTAL) As Float
-' Public mtr_ac_power_rcvd(MTR_TOTAL) As Float
-' Public mtr_ac_power_delv(MTR_TOTAL) As Float
-' Public mtr_ac_va(MTR_TOTAL) As Float
-' Public mtr_ac_vars(MTR_TOTAL) As Float
-' Public mtr_ac_pf(MTR_TOTAL) As Float
-' Public mtr_ac_freq(MTR_TOTAL) As Float
-
-' Public mtr_ac_energy_rcvd(MTR_TOTAL) As Float
-' Public mtr_ac_energy_delv(MTR_TOTAL) As Float
-' Public mtr_ac_energy_rcvd_raw(MTR_TOTAL) As Float
-' Public mtr_ac_energy_delv_raw(MTR_TOTAL) As Float
-' Public mtr_ac_energy_net(MTR_TOTAL) As Float
-' Public mtr_ac_energy_total(MTR_TOTAL) As Float
-' Public mtr_ac_va_hrs_total(MTR_TOTAL) As Float
-' Public mtr_ac_var_hrs_pos(MTR_TOTAL) As Float
-' Public mtr_ac_var_hrs_neg(MTR_TOTAL) As Float
-' Public mtr_ac_var_hrs_net(MTR_TOTAL) As Float
-' Public mtr_ac_var_hrs_total(MTR_TOTAL) As Float
-
-' Public mtr_ac_voltage_ab_angle(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_bc_angle(MTR_TOTAL) As Float
-' Public mtr_ac_voltage_ca_angle(MTR_TOTAL) As Float
-' Public mtr_ac_current_a_angle(MTR_TOTAL) As Float
-' Public mtr_ac_current_b_angle(MTR_TOTAL) As Float
-' Public mtr_ac_current_c_angle(MTR_TOTAL) As Float
-
-
 '## Functions ###################################
 Function parseIpInfo()
   Dim counter As Long
-  Public buffer_str As String * 42
-  Public line_buffer As String * 255
-  Public length_of_ipinfo As Long
+  Dim buffer_str As String * 42
+  Dim line_buffer As String * 255
+  Public array_length_ip_info As Long
 
-  Move(buffer_str, Len(buffer_str), "", 1)
+  array_length_ip_info = ArrayLength(ip_info)
 
-  length_of_ipinfo = ArrayLength(ip_info)
-  For counter = 1 To ArrayLength(ip_info)
-    Move(ip_info(counter), Len(ip_info(counter)), "", 1)
-  Next
+  ' Move(buffer_str, Len(buffer_str), "", 1)
+  Erase(buffer_str)
+  Erase(ip_info)
+
+  ' For counter = 1 To ArrayLength(ip_info)
+  ' For counter = 1 To array_length_ip_info
+    ' Move(ip_info(counter), Len(ip_info(counter)), "", 1)
+  ' Next
 
   'parse Status.IPInfo to get current settings
   line_buffer = LowerCase(Status.IPInfo)
   line_buffer = Replace(line_buffer, SP, "")
   line_buffer = Replace(line_buffer, CRLF, ",")
 
-  SplitStr(ip_info(), line_buffer, ",", ArrayLength(ip_info), 5)
+  ' SplitStr(ip_info(), line_buffer, ",", ArrayLength(ip_info), 5)
+  SplitStr(ip_info(), line_buffer, ",", array_length_ip_info, 5)
 
   #If LoggerType = CR1000 Then
     datalogger_ip = Status.IPAddressEth
@@ -160,148 +116,15 @@ Function parseIpInfo()
   Next
 
   datalogger_mac = buffer_str
+  datalogger_ipv6 = Right(datalogger_ipv6, Len(datalogger_ipv6) - InStr(1, datalogger_ipv6, ":", 2))
   datalogger_dns1 = Right(datalogger_dns1, Len(datalogger_dns1) - InStr(1, datalogger_dns1, ":", 2))
   datalogger_dns2 = Right(datalogger_dns2, Len(datalogger_dns2) - InStr(1, datalogger_dns2, ":", 2))
   datalogger_dns3 = Right(datalogger_dns3, Len(datalogger_dns3) - InStr(1, datalogger_dns3, ":", 2))
   'datalogger_dns4 = Right(datalogger_dns4, Len(datalogger_dns4) - InStr(1, datalogger_dns4, ":", 2))
 EndFunction 'parseIpInfo
 
-
-
-
-'base
-Function readDrakerID() As Boolean
-  Dim file_handle As Long
-  Dim line_buffer As String * 80
-  Public draker_id_length As Long
-
-  'try to open the draker id file, exit if file doesn't exist
-  file_handle = FileOpen("CPU:" & DRAKER_ID_FILE, "r", 0)
-  If file_handle = 0 Then Return FALSE
-
-  'if the file is not empty, parse the contents into the draker id array
-  If FileRead(file_handle, line_buffer, 80) > 0 Then
-    draker_id_length = ArrayLength(draker_id)
-    SplitStr(draker_id(), line_buffer, ",", ArrayLength(draker_id), 5)
-  EndIf
-
-  FileClose(file_handle)
-  Return TRUE
-EndFunction 'readDrakerID
-
-
-
-
-
-' Function PingDevice(ip_addr As String) As Float
-'   Const NUM_OF_PINGS = 10
-'   Dim ping_response_time As Float = 0
-'   Dim counter
-'   'ping_time_out is in milliseconds
-'   Dim ping_time_out As Long = 1000
-
-
-'   For counter = 1 To NUM_OF_PINGS
-'     ping_response_time += PingIP(ip_addr, ping_time_out)
-'   Next
-
-'   Return ping_response_time / NUM_OF_PINGS
-' EndFunction
-
-
-
-
-
-
-' 'electro shark 200
-' Function getElectroShark200(num As Long, port As Long, addr As Long) As Long
-'   Dim result_every(5) As Long
-
-'   Dim buffer_lng(9) As Long
-'   Dim buffer_flt(15) As Float
-'   Public result_every_length As Long
-
-'   Dim counter As Long
-
-'   result_every_length = ArrayLength(result_every)
-
-'   'reset the result codes
-'   For counter = 1 To ArrayLength(result_every)
-'   ' For counter = 1 To 5
-'     result_every(counter) = 0
-'   Next
-
-'   'query! instantaneous voltage, current, power, vars, power factor and frequency
-'   ModBusMaster(result_every(1), port, MTR_SHARK_200_BAUD, addr, 3, buffer_flt(1), 1000 - 1, 15, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT)
-'     mtr_ac_voltage_an(num) = buffer_flt(1)
-'     mtr_ac_voltage_bn(num) = buffer_flt(2)
-'     mtr_ac_voltage_cn(num) = buffer_flt(3)
-'     mtr_ac_voltage_ab(num) = buffer_flt(4)
-'     mtr_ac_voltage_bc(num) = buffer_flt(5)
-'     mtr_ac_voltage_ca(num) = buffer_flt(6)
-'     mtr_ac_current_a(num) = buffer_flt(7)
-'     mtr_ac_current_b(num) = buffer_flt(8)
-'     mtr_ac_current_c(num) = buffer_flt(9)
-'     mtr_ac_power(num) = buffer_flt(10)
-'     mtr_ac_power_rcvd(num) = IIf(buffer_flt(10) < 0, Abs(buffer_flt(10)), 0)
-'     mtr_ac_power_delv(num) = IIf(buffer_flt(10) > 0, Abs(buffer_flt(10)), 0)
-'     mtr_ac_vars(num) = buffer_flt(11)
-'     mtr_ac_va(num) = buffer_flt(12)
-'     mtr_ac_pf(num) = buffer_flt(13)
-'     mtr_ac_freq(num) = buffer_flt(14)
-'     mtr_ac_current_n(num) = buffer_flt(15)
-
-
-'   'query energy
-'   ModBusMaster(result_every(2), port, MTR_SHARK_200_BAUD, addr, 3, buffer_lng(1), -1500, 9, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT, 2)
-'     mtr_ac_energy_rcvd_raw(num) = buffer_lng(1)
-'     mtr_ac_energy_delv_raw(num) = buffer_lng(2)
-
-'     mtr_ac_energy_net(num) = buffer_lng(3)
-'     mtr_ac_energy_total(num) = buffer_lng(4)
-'     mtr_ac_var_hrs_pos(num) = buffer_lng(5)
-'     mtr_ac_var_hrs_neg(num) = buffer_lng(6)
-'     mtr_ac_var_hrs_net(num) = buffer_lng(7)
-'     mtr_ac_var_hrs_total(num) = buffer_lng(8)
-'     mtr_ac_va_hrs_total(num) = buffer_lng(9)
-
-'   'query voltage and current phase angles
-'   ModBusMaster(result_every(3), port, MTR_SHARK_200_BAUD, addr, 3, buffer_lng(1), 4100, 6, MTR_SHARK_200_TRIES, MTR_SHARK_200_TIMEOUT, 1)
-'     mtr_ac_current_a_angle(num) = buffer_lng(1) * 0.1
-'     mtr_ac_current_b_angle(num) = buffer_lng(2) * 0.1
-'     mtr_ac_current_c_angle(num) = buffer_lng(3) * 0.1
-'     mtr_ac_voltage_ab_angle(num) = buffer_lng(4) * 0.1
-'     mtr_ac_voltage_bc_angle(num) = buffer_lng(5) * 0.1
-'     mtr_ac_voltage_ca_angle(num) = buffer_lng(6) * 0.1
-
-'   'use instantaneous measurement query as indicator for comm code
-'   If result_every(1) = 0 Then
-'     mtr_comm_code(num) = 0
-
-'   ElseIf result_every(1) < 0 Then
-'     mtr_comm_code(num) = result_every(1)
-
-'   Else
-'     'only increment comm code if it hadn't been negative
-'     If mtr_comm_code(num) >= 0 Then
-'       mtr_comm_code(num) += 1
-'     Else
-'       mtr_comm_code(num) = 1
-'     EndIf
-'   EndIf
-
-'   Return mtr_comm_code(num)
-' EndFunction 'getElectroShark200
-
-
-
-
-
 '## Shutdown ####################################
 ShutDownBegin
-
-  'base
-  ' If shark_port > 100 Then TCPClose(shark_port)
 
 ShutDownEnd
 
@@ -319,93 +142,4 @@ BeginProg
     RealTime(time_utc())
 
   NextScan
-
-
-
-
-  SlowSequence
-  Do While TRUE
-    Timer(1, MSEC, 2)
-
-    ' If shark_port > 100 Then getElectroShark200(1, shark_port, 1)
-
-    ' If cfg_device_total > 0 Then
-    '   For cfg_counter_clean = 1 To cfg_device_total
-    '     If draker_das_name_save OR cfg_reload Then ExitFor
-
-    '     'only call devices that have clean communications
-    '     If cfg_device_result(cfg_counter_clean) = 0 Then
-
-    '       'report which device is being called
-    '       cfg_device_current_clean = cfg_device_type(cfg_counter_clean) & ":" & cfg_device_index(cfg_counter_clean)
-
-    '       'call the device, don't wait if port is busy
-    '       callDevice(cfg_counter_clean, TRUE)
-
-    '       cfg_device_current_clean = ""
-    '     EndIf
-    '   Next
-    ' EndIf
-
-    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
-    cfg_scan_timer_clean = Timer(1, MSEC, 4) * 0.001
-
-    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
-    cfg_scan_delay_clean = (CFG_SCAN_INTERVAL_CLEAN - cfg_scan_timer_clean) * 1000
-
-    'only delay the scan if the calculated value is positive time
-    If cfg_scan_delay_clean > 0 Then Delay(1, cfg_scan_delay_clean, MSEC)
-  Loop
-  EndSequence
-
-
-
-
-  SlowSequence
-  Do While TRUE
-    Timer(2, MSEC, 2)
-
-    ' If shark_port < 100 Then shark_port = TCPOpen("10.11.50.56", 502, 1, 1000, shark_port, 1)
-
-    ' ip_addr_array_length = ArrayLength(ip_addr)
-    ' ping_response_array_length = ArrayLength(ping_response_time)
-
-    ' For cfg_counter_main = 1 to ArrayLength(ping_response_time)
-    ' For cfg_counter_dirty = 1 to NUM_OF_IPS
-    '   ping_response_time = 0
-    ' Next
-
-    ' For cfg_counter_dirty = 1 to ArrayLength(ip_addr)
-    ' For cfg_counter_dirty = 1 to NUM_OF_IPS
-    '   ping_response_time(cfg_counter_dirty) = PingDevice(ip_addr(cfg_counter_dirty))
-    ' Next
-
-    ' If cfg_device_total > 0 Then
-    '   For cfg_counter_dirty = 1 To cfg_device_total
-    '     If draker_das_name_save OR cfg_reload Then ExitFor
-
-    '     'only call devices that have dirty communications
-    '     If cfg_device_result(cfg_counter_dirty) <> 0 Then
-
-    '       'report which device is being called
-    '       cfg_device_current_dirty = cfg_device_type(cfg_counter_dirty) & ":" & cfg_device_index(cfg_counter_dirty)
-
-    '       'call the device, wait if port is busy
-    '       callDevice(cfg_counter_dirty, FALSE)
-
-    '       cfg_device_current_dirty = ""
-    '     EndIf
-    '   Next
-    ' EndIf
-
-    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
-    cfg_scan_timer_dirty = Timer(2, MSEC, 4) * 0.001
-
-    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
-    cfg_scan_delay_dirty = (CFG_SCAN_INTERVAL_DIRTY - cfg_scan_timer_dirty) * 1000
-
-    'only delay the scan if the calculated value is positive time
-    If cfg_scan_delay_dirty > 0 Then Delay(1, cfg_scan_delay_dirty, MSEC)
-  Loop
-  EndSequence
 EndProg
