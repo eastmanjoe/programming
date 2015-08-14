@@ -21,27 +21,30 @@ elif [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
 
     install apt-cyg /bin
 
-    apt-cyg bash-completion cygutils gcc-g++ git git-completion git-gui \
-            inetutils libsqlite3-devel libxml2-devel libxslt-devel make \
-            mintty nano ncurses openssh patch ping rxvt screen util-linux wget
+    apt-cyg install wget
 
-    apt-cyg openssl openssl-devel libyaml-devel sqlite3 libtool autoconf \
-            automake bison m4 mingw64-i686-gcc mingw64-x86_64-gcc readline
+    apt-cyg install bash-completion cygutils git git-completion git-gui \
+            inetutils libsqlite3-devel libxml2-devel libxslt-devel make \
+            mintty nano ncurses openssh ping rxvt screen util-linux
+
+    apt-cyg install openssl
 
     #setup python
-    ln -sf /cygdrive/c/Python27/python.exe /usr/bin/python
-    ln -s /cygdrive/c/Python27/mkvirtualenv.bat /usr/bin/mkvirtualenv
-    ln -s /cygdrive/c/Python27/lsvirtualenv.bat /usr/bin/lsvirtualenv
-    ln -s /cygdrive/c/Python27/rmvirtualenv.bat /usr/bin/rmvirtualenv
-    ln -s /cygdrive/c/Python27/workon.bat /usr/bin/workon
-    ln -s /cygdrive/c/Python27/deactivate.bat /usr/bin/deactivate
-    ln -s /cygdrive/c/Python27/add2virtualenv.bat /usr/bin/add2virtualenv
+    # ln -sf /cygdrive/c/Python27/python.exe /usr/bin/python
+    # ln -s /cygdrive/c/Python27/mkvirtualenv.bat /usr/bin/mkvirtualenv
+    # ln -s /cygdrive/c/Python27/lsvirtualenv.bat /usr/bin/lsvirtualenv
+    # ln -s /cygdrive/c/Python27/rmvirtualenv.bat /usr/bin/rmvirtualenv
+    # ln -s /cygdrive/c/Python27/workon.bat /usr/bin/workon
+    # ln -s /cygdrive/c/Python27/deactivate.bat /usr/bin/deactivate
+    # ln -s /cygdrive/c/Python27/add2virtualenv.bat /usr/bin/add2virtualenv
 
+    # RVM requirements
+    apt-cyg install patch openssl-devel libyaml-devel libyaml0_2 sqlite3 gcc-g++ \
+                    gcc-core mingw64-i686-gcc-g++ mingw64-x86_64-gcc-g++ bison \
+                    automake m4 autoconf libtool cygwin32-readline zlib-devel
 
     # install ruby
-    curl -#L https://get.rvm.io | bash -s stable --autolibs=3 --ruby=1.9.3
-
-
+    curl -#L https://get.rvm.io | bash -s stable --autolibs=3 --ruby=1.9.3 --auto-dotfiles
 
     # # set PATH to use windows python instead of cygwin python
     # # PYTHON_DIR="/cygdrive/c/Python27"
