@@ -1,7 +1,5 @@
 '################################################
-'Property of Draker Laboratories
-'
-' Test Description
+' Test Program to change the network settings via the WebAPI and public variables
 '
 '################################################
 
@@ -29,7 +27,7 @@
 'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
 '################################################
 
-Public test_ver As String = "4.01.00"
+Public test_ver As String = "4.04.00"
 
 
 '## Configuration ###############################
@@ -48,10 +46,10 @@ Const QN = Chr(34)
 Include "CPU:network_settings.dld"
 
 Public pnl_network_settings_error As String * 1024
-Dim ip_info(8) As String * 32
-Alias ip_info = datalogger_mac, datalogger_ip, datalogger_netmask, _
-  datalogger_gateway, datalogger_dns1, datalogger_dns2, datalogger_dns3, _
-  datalogger_dns4
+Public ip_info_params(9) As String * 42
+Alias ip_info_params = datalogger_default_network, datalogger_mac, datalogger_ip, _
+  datalogger_netmask, datalogger_gateway, datalogger_ipv6, datalogger_dns1, _
+  datalogger_dns2, datalogger_dns3
 Dim counter As Long
 
 '################################################
@@ -69,21 +67,20 @@ Dim counter As Long
 '## Functions ###################################
 Function parseIpInfo()
   Dim counter As Long
-  Dim buffer_str As String * 32
-  Dim line_buffer As String * 200
+  Dim buffer_str As String * 42
+  Dim line_buffer As String * 255
 
-  Move(buffer_str, Len(buffer_str), "", 1)
+  Erase(buffer_str)
+  Erase(ip_info_params)
 
-  For counter = 1 to ArrayLength(ip_info)
-    Move(ip_info(counter), Len(ip_info(counter)), "", 1)
-  Next
-
-  'parse Status.IPInfo to get current settings
-  line_buffer = LowerCase(Status.IPInfo)
+  'parse IPInfo() to get current settings
+  line_buffer = LowerCase(IPInfo(cfg_datalogger_interface, 0))
   line_buffer = Replace(line_buffer, SP, "")
   line_buffer = Replace(line_buffer, CRLF, ",")
 
-  SplitStr(ip_info(), line_buffer, ",", ArrayLength(ip_info), 5)
+  'ISSUE - ip_info_params
+  SplitStr(ip_info_params(), line_buffer, ",", ArrayLength(ip_info_params), 5)
+  ' SplitStr(ip_info_params(), line_buffer, ",", 9, 5)
 
   #If LoggerType = CR1000 Then
     datalogger_ip = Status.IPAddressEth
@@ -106,10 +103,11 @@ Function parseIpInfo()
   Next
 
   datalogger_mac = buffer_str
+  datalogger_ipv6 = Right(datalogger_ipv6, Len(datalogger_ipv6) - InStr(1, datalogger_ipv6, ":", 2))
   datalogger_dns1 = Right(datalogger_dns1, Len(datalogger_dns1) - InStr(1, datalogger_dns1, ":", 2))
   datalogger_dns2 = Right(datalogger_dns2, Len(datalogger_dns2) - InStr(1, datalogger_dns2, ":", 2))
   datalogger_dns3 = Right(datalogger_dns3, Len(datalogger_dns3) - InStr(1, datalogger_dns3, ":", 2))
-  datalogger_dns4 = Right(datalogger_dns4, Len(datalogger_dns4) - InStr(1, datalogger_dns4, ":", 2))
+  'datalogger_dns4 = Right(datalogger_dns4, Len(datalogger_dns4) - InStr(1, datalogger_dns4, ":", 2))
 EndFunction 'parseIpInfo
 
 
@@ -233,7 +231,7 @@ Function setNetworkSettings(ip_addr As String * 24, netmask As String * 24, _
     EndIf
   EndIf
 
-  SetStatus("Domain Name Server", DNS1_ADDRESS)
+  SetStatus("DNS(1)", DNS1_ADDRESS)
 
   Return TRUE
 EndFunction 'setNetworkSettings
@@ -242,6 +240,12 @@ EndFunction 'setNetworkSettings
 
 '## Main Program ################################
 BeginProg
+  If LoggerType = CR800 Then
+    cfg_datalogger_interface = 2
+  ElseIf LoggerType = CR1000 Then
+    cfg_datalogger_interface = 0
+  EndIf
+
   parseIpInfo()
 
   If pnl_cfg_change_network_settings Then
