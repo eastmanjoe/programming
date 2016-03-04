@@ -198,9 +198,9 @@ Function setNetworkSettings(ip_addr As String * 24, netmask As String * 24, _
 
   If StrComp(datalogger_ip, ip_addr) <> 0 Then
     #If LoggerType = CR1000
-      SetStatus("IPAddressEth", ip_addr)
+      SetSetting("IPAddressEth", ip_addr)
     #ElseIf LoggerType = CR800
-      SetStatus("IPAddressCSIO(1)", ip_addr)
+      SetSetting("IPAddressCSIO(1)", ip_addr)
     #EndIf
 
   EndIf
@@ -216,22 +216,22 @@ Function setNetworkSettings(ip_addr As String * 24, netmask As String * 24, _
 
     If StrComp(datalogger_netmask, netmask) <> 0 Then
       #If LoggerType = CR1000
-        SetStatus("IPMaskEth", netmask)
+        SetSetting("IPMaskEth", netmask)
       #ElseIf LoggerType = CR800
-        SetStatus("IPMaskCSIO(1)", netmask)
+        SetSetting("IPMaskCSIO(1)", netmask)
       #EndIf
     EndIf
 
     If StrComp(datalogger_gateway, gateway) <> 0 Then
       #If LoggerType = CR1000
-        SetStatus("IPGateway", gateway)
+        SetSetting("IPGateway", gateway)
       #ElseIf LoggerType = CR800
-        SetStatus("IPGatewayCSIO(1)", gateway)
+        SetSetting("IPGatewayCSIO(1)", gateway)
       #EndIf
     EndIf
   EndIf
 
-  SetStatus("DNS(1)", DNS1_ADDRESS)
+  SetSetting("DNS(1)", DNS1_ADDRESS)
 
   Return TRUE
 EndFunction 'setNetworkSettings
