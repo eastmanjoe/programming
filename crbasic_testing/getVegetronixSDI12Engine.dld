@@ -1,7 +1,5 @@
 '################################################
-'Property of Draker Laboratories
-'
-' Test Description
+' Test code to get data from the Vegetronix SDI12 engine
 '
 '################################################
 
@@ -30,13 +28,6 @@ Alias vegtronix_data(4) = vegtronix_tempsensor
 '################################################
 
 '## Data Tables #################################
-' DataTable(fifteenMin, TRUE, -1)
-'   DataInterval(0, 15, MIN, 0)
-'   #If LoggerType = CR1000
-'   CardOut(0, -1)
-'   #EndIf
-
-' EndTable 'fifteenMin
 '################################################
 
 '## Functions ###################################

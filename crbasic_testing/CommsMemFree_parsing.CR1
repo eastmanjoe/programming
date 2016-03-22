@@ -1,61 +1,13 @@
 '################################################
-'Property of Draker Laboratories
-'################################################
-
-'// PREFIX CORE /////////////////////////////////////////////////////////
 
 '## Description #################################
-'The core component handles monitoring the datalogger itself.
-'This includes panel temp, battery voltage, and status variables.
+'Test code to parse CommsMemFree in Status Table
 '
-'Components:
-'// COPY DESCRIPTION ////////////////////////////////////////////////////
-'  core
-'// END /////////////////////////////////////////////////////////////////
-'################################################
-
-
-'## Change Log ##################################
-'2011-09-14 ITM [v4.01.00] Updated to new template, moved slow scan total into core.
-'2011-07-05 JHE [v4.03] Changed # records for dataloggerStatus table from auto-fill to fixed at 2000
-'2011-06-15 ITM [v4.02] Updated to daft tags.
-'2011-05-11 ITM [v4.01] Updated the draker version naming scheme.
-'2011-05-11 ITM [v4.00] Fixed cardout to only work on cr1000, updated core variable names, fixed status logic.
-'
-'Note: Add changes to the top of the list, using the format:
-'YYYY-MM-DD JQP [vM.mm.pp] Made this change and that change
-'################################################
-
-
-'## Versions ####################################
-Public draker_base_ver As String * 7 = "4.01.00"
-'// COPY VERSION ////////////////////////////////////////////////////////
-Public draker_core_ver As String * 7 = "4.01.00"
-'// END /////////////////////////////////////////////////////////////////
 '################################################
 
 
 '## Configuration ###############################
 PipeLineMode
-
-Const NOT_USED = 0
-Const CUSTOM = 1
-Const DL202 = 2
-Const DL208 = 3
-Const DL242 = 4
-Const DL264 = 5
-Const PROSPECTOR = 6
-
-Const DRAKER_PN = DL202
-
-'// COPY CONFIG /////////////////////////////////////////////////////////
-'################################################
-'core
-Const CORE_SLOW_SCAN_TOTAL = 1
-
-'// END /////////////////////////////////////////////////////////////////
-'################################################
-
 
 '## Declarations ################################
 Const FREQ_REJECTION = _60HZ
@@ -63,12 +15,9 @@ Const CR = CHR(13)
 Const LF = CHR(10)
 Const CRLF = CHR(13) & CHR(10)
 
-'// COPY DECLARATION ////////////////////////////////////////////////////
 '################################################
-'core
-Public core_status As Long = 0
-Public core_panel_temp As Float
-Public core_bat_voltage As Float
+Public panel_temp As Float
+Public bat_voltage As Float
 Dim core_last_status As Long
 
 Public cmf_01(10) As Long
@@ -92,26 +41,15 @@ Alias cmf_03(4) = cmf_03_big_que_free
 Alias cmf_03(5) = cmf_03_rx_que
 Alias cmf_03(6) = cmf_03_tx_que
 
-Units core_panel_temp = C
-Units core_bat_voltage = Vdc
-
-'// END /////////////////////////////////////////////////////////////////
-'################################################
-
-
-'## Data Tables #################################
-
-'################################################
-
-
-'## Display Tables ##############################
+Units panel_temp = C
+Units bat_voltage = Vdc
 
 '################################################
 
 
 '## Functions ###################################
-'// COPY FUNCTION ///////////////////////////////////////////////////////
 Function parseCommsMemFree()
+' test parameters to verify the parsing is working
 ' Function parseCommsMemFree(commmemfree01 As Long, commmemfree03 As Long)
   Dim buffer_lng As Long
 
@@ -130,6 +68,8 @@ Function parseCommsMemFree()
 
   'Convert CommsMemFree(1) to a string
   buffer_lng = Status.CommsMemFree(1)
+
+  ' test parameters to verify the parsing is working
   ' buffer_lng = commmemfree01
 
   cmf_01_tny_free = buffer_lng MOD 100
@@ -147,6 +87,7 @@ Function parseCommsMemFree()
   cmf_02_keep_used = Status.CommsMemFree(2)
 
   buffer_lng = Status.CommsMemFree(3)
+    ' test parameters to verify the parsing is working
   ' buffer_lng = commmemfree03
 
   cmf_03_lil_que_free = buffer_lng MOD 100
@@ -158,16 +99,16 @@ Function parseCommsMemFree()
   cmf_03_big_que_used = cmf_03_big_ip_que_reset - cmf_03_big_que_free
 
 EndFunction 'parseCommsMemFree
-'// END /////////////////////////////////////////////////////////////////
 '################################################
 
 
 '## Main Program ################################
 BeginProg
   Scan(6, SEC, 3, 0)
-    PanelTemp(core_panel_temp, FREQ_REJECTION)
-    Battery(core_bat_voltage)
+    PanelTemp(panel_temp, FREQ_REJECTION)
+    Battery(bat_voltage)
 
+    ' test parameters to verify the parsing is working
     ' parseCommsMemFree(228968437, 21428)
     parseCommsMemFree()
   NextScan
