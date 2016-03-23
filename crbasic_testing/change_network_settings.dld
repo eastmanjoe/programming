@@ -168,7 +168,7 @@ Function parseIpInfo()
 
   ' build the datalogger_ipinfo to match the Status.IPInfo field of OS26
   ' "eth MAC: 00d02c044e5b\r\neth IP: 10.11.40.23\r\neth mask: 255.255.0.0\r\neth gw: 10.11.1.1\r\ndns: 0.0.0.8\r\ndns: 10.11.10.11\r\n"
-  datalogger_ipinfo = "eth MAC: " + datalogger_mac + CRLF
+  datalogger_ipinfo = "eth MAC: " + Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2)) + CRLF
   datalogger_ipinfo += "eth IP: " + datalogger_ip + CRLF
   datalogger_ipinfo += "eth mask: " + datalogger_netmask + CRLF
   datalogger_ipinfo += "eth gw: " + datalogger_gateway + CRLF
