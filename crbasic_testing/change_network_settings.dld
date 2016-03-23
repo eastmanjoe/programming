@@ -44,6 +44,7 @@
 'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
 'http://166.161.64.248/?command=setvalueex&uri=dl:public.pnl_logger_gateway&value=10.11.1.1&format=json
 
+' As of OS28 the default auto-IP Address is: 169.254.67.85
 '################################################
 
 Public test_ver As String = "5.05.00"
@@ -61,12 +62,13 @@ Const CR = Chr(13)
 Const LF = Chr(10)
 Const CRLF = CR & LF
 Const QN = Chr(34)
+Const NULL = Chr(00)
 
 Public pnl_network_settings_error As String * 1024
-Public ip_info(9) As String * 42
+Public ip_info(8) As String * 42
 Alias ip_info = datalogger_default_network, datalogger_mac, datalogger_ip, _
   datalogger_netmask, datalogger_gateway, datalogger_ipv6, datalogger_dns1, _
-  datalogger_dns2, datalogger_dns3
+  datalogger_dns2
 Public datalogger_ipinfo As String * 256
 Public cfg_datalogger_interface As Long
 Dim counter As Long
@@ -75,17 +77,19 @@ Public pnl_cfg_change_network_settings As Boolean = FALSE
 Public pnl_logger_ip As String * 32 = ""
 Public pnl_logger_netmask As String * 32 = ""
 Public pnl_logger_gateway As String * 32 = ""
-Public pnl_logger_dns1 As String * 32 = ""
+Public pnl_logger_dns1 As String * 32 = "8.8.8.8"
 Public pnl_logger_dns2 As String * 32 = ""
 
 ConstTable(NETWORK_SETTINGS)
   Const CHANGE_NETWORK_SETTINGS = FALSE
-  Const IP_ADDRESS = ""
-  Const NETMASK = ""
-  Const GATEWAY = ""
-  Const DNS1_ADDRESS = "8.8.8.8"
-  Const DNS2_ADDRESS = ""
+  Const IP_ADDRESS = "169.254.67.85"
+  Const NETMASK = "255.255.255.0"
+  Const GATEWAY = "0.0.0.0"
+  Const DNS1_ADDRESS = "8.8.4.4"
+  Const DNS2_ADDRESS = "8.8.8.8"
 EndConstTable
+
+Public debug As String * 1024
 
 '################################################
 
@@ -104,19 +108,21 @@ Function parseIpInfo()
   Dim counter As Long
   Dim buffer_str As String * 256
   Dim line_buffer As String * 200
-  Dim buffer_ip_info(9) As String * 42
+  Dim buffer_ip_info(6) As String * 42
 
   Erase(buffer_str)
   Erase(line_buffer)
 
   'parse Status.EthernetInfo to get current settings
-  datalogger_ipinfo = Status.EthernetInfo
+  buffer_str = Status.EthernetInfo
 
-  line_buffer = LowerCase(datalogger_ipinfo)
+  line_buffer = LowerCase(buffer_str)
   line_buffer = Replace(line_buffer, SP, "")
   line_buffer = Replace(line_buffer, CRLF, ",")
 
   SplitStr(buffer_ip_info(), line_buffer, ",", ArrayLength(buffer_ip_info), 5)
+
+  Erase(buffer_str)
 
   ' capture only the mac address
   buffer_str = Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2))
@@ -133,20 +139,41 @@ Function parseIpInfo()
   Next
 
   ' capture the ipv6 address
-  datalogger_ipv6 = Right(buffer_ip_info(6), Len(buffer_ip_info(6)) - InStr(1, buffer_ip_info(6), ":", 2))
+  datalogger_ipv6 = UpperCase(Right(buffer_ip_info(6), Len(buffer_ip_info(6)) - InStr(1, buffer_ip_info(6), ":", 2)))
 
   #If LoggerType = CR1000 Then
     datalogger_ip = Status.IPAddressEth
-    datalogger_netmask = Status.IPMaskEth
-    datalogger_gateway = Status.IPGateway
   #ElseIf LoggerType = CR800 Then
     datalogger_ip = Status.IPAddressCSIO(1)
-    datalogger_netmask = Status.IPMaskCSIO(1)
-    datalogger_gateway = Status.IPGatewayCSIO(1)
   #EndIf
 
-  datalogger_dns1 = Status.DNS(1)
-  datalogger_dns2 = Status.DNS(2)
+  If datalogger_ip <> "0.0.0.0" Then
+    #If LoggerType = CR1000 Then
+      datalogger_netmask = Status.IPMaskEth
+      datalogger_gateway = Status.IPGateway
+    #ElseIf LoggerType = CR800 Then
+      datalogger_netmask = Status.IPMaskCSIO(1)
+      datalogger_gateway = Status.IPGatewayCSIO(1)
+    #EndIf
+
+    datalogger_dns1 = Status.DNS(1)
+    datalogger_dns2 = Status.DNS(2)
+  Else
+    datalogger_netmask = "0.0.0.0"
+    datalogger_gateway = "0.0.0.0"
+    datalogger_dns1 = "0.0.0.0"
+    datalogger_dns2 = "0.0.0.0"
+  EndIf
+
+
+  ' build the datalogger_ipinfo to match the Status.IPInfo field of OS26
+  ' "eth MAC: 00d02c044e5b\r\neth IP: 10.11.40.23\r\neth mask: 255.255.0.0\r\neth gw: 10.11.1.1\r\ndns: 0.0.0.8\r\ndns: 10.11.10.11\r\n"
+  datalogger_ipinfo = "eth MAC: " + datalogger_mac + CRLF
+  datalogger_ipinfo += "eth IP: " + datalogger_ip + CRLF
+  datalogger_ipinfo += "eth mask: " + datalogger_netmask + CRLF
+  datalogger_ipinfo += "eth gw: " + datalogger_gateway + CRLF
+  datalogger_ipinfo += "dns: " + datalogger_dns1 + CRLF
+  datalogger_ipinfo += "dns: " + datalogger_dns2 + CRLF
 
 EndFunction 'parseIpInfo
 
@@ -154,16 +181,18 @@ EndFunction 'parseIpInfo
 
 
 
-Function checkIpFormat(type As String * 24, ip_string As String * 24) As String * 1024
+Function checkIpFormat(type As String * 24, ip_string As String * 24) As Boolean
   Dim buffer_str(4) As String * 3
   Dim counter As Long
   Dim chr_counter As Long
 
   If ip_string = "" Then
-    Return type & " is missing"
+    pnl_network_settings_error = type & " is missing"
+    Return FALSE
 
   ElseIf Len(ip_string) > 15 Then
-    Return type & " contains too many characters"
+    pnl_network_settings_error = type & " contains too many characters"
+    Return FALSE
 
   Else
     'check for valid ip address format
@@ -171,70 +200,77 @@ Function checkIpFormat(type As String * 24, ip_string As String * 24) As String 
 
     For counter = 1 To 4
       If buffer_str(counter) = "" Then
-        Return type & " is missing octet number: " & counter
+        pnl_network_settings_error = type & " is missing octet number: " & counter
+        Return FALSE
       EndIf
 
       If Len(buffer_str(counter)) > 3 Then
-        Return type & " has too many characters in octet number: " & counter
+        pnl_network_settings_error = type & " has too many characters in octet number: " & counter
+        Return FALSE
       EndIf
 
       For chr_counter = 1 To Len(buffer_str(counter))
         If ASCII(buffer_str(counter, 1, chr_counter)) < 48 OR ASCII(buffer_str(counter, 1, chr_counter)) > 57 Then
-          Return type & " contains illegal character in octet number: " & counter
+          pnl_network_settings_error = type & " contains illegal character in octet number: " & counter
+          Return FALSE
         EndIf
       Next
     Next
   EndIf
 
-  Return ""
-EndFunction 'checkIpFormat
-
-
-
-
-
-Function setNetworkSettings()
-  #If LoggerType = CR1000
-    SetSetting("IPAddressEth", IP_ADDRESS)
-  #ElseIf LoggerType = CR800
-    SetSetting("IPAddressCSIO(1)", IP_ADDRESS)
-  #EndIf
-
-  'if setting to DHCP, set the default DNS addresses and skip setting the other network settings
-  If IP_ADDRESS <> "0.0.0.0" Then
-    #If LoggerType = CR1000
-      SetSetting("IPMaskEth", NETMASK)
-    #ElseIf LoggerType = CR800
-      SetSetting("IPMaskCSIO(1)", NETMASK)
-    #EndIf
-
-    #If LoggerType = CR1000
-      SetSetting("IPGateway", GATEWAY)
-    #ElseIf LoggerType = CR800
-      SetSetting("IPGatewayCSIO(1)", GATEWAY)
-    #EndIf
-  EndIf
-
-  SetSetting("DNS(1)", DNS1_ADDRESS)
-  SetSetting("DNS(2)", DNS2_ADDRESS)
+  debug += type & " is valid; "
 
   Return TRUE
-EndFunction 'setNetworkSettings
+EndFunction 'checkIpFormat
 '################################################
 
 
 '## Main Program ################################
+ApplyandRestartSequence
+  SetSetting("NETWORK_SETTINGS.ApplyAndRestart", 1)
+EndApplyandRestartSequence
+
+
+
 BeginProg
+    debug = "Program Starting" + CRLF
+
   If CHANGE_NETWORK_SETTINGS Then
-    setNetworkSettings()
+    debug += "Changing Settings" + CRLF
+    #If LoggerType = CR1000
+      SetSetting("IPAddressEth", IP_ADDRESS)
+    #ElseIf LoggerType = CR800
+      SetSetting("IPAddressCSIO(1)", IP_ADDRESS)
+    #EndIf
+
+    'if setting to DHCP, skip setting the other network settings
+    If IP_ADDRESS <> "0.0.0.0" Then
+      #If LoggerType = CR1000
+        SetSetting("IPMaskEth", NETMASK)
+      #ElseIf LoggerType = CR800
+        SetSetting("IPMaskCSIO(1)", NETMASK)
+      #EndIf
+
+      #If LoggerType = CR1000
+        SetSetting("IPGateway", GATEWAY)
+      #ElseIf LoggerType = CR800
+        SetSetting("IPGatewayCSIO(1)", GATEWAY)
+      #EndIf
+
+      SetSetting("DNS(2)", DNS2_ADDRESS)
+    EndIf
 
     SetSetting("NETWORK_SETTINGS.CHANGE_NETWORK_SETTINGS", FALSE)
-    SetSetting("NETWORK_SETTINGS.IP_ADDRESS", "")
-    SetSetting("NETWORK_SETTINGS.NETMASK", "")
-    SetSetting("NETWORK_SETTINGS.GATEWAY", "")
-    SetSetting("NETWORK_SETTINGS.DNS2_ADDRESS", "")
+    SetSetting("NETWORK_SETTINGS.IP_ADDRESS", "169.254.67.85")
+    SetSetting("NETWORK_SETTINGS.NETMASK", "255.255.255.0")
+    SetSetting("NETWORK_SETTINGS.GATEWAY", "0.0.0.0")
+    SetSetting("NETWORK_SETTINGS.DNS2_ADDRESS", "8.8.4.4")
     SetSetting("NETWORK_SETTINGS.ApplyAndRestart", TRUE)
   EndIf
+
+  SetSetting("DNS(1)", DNS1_ADDRESS)
+  SetSetting("FTPEnabled", FALSE)
+  SetSetting("TelnetEnabled", FALSE)
 
   If LoggerType = CR800 Then
     cfg_datalogger_interface = 2
@@ -245,26 +281,44 @@ BeginProg
   parseIpInfo()
 
 
+  debug = "Scan Starting" + CRLF
   Scan (30,Sec,3,0)
 
     parseIpInfo()
 
+    ' update the consttable
     If pnl_cfg_change_network_settings Then
+
       Erase(pnl_network_settings_error)
+      Erase(debug)
 
-      ' update the consttable
-      SetSetting("NETWORK_SETTINGS.CHANGE_NETWORK_SETTINGS", TRUE)
-      SetSetting("NETWORK_SETTINGS.IP_ADDRESS", checkIpFormat("ip_addr", pnl_logger_ip))
-      SetSetting("NETWORK_SETTINGS.NETMASK", checkIpFormat("netmask", pnl_logger_netmask))
-      SetSetting("NETWORK_SETTINGS.GATEWAY", checkIpFormat("gateway", pnl_logger_gateway))
-      If pnl_logger_dns2 <> "" Then
-        SetSetting("NETWORK_SETTINGS.DNS2_ADDRESS", checkIpFormat("dns2 address", pnl_logger_dns2))
+      If checkIpFormat("ip_addr", pnl_logger_ip) Then
+        SetSetting("NETWORK_SETTINGS.IP_ADDRESS", pnl_logger_ip)
       EndIf
 
-      ' if no error, restart the program
-      If pnl_network_settings_error <> "" Then
-        SetSetting("NETWORK_SETTINGS.ApplyAndRestart", TRUE)
+      ' if datalogger set to DHCP do not set the other settings
+      If pnl_logger_ip <> "0.0.0.0" AND pnl_network_settings_error = "" Then
+        If checkIpFormat("netmask", pnl_logger_netmask) AND checkIpFormat("gateway", pnl_logger_gateway) Then
+          SetSetting("NETWORK_SETTINGS.NETMASK", pnl_logger_netmask)
+          SetSetting("NETWORK_SETTINGS.GATEWAY", pnl_logger_gateway)
+
+          If pnl_logger_dns2 <> "" Then
+            If checkIpFormat("dns2 address", pnl_logger_dns2) Then
+              SetSetting("NETWORK_SETTINGS.DNS2_ADDRESS", pnl_logger_dns2)
+            EndIf
+          Else
+            SetSetting("NETWORK_SETTINGS.DNS2_ADDRESS", DNS2_ADDRESS)
+          EndIf
+        EndIf
       EndIf
+
+      ' if no error, apply and restart the program to change the settings
+      If pnl_network_settings_error = "" Then
+        SetSetting("NETWORK_SETTINGS.CHANGE_NETWORK_SETTINGS", 1)
+        SetSetting("NETWORK_SETTINGS.ApplyAndRestart", 1)
+      EndIf
+
+      pnl_cfg_change_network_settings = FALSE
     EndIf
 
   NextScan
