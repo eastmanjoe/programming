@@ -147,35 +147,34 @@ Function parseIpInfo()
     datalogger_ip = Status.IPAddressCSIO(1)
   #EndIf
 
-  If datalogger_ip <> "0.0.0.0" Then
-    #If LoggerType = CR1000 Then
-      datalogger_netmask = Status.IPMaskEth
-      datalogger_gateway = Status.IPGateway
-    #ElseIf LoggerType = CR800 Then
-      datalogger_netmask = Status.IPMaskCSIO(1)
-      datalogger_gateway = Status.IPGatewayCSIO(1)
-    #EndIf
+  #If LoggerType = CR1000 Then
+    datalogger_netmask = Status.IPMaskEth
+    datalogger_gateway = Status.IPGateway
+  #ElseIf LoggerType = CR800 Then
+    datalogger_netmask = Status.IPMaskCSIO(1)
+    datalogger_gateway = Status.IPGatewayCSIO(1)
+  #EndIf
 
-    datalogger_dns1 = Status.DNS(1)
-    datalogger_dns2 = Status.DNS(2)
+  datalogger_dns1 = Status.DNS(1)
+  datalogger_dns2 = Status.DNS(2)
+
+  If datalogger_ip <> "0.0.0.0" Then
+  ' build the datalogger_ipinfo to match the Status.IPInfo field of OS26 with the addition of the DHCP flag
+  ' "eth MAC: 00d02c044e5b\r\neth IP: 10.11.40.23\r\neth mask: 255.255.0.0\r\neth gw: 10.11.1.1\r\ndns: 0.0.0.8\r\ndns: 10.11.10.11\r\n"
+    datalogger_ipinfo = "DHCP: disabled" + CRLF
+
   Else
-    datalogger_netmask = "0.0.0.0"
-    datalogger_gateway = "0.0.0.0"
-    datalogger_dns1 = "0.0.0.0"
-    datalogger_dns2 = "0.0.0.0"
+    datalogger_ipinfo = "DHCP: enabled" + CRLF
   EndIf
 
-
-  ' build the datalogger_ipinfo to match the Status.IPInfo field of OS26
-  ' "eth MAC: 00d02c044e5b\r\neth IP: 10.11.40.23\r\neth mask: 255.255.0.0\r\neth gw: 10.11.1.1\r\ndns: 0.0.0.8\r\ndns: 10.11.10.11\r\n"
-  datalogger_ipinfo = "eth MAC: " + Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2)) + CRLF
-  datalogger_ipinfo += "eth IP: " + datalogger_ip + CRLF
+  datalogger_ipinfo += "eth MAC: " + Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2)) + CRLF
+  datalogger_ipinfo += "eth IP: " + Right(buffer_ip_info(3), Len(buffer_ip_info(3)) - InStr(1, buffer_ip_info(3), ":", 2)) + CRLF
   datalogger_ipinfo += "eth mask: " + datalogger_netmask + CRLF
   datalogger_ipinfo += "eth gw: " + datalogger_gateway + CRLF
   datalogger_ipinfo += "dns: " + datalogger_dns1 + CRLF
   datalogger_ipinfo += "dns: " + datalogger_dns2 + CRLF
-
 EndFunction 'parseIpInfo
+
 
 
 
@@ -226,9 +225,9 @@ EndFunction 'checkIpFormat
 
 
 '## Main Program ################################
-ApplyandRestartSequence
-  SetSetting("NETWORK_SETTINGS.ApplyAndRestart", 1)
-EndApplyandRestartSequence
+' ApplyandRestartSequence
+'   SetSetting("NETWORK_SETTINGS.ApplyAndRestart", 1)
+' EndApplyandRestartSequence
 
 
 
