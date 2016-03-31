@@ -58,8 +58,8 @@ install_packages()
     rm sage
 
 
-    # install required packages for draker
-    sage install wget
+    # install required packages
+    # sage install wget
     sage install bash-completion cygutils git git-completion git-gui
     sage install inetutils libsqlite3-devel libxml2-devel libxslt-devel make
     sage install mintty nano ncurses openssh ping rxvt util-linux
