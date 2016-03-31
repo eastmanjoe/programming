@@ -1,6 +1,7 @@
 text eol=auto
 
 *.sh eol=lf
+.bash* eol=lf
 # *.js eol=crlf
 # *.png eol=crlf
 # *.html eol=crlf
