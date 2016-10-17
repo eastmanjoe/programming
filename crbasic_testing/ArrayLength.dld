@@ -13,6 +13,14 @@ Const CFG_SCAN_INTERVAL_CLEAN = 30
 Const CFG_SCAN_INTERVAL_DIRTY = 60
 ' Const CFG_SCAN_INTERVAL_UTIL = 30
 
+Const CFG_DEVICE_MAX = 6
+Const CFG_PORT_MAX = 3
+
+Const INV_TOTAL = 2
+Const INV_FRONIUS_BAUD = 9600
+Const INV_FRONIUS_TRIES = 1
+Const INV_FRONIUS_TIMEOUT = 100
+
 '## Declarations ################################
 ' Public ip_addr(NUM_OF_IPS) As String * 15 = {"10.11.50.10", "10.11.50.21", "10.11.50.53", "10.11.50.24", "10.11.50.56", "10.11.50.61", "10.11.50.23", "10.11.50.180", "166.143.29.138", "10.11.40.24"}
 ' Public ip_addr_array_length As Long
@@ -53,6 +61,7 @@ Public ip_info(9) As String * 42
 Alias ip_info = datalogger_default_network, datalogger_mac, datalogger_ip, _
   datalogger_netmask, datalogger_gateway, datalogger_ipv6, datalogger_dns1, _
   datalogger_dns2, datalogger_dns3
+Public datalogger_ipinfo As String * 256
 
 Dim time_utc(9) As Long
 Alias time_utc(1) = time_utc_year
@@ -69,59 +78,378 @@ Units cfg_scan_timer_clean = Sec
 Units cfg_scan_timer_dirty = Sec
 Units cfg_scan_timer_util = Sec
 
+Dim cfg_datalogger_last_record As Long
+
+Public cfg_port_total As Long = 2
+Public cfg_ports(CFG_PORT_MAX) As Long = {COM1, COM2}
+Dim cfg_port_busy(CFG_PORT_MAX) As Boolean
+
+Public cfg_device_prefix(CFG_DEVICE_MAX) As String * 8 = {"inv"}
+Public cfg_device_index(CFG_DEVICE_MAX) As Long = {1}
+Public cfg_device_type(CFG_DEVICE_MAX) As String * 32 = {"fronius"}
+Public cfg_device_port_num(CFG_DEVICE_MAX) As Long = {"1"}
+Public cfg_device_addr(CFG_DEVICE_MAX) As Long = {22}
+Dim cfg_device_result(CFG_DEVICE_MAX) As Long
+
+'fronius
+Public inv_comm_code(INV_TOTAL) As Long
+
+Public inv_dc_voltage(INV_TOTAL) As Float
+Public inv_dc_current(INV_TOTAL) As Float
+Public inv_dc_power(INV_TOTAL) As Float
+
+Public inv_ac_voltage_an(INV_TOTAL) As Float
+Public inv_ac_voltage_bn(INV_TOTAL) As Float
+Public inv_ac_voltage_cn(INV_TOTAL) As Float
+Public inv_ac_voltage_ab(INV_TOTAL) As Float
+Public inv_ac_voltage_bc(INV_TOTAL) As Float
+Public inv_ac_voltage_ca(INV_TOTAL) As Float
+Public inv_ac_current(INV_TOTAL) As Float
+Public inv_ac_current_a(INV_TOTAL) As Float
+Public inv_ac_current_b(INV_TOTAL) As Float
+Public inv_ac_current_c(INV_TOTAL) As Float
+Public inv_ac_power(INV_TOTAL) As Float
+Public inv_ac_va(INV_TOTAL) As Float
+Public inv_ac_vars(INV_TOTAL) As Float
+Public inv_ac_pf(INV_TOTAL) As Float
+Public inv_ac_freq(INV_TOTAL) As Float
+
+Public inv_ac_energy(INV_TOTAL) As Float
+
+Public inv_run_state(INV_TOTAL) As Long
+Public inv_status_01(INV_TOTAL) As Long
+Public inv_fault_01(INV_TOTAL) As Long
+Public inv_fault_02(INV_TOTAL) As Long
+Public inv_fault_03(INV_TOTAL) As Long
+Public inv_fault_04(INV_TOTAL) As Long
+Public inv_fault_05(INV_TOTAL) As Long
+Public inv_fault_06(INV_TOTAL) As Long
+
+Public inv_temp_01(INV_TOTAL) As Float
+Public inv_temp_02(INV_TOTAL) As Float
+Public inv_temp_03(INV_TOTAL) As Float
+Public inv_temp_04(INV_TOTAL) As Float
+
+Public inv_sn(INV_TOTAL) As String * 40
+Public inv_fw_ver(INV_TOTAL) As String * 40
+Public inv_model(INV_TOTAL) As String * 40
+
+Public inv_faulted(INV_TOTAL) As Boolean
+
+Dim DIS_inv_dc_voltage(INV_TOTAL) As Boolean
+Dim DIS_inv_dc_current(INV_TOTAL) As Boolean
+Dim DIS_inv_dc_power(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_an(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_bn(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_cn(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_ab(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_bc(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_voltage_ca(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_current(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_current_a(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_current_b(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_current_c(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_power(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_va(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_vars(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_pf(INV_TOTAL) As Boolean
+Dim DIS_inv_ac_freq(INV_TOTAL) As Boolean
+Dim DIS_inv_temp_01(INV_TOTAL) As Boolean
+Dim DIS_inv_temp_02(INV_TOTAL) As Boolean
+Dim DIS_inv_temp_03(INV_TOTAL) As Boolean
+Dim DIS_inv_temp_04(INV_TOTAL) As Boolean
+
+Dim inv_last_record(INV_TOTAL) As Long
+Dim inv_last_day(INV_TOTAL) As Long
+
+Units inv_dc_voltage = Volts
+Units inv_dc_current = Amps
+Units inv_dc_power = kW
+
+Units inv_ac_voltage_an = Volts
+Units inv_ac_voltage_bn = Volts
+Units inv_ac_voltage_cn = Volts
+Units inv_ac_voltage_ab = Volts
+Units inv_ac_voltage_bc = Volts
+Units inv_ac_voltage_ca = Volts
+Units inv_ac_current = Amps
+Units inv_ac_current_a = Amps
+Units inv_ac_current_b = Amps
+Units inv_ac_current_c = Amps
+Units inv_ac_power = kW
+Units inv_ac_va = kVA
+Units inv_ac_vars = kVAR
+Units inv_ac_freq = Hz
+
+Units inv_ac_energy = kWh
+
+Units inv_temp_01 = Deg C
+Units inv_temp_02 = Deg C
+Units inv_temp_03 = Deg C
+Units inv_temp_04 = Deg C
+
+
+
+DataTable(fifteenMin, TRUE, -1)
+  DataInterval(0, 15, MIN, 0)
+
+  'fronius
+  Sample(INV_TOTAL, inv_comm_code(), Long)
+
+  Average(INV_TOTAL, inv_dc_voltage(), IEEE4, DIS_inv_dc_voltage())
+  Average(INV_TOTAL, inv_dc_current(), IEEE4, DIS_inv_dc_current())
+  Average(INV_TOTAL, inv_dc_power(), IEEE4, DIS_inv_dc_power())
+
+  Average(INV_TOTAL, inv_ac_voltage_an(), IEEE4, DIS_inv_ac_voltage_an())
+  Average(INV_TOTAL, inv_ac_voltage_bn(), IEEE4, DIS_inv_ac_voltage_bn())
+  Average(INV_TOTAL, inv_ac_voltage_cn(), IEEE4, DIS_inv_ac_voltage_cn())
+  Average(INV_TOTAL, inv_ac_voltage_ab(), IEEE4, DIS_inv_ac_voltage_ab())
+  Average(INV_TOTAL, inv_ac_voltage_bc(), IEEE4, DIS_inv_ac_voltage_bc())
+  Average(INV_TOTAL, inv_ac_voltage_ca(), IEEE4, DIS_inv_ac_voltage_ca())
+  Average(INV_TOTAL, inv_ac_current(), IEEE4, DIS_inv_ac_current())
+  Average(INV_TOTAL, inv_ac_current_a(), IEEE4, DIS_inv_ac_current_a())
+  Average(INV_TOTAL, inv_ac_current_b(), IEEE4, DIS_inv_ac_current_b())
+  Average(INV_TOTAL, inv_ac_current_c(), IEEE4, DIS_inv_ac_current_c())
+  Average(INV_TOTAL, inv_ac_power(), IEEE4, DIS_inv_ac_power())
+  Average(INV_TOTAL, inv_ac_va(), IEEE4, DIS_inv_ac_va())
+  Average(INV_TOTAL, inv_ac_vars(), IEEE4, DIS_inv_ac_vars())
+  Average(INV_TOTAL, inv_ac_pf(), IEEE4, DIS_inv_ac_pf())
+  Average(INV_TOTAL, inv_ac_freq(), IEEE4, DIS_inv_ac_freq())
+
+  Sample(INV_TOTAL, inv_ac_energy(), IEEE4)
+
+  Sample(INV_TOTAL, inv_run_state(), UINT4)
+  Sample(INV_TOTAL, inv_status_01(), UINT4)
+  Sample(INV_TOTAL, inv_fault_01(), UINT4)
+  Sample(INV_TOTAL, inv_fault_02(), UINT4)
+  Sample(INV_TOTAL, inv_fault_03(), UINT4)
+  Sample(INV_TOTAL, inv_fault_04(), UINT4)
+  Sample(INV_TOTAL, inv_fault_05(), UINT4)
+
+  Average(INV_TOTAL, inv_temp_01(), IEEE4, DIS_inv_temp_01())
+  Average(INV_TOTAL, inv_temp_02(), IEEE4, DIS_inv_temp_02())
+  Average(INV_TOTAL, inv_temp_03(), IEEE4, DIS_inv_temp_03())
+  Average(INV_TOTAL, inv_temp_04(), IEEE4, DIS_inv_temp_04())
+
+  Sample(INV_TOTAL, inv_sn(), String)
+  Sample(INV_TOTAL, inv_fw_ver(), String)
+  Sample(INV_TOTAL, inv_model(), String)
+
+EndTable 'fifteenMin
+
+
+
+
+
+
 '## Functions ###################################
 Function parseIpInfo()
   Dim counter As Long
-  Dim buffer_str As String * 42
-  Dim line_buffer As String * 255
-  Public array_length_ip_info As Long
+  Dim buffer_str As String * 256
+  Dim line_buffer As String * 200
+  Dim buffer_ip_info(6) As String * 42
 
-  array_length_ip_info = ArrayLength(ip_info)
-
-  ' Move(buffer_str, Len(buffer_str), "", 1)
   Erase(buffer_str)
-  Erase(ip_info)
+  Erase(line_buffer)
 
-  ' For counter = 1 To ArrayLength(ip_info)
-  ' For counter = 1 To array_length_ip_info
-    ' Move(ip_info(counter), Len(ip_info(counter)), "", 1)
-  ' Next
+  'parse Status.EthernetInfo to get current settings
+  #If LoggerType = CR1000
+    buffer_str = Status.EthernetInfo
+  #ElseIf LoggerType = CR800
+    buffer_str = Status.CSIOInfo
+  #EndIf
 
-  'parse Status.IPInfo to get current settings
-  line_buffer = LowerCase(Status.IPInfo)
+  line_buffer = LowerCase(buffer_str)
   line_buffer = Replace(line_buffer, SP, "")
   line_buffer = Replace(line_buffer, CRLF, ",")
 
-  ' SplitStr(ip_info(), line_buffer, ",", ArrayLength(ip_info), 5)
-  SplitStr(ip_info(), line_buffer, ",", array_length_ip_info, 5)
+  ' SplitStr(buffer_ip_info(), line_buffer, ",", 6, 5)
+  SplitStr(buffer_ip_info(), line_buffer, ",", ArrayLength(buffer_ip_info), 5)
+
+  Erase(buffer_str)
+
+  ' capture only the mac address
+  buffer_str = Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2))
+
+  'change mac address format from 00d02c0209b0 to 00:D0:2C:02:09:B0
+  buffer_str = UpperCase(buffer_str)
+
+  Erase(datalogger_mac)
+
+  For counter = 1 To Len(buffer_str) Step 2
+    datalogger_mac &= Mid(buffer_str, counter, 2)
+
+    If counter < 11 Then datalogger_mac &= ":"
+  Next
+
+  ' capture the ipv6 address
+  datalogger_ipv6 = UpperCase(Right(buffer_ip_info(6), Len(buffer_ip_info(6)) - InStr(1, buffer_ip_info(6), ":", 2)))
 
   #If LoggerType = CR1000 Then
     datalogger_ip = Status.IPAddressEth
+  #ElseIf LoggerType = CR800 Then
+    datalogger_ip = Status.IPAddressCSIO(1)
+  #EndIf
+
+  #If LoggerType = CR1000 Then
     datalogger_netmask = Status.IPMaskEth
     datalogger_gateway = Status.IPGateway
   #ElseIf LoggerType = CR800 Then
-    datalogger_ip = Status.IPAddressCSIO(1)
     datalogger_netmask = Status.IPMaskCSIO(1)
     datalogger_gateway = Status.IPGatewayCSIO(1)
   #EndIf
 
-  'change mac address format from 00d02c0209b0 to 00:D0:2C:02:09:B0
-  datalogger_mac = Right(datalogger_mac, Len(datalogger_mac) - InStr(1, datalogger_mac, ":", 2))
-  datalogger_mac = UpperCase(datalogger_mac)
+  datalogger_dns1 = Status.DNS(1)
+  datalogger_dns2 = Status.DNS(2)
 
-  For counter = 1 To Len(datalogger_mac) Step 2
-    buffer_str &= Mid(datalogger_mac, counter, 2)
+  If datalogger_ip <> "0.0.0.0" Then
+  ' build the datalogger_ipinfo to match the Status.IPInfo field of OS26 with the addition of the DHCP flag
+  ' "eth MAC: 00d02c044e5b\r\neth IP: 10.11.40.23\r\neth mask: 255.255.0.0\r\neth gw: 10.11.1.1\r\ndns: 0.0.0.8\r\ndns: 10.11.10.11\r\n"
+    datalogger_ipinfo = "DHCP: disabled" + CRLF
 
-    If counter < 11 Then buffer_str &= ":"
+  Else
+    datalogger_ipinfo = "DHCP: enabled" + CRLF
+  EndIf
+
+  datalogger_ipinfo += "eth MAC: " + Right(buffer_ip_info(2), Len(buffer_ip_info(2)) - InStr(1, buffer_ip_info(2), ":", 2)) + CRLF
+  datalogger_ipinfo += "eth IP: " + Right(buffer_ip_info(3), Len(buffer_ip_info(3)) - InStr(1, buffer_ip_info(3), ":", 2)) + CRLF
+  datalogger_ipinfo += "eth mask: " + datalogger_netmask + CRLF
+  datalogger_ipinfo += "eth gw: " + datalogger_gateway + CRLF
+  datalogger_ipinfo += "dns: " + datalogger_dns1 + CRLF
+  datalogger_ipinfo += "dns: " + datalogger_dns2 + CRLF
+EndFunction 'parseIpInfo
+
+
+
+
+  'base
+Function pingIpAddress(ip_addr As String, time_out As Long) As Float
+  Dim ping_response_time(10) As Long
+  Dim total_ping_response_time As Long
+  Dim counter
+
+  ping_response_time = 0
+
+  For counter = 1 To ArrayLength(ping_response_time)
+    ping_response_time(counter) = PingIP(ip_addr, time_out)
+    total_ping_response_time += ping_response_time(counter)
   Next
 
-  datalogger_mac = buffer_str
-  datalogger_ipv6 = Right(datalogger_ipv6, Len(datalogger_ipv6) - InStr(1, datalogger_ipv6, ":", 2))
-  datalogger_dns1 = Right(datalogger_dns1, Len(datalogger_dns1) - InStr(1, datalogger_dns1, ":", 2))
-  datalogger_dns2 = Right(datalogger_dns2, Len(datalogger_dns2) - InStr(1, datalogger_dns2, ":", 2))
-  datalogger_dns3 = Right(datalogger_dns3, Len(datalogger_dns3) - InStr(1, datalogger_dns3, ":", 2))
-  'datalogger_dns4 = Right(datalogger_dns4, Len(datalogger_dns4) - InStr(1, datalogger_dns4, ":", 2))
-EndFunction 'parseIpInfo
+  Return total_ping_response_time / ArrayLength(ping_response_time)
+EndFunction 'pingIpAddress
+
+
+
+
+
+'base
+Function pingKeepAlive()
+  Dim gateway_ping_response As Float
+  Dim datalogger_network_enabled As Boolean = TRUE
+
+  'ping gateway every 15 minutes
+  If time_utc_min MOD 15 < 2 OR time_utc_min MOD 15 > 13 Then
+
+    gateway_ping_response = pingIpAddress(datalogger_gateway,5000)
+
+    If gateway_ping_response = 0 Then
+      datalogger_network_enabled = FALSE
+
+      'TRUE = network interface enabled, FALSE = network interface disabled
+      EthernetPower(datalogger_network_enabled)
+
+      Delay(1, 1, SEC)
+
+      datalogger_network_enabled = TRUE
+
+      'TRUE = network interface enabled, FALSE = network interface disabled
+      EthernetPower(datalogger_network_enabled)
+    EndIf
+
+  EndIf
+EndFunction 'pingKeepAlive
+
+
+
+
+
+Function getFroniusDataManger2(num As Long, port As Long, addr As Long) As Long
+  Dim result_every_fronius_data(9) As Long
+  Dim result_daily_fronius_data(1) As Long
+  Dim counter As Long
+
+  'if num is out of bounds, return error code
+  If num < 1 OR num > INV_TOTAL Then Return -9999
+
+  'reset the result codes
+  ' For counter = 1 To 9
+  For counter = 1 To ArrayLength(result_every_fronius_data)
+    result_every_fronius_data(counter) = 0
+  Next
+
+  'use inverter status and fault query to indicate comm code
+  If result_every_fronius_data(2) = 0 Then
+    inv_comm_code(num) = 0
+
+  ElseIf result_every_fronius_data(2) < 0 Then
+    inv_comm_code(num) = result_every_fronius_data(2)
+
+  Else
+    'only increment comm code if it hadn't been negative
+    If inv_comm_code(num) >= 0 Then
+      inv_comm_code(num) += 1
+    Else
+      inv_comm_code(num) = 1
+    EndIf
+  EndIf
+
+  Return inv_comm_code(num)
+EndFunction 'getFroniusDataManger2
+
+
+
+
+
+Function callDevice(num As Long, do_not_wait As Boolean)
+  Dim port_num As Long
+  Dim result As Long
+
+  'if device num is out of bounds then exit
+  If num < 1 OR num > cfg_device_total Then
+    cfg_reload_error = "The device called is out of bounds"
+    ExitFunction
+  EndIf
+
+  'if the port is being used by another call then wait for it to be freed
+  port_num = cfg_device_port_num(num)
+  Do While cfg_port_busy(port_num)
+
+    If do_not_wait Then ExitFunction
+  Loop
+  cfg_port_busy(port_num) = TRUE
+
+  'call the device
+  Select Case cfg_device_type(num)
+
+  'fronius
+  Case "fronius"
+    result = getFroniusDataManger2(cfg_device_index(num), cfg_ports(port_num), cfg_device_addr(num))
+
+  EndSelect
+
+  cfg_port_busy(port_num) = FALSE
+
+  'check if index was out of bounds
+  If result = -9999 Then cfg_reload_error = "The array index is out of bounds"
+
+  'capture the result code
+  If result = 0 Then
+    cfg_device_result(num) = 0
+  Else
+    cfg_device_result(num) += 1
+  EndIf
+EndFunction 'callDevice
+
 
 '## Shutdown ####################################
 ShutDownBegin
@@ -134,12 +462,36 @@ ShutDownEnd
 BeginProg
 
   parseIpInfo()
-  readDrakerID()
 
   Scan (60,Sec,3,0)
 
     'Populate the time_utc array with the current timestamp
     RealTime(time_utc())
 
+    pingKeepAlive()
+
+    CallTable(fifteenMin)
+
   NextScan
+
+  'slow scan for devices with clean communications (comm code = 0)
+  SlowSequence
+  Do While TRUE
+    Timer(1, MSEC, 2)
+
+    'call the device, don't wait if port is busy
+    callDevice(1, TRUE)
+
+    cfg_device_current_clean = ""
+
+    'capture the scan time (the timer function returns an integer, doing this conversion provides a decimal)
+    cfg_scan_timer_clean = Timer(1, MSEC, 4) * 0.001
+
+    'calculate the delay (the delay function requires an integer so scale the value to MSEC and store in long)
+    cfg_scan_delay_clean = (CFG_SCAN_INTERVAL_CLEAN - cfg_scan_timer_clean) * 1000
+
+    'only delay the scan if the calculated value is positive time
+    If cfg_scan_delay_clean > 0 Then Delay(1, cfg_scan_delay_clean, MSEC)
+  Loop
+  EndSequence
 EndProg
