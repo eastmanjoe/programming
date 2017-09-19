@@ -1,0 +1,64 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+name: CR Basic
+scopeName: source.crbasic
+fileTypes: [cr1, cr8, dld, cr2, cr6, cr300]
+uuid: e7b38491-be7c-48e8-8ecf-058c887313a0
+
+patterns:
+- comment: Variable Declaration
+  name: keyword.source
+  match: (?<!\.)\b(Const|Public|Dim|Alias|Units)\b
+
+- comment: Instructions
+  name: keyword.source
+  match: (?<!\.)\b(DisplayValue|MenuItem|MenuPick|MenuRecompile|ArrayLength|Calfile|Calibrate|CheckPort|ClockChange|ClockSet|ComPortIsActive|Data|DataLong|DaylightSaving|DaylightSavingUS|FieldCal|FieldCalStrain|GetRecord|GPS|InstructionTimes|LoadFieldCal|Move|MuxSelect|NewFieldCal|NewFile|PipeLineMode|PortGet|PortsConfig|PortSet|PreserveVariables|PulsePort|PWM|Read|ReadIO|RealTime|ResetTable|Restore|SDI12SensorSetup|SDI12SensorResponse|SecsSince1990|SequentialMode|SetSecurity|SetStatus|Signature|StationName|SW12|TimedControl|TimeIntoInterval|Timer|WriteIO|FileClose|FileCopy|FileEncrypt|FileList|FileManage|FileOpen|FileRead|FileReadLine|FileRename|FileSize|FileTime|FileWrite|GetFile|NewFile|SendFile|TableFile|DHCPRenew|EmailRecv|EMailSend|FTPClient|HTTPOut|IPTrace|NetworkTimeProtocol|PingIP|PPPClose|PPPOpen|TCPClose|TCPOpen|UDPDataGram|UDPOpen|ABS|ACOS|AddPrecise|AngleDegrees|ASCII|ASIN|ATN|ATN2|AvgRun|AvgSpa|Ceiling|CheckSum|COS|COSH|Covariance|CovSpa|DewPoint|EXP|FFT|FFTSpa|FindSpa|FIX|Floor|FRAC|Hex|HexToDec|INT|LN|LOG|LOG10|MaxSpa|MinSpa|MoveBytes|MovePrecise|PeakValley|PRTCalc|PWR|Rainflow|Randomize|RectPolar|RMSSpa|RND|Round|SatVP|SGN|SIN|SINH|SortSpa|SQR|StdDevSpa|StrainCalc|TAN|TANH|VaporPressure|WetDryBulb|ACPower|AM25T|AVW200|Battery|BrFull|BrFull6W|BrHalf|BrHalf3W|BrHalf4W|CS616|CS7500|CSAT3|CWB100|CWB100Routes|CWB100RSSI|EC100|EC100Configure|ExciteV|HydraProbe|LI7200|LI7700|PanelTemp|PeriodAvg|PulseCount|PulseCountReset|SDI12Recorder|TCDiff|TCSe|TDR100|TGA|Therm107|Therm108|Therm109|TimerIO|VibratingWire|VoltDiff|VoltSe|AcceptDataRecords|Broadcast|ClockReport|DataGram|GetDataRecord|GetFile|GetVariables|Network|PakBusClock|Route|RoutersNeighbors|Routes|SendData|SendFile|SendGetVariables|SendTableDef|SendVariables|StaticRoute|TimeUntilTransmit|ArrayIndex|Call|CallTable|Case|Is|ContinueScan|Delay|Dim|Else|ESSInitialize|ESSVariables|Exit|ExitDo|ExitFor|ExitFunction|ExitScan|ExitSub|FileManage|IfTime|IIF|Include|Loop|NewFieldNames|Optional|Public|ReadOnly|Return|RunProgram|SemaphoreGet|SemaphoreRelease|Step|TriggerSequence|Until|WaitDigTrig|WaitTriggerSequence|Mod[Bb]usMaster|Mod[Bb]usSlave|Then|#Else|Case|StrComp|FormatLong|FormatFloat|FormatLongLong|SerialOpen|SerialOut|SerialFlush|SerialIn|SplitStr|#ElseIf|ExDelSE|ElseIf|Const|CHR|Trim|WriteIO|SolarPosition|InStr|SerialClose|Len|Mid|Left|Right|UpperCase|LowerCase|Replace|To|Sprintf|EmailSend|LTrim|RTrim|HTTPGet|HTTPPut|HTTPPost|MOD|Resistance|Thermistor|Erase|SetSetting|IPInfo|EthernetPower|CType|XMLParse)\b
+
+- comment: Data Table
+  name: keyword.source
+  match: (?<!\.)\b(DataInterval|CardOut|Average|Minimum|Sample|Maximum|StdDev|WindVector|FieldNames|Totalize|ETsz|FillStop|Histogram|Histogram4D|LevelCrossing|Median|Moment|OpenInterval|SampleFieldCal|SampleMaxMin|TableFile|TableHide|WorstCase)
+
+- comment: DataTable Declaration
+  name: keyword.source
+  match: (?<!\.)\b(As|Long|Float|String|Boolean|IEEE4|FP2|UINT2|UINT4|BOOL8|TRUE|FALSE|NAN)\b
+
+- comment: Variable Declaration
+  name: keyword.source
+  match: (?<!\.)\b(Sub|SubMenu|If|DisplayMenu|DataTable|BeginProg|Scan|ConstTable|Function|Do|For|#If|SubScan|While|Select|ShutDownBegin|SlowSequence|ElseIf|#ElseIf|EndSub|EndSubMenu|EndIf|EndMenu|EndTable|EndProg|NextScan|EndConstTable|EndFunction|Loop|Next|#EndIf|EndSequence|NextSubScan|Wend|EndSelect|ShutDownEnd|EndSequence|ApplyandRestartSequence|EndApplyandRestartSequence)\b
+
+- name: comment
+  match: (').*$\n?
+
+- include: '#crbasic_constant_language'
+
+- include: '#number'
+
+- name: support.constant
+  match: (\-|\+|\*|\/|\^|\-=|\+=|\*=|\/=|\&=|\&)
+
+- name: support.constant
+  match: (<>|<|>|<=|>=|=)
+
+- name: support.constant
+  match: (?<!\.)\b(NOT|AND|OR|XOR|IMP|INTDV)\b
+
+- name: string.quoted.double.crbasic
+  begin: '"'
+  beginCaptures:
+    '0': {name: punctuation.definition.string.begin.crbasic}
+  end: '"'
+  endCaptures:
+    '0': {name: punctuation.definition.string.end.crbasic}
+  patterns:
+  - name: constant.character.escape.crbasic
+    match: \\.
+
+repository:
+  crbasic_constant_language:
+    comment: CRBasic Constants constants
+    name: constant.numeric
+    match: (?<!\.)\b(false|true|FALSE|TRUE)\b
+
+  number:
+    comment: 'Valid numbers: 1, .1, 1.1, .1e1, 1.1e1, 1e1, 1i, 1j, 1e2j'
+    name: constant.numeric
+    match: (?<=[\s\-\+\*\/\\=:\[\(\{,]|^)\d*\.?\d+([eE][+-]?\d)?([0-9&&[^\.]])*(i|j)?\b

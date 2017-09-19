@@ -1,0 +1,11 @@
+-import requests
+-import requests
+-import time
+-time.strftime('%X %x %Z')
+-resp = requests.get("http://172.28.0.1/latest_data.json")
+-resp = requests.get("http://172.28.0.1/latest_data.json", timeout=1)
+-resp
+-resp = requests.get("http://172.28.0.1/latest_data.json", timeout=1)
+-import getopt
+-pwd
+-path

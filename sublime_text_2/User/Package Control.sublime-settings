@@ -1,0 +1,21 @@
+{
+	"auto_upgrade_last_run": null,
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"DokuWiki",
+		"HTMLBeautify",
+		"HtmlTidy",
+		"Indent XML",
+		"Javascript Beautify",
+		"Package Control",
+		"PackageDev"
+	],
+	"repositories":
+	[
+		"https://github.com/sentience/DokuWiki.git"
+	]
+}

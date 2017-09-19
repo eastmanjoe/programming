@@ -1,0 +1,9 @@
+name: Miscellaneous
+scope: source.crbasic
+settings:
+  decreaseIndentPattern: '^\s*(elseif|else|endif|next|endfunction|#endif|#elseif)\b.*:'
+  disableIndentNextLinePattern: ''
+  increaseIndentPattern: ^\s*(elseif|else|if|for|while|#if)\b.*:\s*$
+  shellVariables:
+  - {name: TM_COMMENT_START, value: "' "}
+uuid: 33877934-69D3-4773-8786-9B5211012A9A

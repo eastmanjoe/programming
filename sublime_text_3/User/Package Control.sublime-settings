@@ -1,0 +1,17 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"Indent XML",
+		"INI",
+		"Package Control",
+		"PackageDev",
+		"PackageResourceViewer",
+		"Pretty JSON",
+		"SideBarEnhancements",
+		"Theme - Soda"
+	]
+}

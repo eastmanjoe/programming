@@ -1,0 +1,7 @@
+{
+
+	// "cmd": ["C:\\python27\\venv\\pymodbus\\Scripts\\python.exe", "-u", "$file", "--log=DEBUG"],
+	"cmd": ["C:\\python27\\venv\\pymodbus\\Scripts\\python.exe", "-u", "C:\\Draker\\Programming\\Python\\scripts\\etl_netbook_testing.py", " --log=DEBUG"],
+    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+    "selector": "source.python"
+}

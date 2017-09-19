@@ -1,0 +1,5 @@
+{
+    "selector": "source.CRBasic",
+    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+    "cmd": ["C:\\Campbellsci\\Lib\\Compilers\\cr1comp.exe", "-vus", "$file"]
+}
